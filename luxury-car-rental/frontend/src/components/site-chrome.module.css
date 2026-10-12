@@ -1,0 +1,349 @@
+/* ==============================================================
+   CHROME COMMUN — LUXURY CARS
+   Header + footer partagés par tout le site public et client.
+   (L'espace admin conserve sa propre mise en page.)
+   ============================================================== */
+
+/* ==============================================================
+   HEADER
+   ============================================================== */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--line-soft);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 1px 0 rgba(201, 169, 107, 0.06);
+}
+
+.headerInner {
+  width: min(calc(100% - 64px), 1300px);
+  min-height: 84px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.brandMark {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--champagne);
+  color: var(--champagne);
+  font-family: var(--serif);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.brandText strong {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.brandText em {
+  font-style: normal;
+  color: var(--champagne);
+}
+
+.brandText small {
+  color: var(--muted-2);
+  font-size: 8px;
+  letter-spacing: 2.6px;
+}
+
+.navigation {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 2.2vw, 34px);
+}
+
+.navigation a {
+  position: relative;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  transition: color 0.2s ease;
+}
+
+.navigation a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -7px;
+  height: 1px;
+  background: var(--champagne);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+
+.navigation a:hover {
+  color: var(--ink);
+}
+
+.navigation a:hover::after {
+  transform: scaleX(1);
+}
+
+.navigation a.activeLink {
+  color: var(--ink);
+}
+
+.navigation a.activeLink::after {
+  transform: scaleX(1);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 18px;
+}
+
+.signIn {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.signIn:hover {
+  color: var(--ink);
+}
+
+.accountButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--champagne);
+  color: var(--champagne);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.accountButton:hover {
+  background: var(--champagne);
+  color: var(--noir);
+}
+
+/* Bouton principal « My reservations » dans le header. */
+.reservationsButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--champagne);
+  background: var(--champagne);
+  color: var(--noir);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.reservationsButton:hover {
+  background: var(--champagne-3);
+  border-color: var(--champagne-3);
+}
+
+.signOut {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--champagne-line);
+  background: transparent;
+  color: var(--champagne-2);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.signOut:hover:not(:disabled) {
+  background: var(--champagne);
+  border-color: var(--champagne);
+  color: var(--noir);
+}
+
+.signOut:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* ==============================================================
+   FOOTER
+   ============================================================== */
+
+.footer {
+  background: var(--ivory-2);
+  color: var(--ink);
+  border-top: 1px solid var(--line-soft);
+}
+
+.footerTop {
+  width: min(calc(100% - 64px), 1300px);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 50px;
+  padding: 80px 0;
+}
+
+.footerBrand a {
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 22px;
+  letter-spacing: 4px;
+}
+
+.footerBrand em {
+  font-style: normal;
+  color: var(--gold-text);
+}
+
+.footerBrand p {
+  margin-top: 22px;
+  color: var(--muted-text);
+  font-size: 13px;
+  line-height: 1.9;
+}
+
+.footerColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.footerColumn strong {
+  margin-bottom: 8px;
+  color: var(--gold-text);
+  font-size: 10px;
+  letter-spacing: 2.4px;
+}
+
+.footerColumn a {
+  color: var(--muted-text);
+  font-size: 13px;
+  transition: color 0.2s ease;
+}
+
+.footerColumn a:hover {
+  color: var(--ink);
+}
+
+.footerBottom {
+  width: min(calc(100% - 64px), 1300px);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 26px 0 36px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--muted-text);
+  font-size: 11px;
+}
+
+/* ==============================================================
+   RESPONSIVE
+   ============================================================== */
+
+@media (max-width: 900px) {
+  .headerInner {
+    flex-wrap: wrap;
+    padding: 12px 0;
+    gap: 14px;
+  }
+
+  .navigation {
+    order: 3;
+    flex: 1 0 100%;
+    justify-content: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--line-soft);
+  }
+
+  .headerActions {
+    margin-left: auto;
+    gap: 12px;
+  }
+
+  .footerTop {
+    grid-template-columns: 1fr 1fr;
+    gap: 44px 24px;
+  }
+
+  .footerBrand {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .headerInner,
+  .footerTop,
+  .footerBottom {
+    width: min(calc(100% - 36px), 1300px);
+  }
+
+  .brandText small {
+    display: none;
+  }
+
+  .headerActions .signIn {
+    display: none;
+  }
+
+  .accountButton,
+  .reservationsButton,
+  .signOut {
+    padding: 0 14px;
+  }
+
+  .footerTop {
+    grid-template-columns: 1fr;
+    padding: 60px 0;
+  }
+
+  .footerBottom {
+    flex-direction: column;
+    gap: 8px;
+    line-height: 1.7;
+  }
+}

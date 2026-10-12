@@ -1,0 +1,275 @@
+@import "tailwindcss";
+
+/* ==============================================================
+   LUXURY CARS — DESIGN SYSTEM
+   Thème : IVOIRE / CHAMPAGNE
+   Base commune à tout le site (public, compte, admin).
+   ============================================================== */
+
+:root {
+  /* ============================================================
+     LUXURY CARS — DESIGN SYSTEM « IVOIRE & OR »
+     Esthétique Patek Philippe / maison de haute joaillerie :
+     ivoire chaud, blanc nacré, or champagne, hairline fines.
+     ============================================================ */
+
+  /* Fonds — Ivoire chaud & blanc nacré */
+  --noir: #191512;
+  --noir-2: #100d0a;
+  --ivory: #f7f3ea;
+  --ivory-2: #f1ecdf;
+  --ivory-3: #eae4d5;
+  --white: #ffffff;
+  --white-2: #fbf8f1;
+
+  /* Encres — brun-noir chaud */
+  --ink: #1e1a14;
+  --ink-2: #43392c;
+  --ink-3: #6b6254;
+  --muted: #756c5b;
+  --muted-2: #8a8171;
+  --muted-3: #9c9486;
+
+  /* Textes — variantes conformes AA (>= 4.5:1) sur fonds ivoire.
+     Réservées au contenu textuel : l'ornement et les hairlines
+     gardent l'or champagne clair (--champagne). */
+  --gold-text: #805f2b;
+  --muted-text: #6a6153;
+  --danger-text: #9e422e;
+  --success-text: #3d6649;
+
+  /* Lignes — Hairlines or champagne */
+  --line: rgba(148, 118, 62, 0.24);
+  --line-soft: rgba(148, 118, 62, 0.12);
+  --line-strong: rgba(148, 118, 62, 0.4);
+
+  /* Accent — Or champagne */
+  --champagne: #b18d4e;
+  --champagne-2: #9e7c3f;
+  --champagne-3: #d3ba85;
+  --champagne-soft: rgba(177, 141, 78, 0.12);
+  --champagne-line: rgba(177, 141, 78, 0.5);
+
+  /* Surfaces translucides (verre) — pilotées par le thème.
+     Elles permettent au mode sombre de rester cohérent
+     sans toucher aux feuilles de style des pages. */
+  --surface-glass: rgba(255, 255, 255, 0.6);
+  --header-bg: rgba(248, 244, 235, 0.86);
+  --header-bg-soft: rgba(248, 244, 235, 0.9);
+
+  /* Composante RGB de l'ivoire : permet aux dégradés de
+     suivre automatiquement le thème clair / sombre. */
+  --ivory-rgb: 247, 243, 234;
+
+  /* États */
+  --danger: #b3543c;
+  --danger-bg: rgba(179, 84, 60, 0.09);
+  --danger-line: rgba(179, 84, 60, 0.3);
+  --success: #4e7d5c;
+  --success-bg: rgba(78, 125, 92, 0.1);
+  --success-line: rgba(78, 125, 92, 0.3);
+
+  /* Typo — une seule famille sans-serif, normale et claire,
+     utilisée pour tout le site (titres et texte courant).
+     --serif pointe volontairement sur la même famille afin que
+     plus aucun titre ne s'affiche dans une police décorative. */
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  --serif: var(--sans);
+
+  /* Mise en page */
+  --container: 1240px;
+  --shadow: 0 44px 90px -42px rgba(43, 34, 18, 0.35);
+  --shadow-soft: 0 26px 56px -30px rgba(43, 34, 18, 0.28);
+
+  /* Rétro-compatibilité (ancien thème sombre) */
+  --background: var(--ivory);
+  --surface: var(--white);
+  --surface-soft: var(--ivory-3);
+  --border: var(--line);
+  --text: var(--ink);
+  --text-soft: var(--muted);
+  --accent: var(--champagne);
+  --accent-light: var(--champagne-2);
+}
+
+/* ==============================================================
+   MODE SOMBRE — LUXURY CARS
+   Activé par data-theme="dark" sur <html>.
+   Le noir profond et l'or champagne remplacent l'ivoire,
+   sans toucher aux panneaux déjà sombres (--noir).
+   ============================================================== */
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Fonds — noir chaud & brun profond */
+  --ivory: #13100c;
+  --ivory-2: #1a1610;
+  --ivory-3: #221d15;
+  --white: #1b1712;
+  --white-2: #201b14;
+
+  /* Encres — ivoire clair */
+  --ink: #f4efe4;
+  --ink-2: #dcd4c4;
+  --ink-3: #b3a992;
+  --muted: #a79d88;
+  --muted-2: #948a76;
+  --muted-3: #837a68;
+
+  /* Textes */
+  --gold-text: #d6b878;
+  --muted-text: #a79d88;
+  --danger-text: #e0a08e;
+  --success-text: #8fc39c;
+
+  /* Lignes */
+  --line: rgba(211, 186, 133, 0.22);
+  --line-soft: rgba(211, 186, 133, 0.12);
+  --line-strong: rgba(211, 186, 133, 0.4);
+
+  /* Accent — or champagne éclairci */
+  --champagne: #c9a96b;
+  --champagne-2: #d3ba85;
+  --champagne-3: #e6d3a6;
+  --champagne-soft: rgba(201, 169, 107, 0.16);
+  --champagne-line: rgba(201, 169, 107, 0.5);
+
+  /* États */
+  --danger: #d98a72;
+  --danger-bg: rgba(217, 138, 114, 0.14);
+  --danger-line: rgba(217, 138, 114, 0.34);
+  --success: #7fb28d;
+  --success-bg: rgba(127, 178, 141, 0.14);
+  --success-line: rgba(127, 178, 141, 0.34);
+
+  /* Surfaces translucides */
+  --surface-glass: rgba(255, 255, 255, 0.05);
+  --header-bg: rgba(19, 16, 12, 0.85);
+  --header-bg-soft: rgba(19, 16, 12, 0.9);
+  --ivory-rgb: 19, 16, 12;
+}
+
+/* Transition douce lors du basculement clair / sombre. */
+html {
+  background-color: var(--ivory);
+}
+
+body {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(1100px 560px at 85% -10%, rgba(201, 169, 107, 0.07), transparent 60%),
+    radial-gradient(900px 500px at -10% 30%, rgba(201, 169, 107, 0.04), transparent 55%),
+    var(--ivory);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--sans);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  background: var(--champagne);
+  color: var(--noir);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--champagne);
+  outline-offset: 3px;
+}
+
+.container {
+  width: min(calc(100% - 64px), var(--container));
+  margin: 0 auto;
+}
+
+@media (max-width: 760px) {
+  .container {
+    width: min(calc(100% - 36px), var(--container));
+  }
+}
+
+/* Scrollbar discrète, dans l'esprit du thème */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--champagne-line) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--champagne-line);
+  border: 3px solid var(--noir);
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

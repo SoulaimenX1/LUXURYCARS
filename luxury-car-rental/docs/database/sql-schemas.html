@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<title>Schémas SQL — LUXURY CARS</title>
+<script src="vendor/mermaid.min.js"></script>
+<style>
+  @page { size: A4; margin: 14mm 12mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Manrope", "Segoe UI", Arial, sans-serif;
+    color: #1e1a14;
+    margin: 0;
+    padding: 24px 28px 60px;
+    background: #fbf8f1;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  h1, h2, h3 {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    color: #1e1a14;
+    font-weight: 600;
+    margin: 0;
+  }
+  .header {
+    border-bottom: 2px solid #c9a96b;
+    padding-bottom: 14px;
+    margin-bottom: 24px;
+  }
+  h1 { font-size: 34px; letter-spacing: -0.5px; }
+  .subtitle { color: #756c5b; font-size: 13px; margin-top: 6px; }
+  h2 {
+    font-size: 24px;
+    margin: 34px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e3d9c4;
+    color: #43392c;
+  }
+  h3 { font-size: 18px; margin: 22px 0 8px; color: #6b6254; }
+  p { margin: 8px 0; color: #43392c; }
+  .legend { display: flex; gap: 22px; flex-wrap: wrap; margin: 14px 0 6px; }
+  .legend div { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .dot.done { background: #7a9b5e; }
+  .dot.todo { background: #d9a441; }
+  .diagram {
+    background: #ffffff;
+    border: 1px solid #ece3d0;
+    border-radius: 10px;
+    padding: 16px 10px;
+    margin: 14px 0 22px;
+    overflow: hidden;
+    box-shadow: 0 18px 40px -30px rgba(43,34,18,0.35);
+  }
+  .mermaid { text-align: center; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 12px 0 20px;
+    font-size: 12px;
+  }
+  th, td { border: 1px solid #e7ddc8; padding: 7px 10px; text-align: left; }
+  th { background: #f1ecdf; color: #43392c; font-weight: 700; }
+  tr:nth-child(even) td { background: #fbf8f1; }
+  code { background: #f1ecdf; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+  .note {
+    background: #fff8e8;
+    border-left: 3px solid #c9a96b;
+    padding: 10px 14px;
+    margin: 14px 0;
+    font-size: 12px;
+    color: #5c5344;
+  }
+  .page-break { page-break-before: always; }
+  .avoid-break { page-break-inside: avoid; }
+  footer { margin-top: 40px; border-top: 1px solid #e3d9c4; padding-top: 12px; color: #8a8171; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Schémas SQL — LUXURY CARS</h1>
+  <div class="subtitle">
+    Base de données PostgreSQL · Schéma complet (déjà fait &amp; à faire) et périmètre du projet actuel
+  </div>
+</div>
+
+<div class="legend">
+  <div><span class="dot done"></span> <strong>Déjà fait</strong> — table créée et utilisée par l'application</div>
+  <div><span class="dot todo"></span> <strong>À faire</strong> — table créée, fonctionnalité applicative à développer</div>
+</div>
+
+<div class="note">
+  Source de vérité : <code>backend/database/schema.sql</code> ·
+  Patch : <code>backend/database/patches/002-editions-and-notifications.sql</code> ·
+  Migrations : <code>backend/src/database/migrations/</code><br />
+  Les <strong>22 tables</strong> du schéma complet existent déjà en base. « À faire » =
+  fonctionnalité non développée, pas table manquante.
+</div>
+
+<h2>1. Périmètre du projet actuel (déjà fait) ✅</h2>
+<p>Catalogue de voitures, comptes clients, réservations et notifications.</p>
+<div class="diagram">
+<pre class="mermaid">
+erDiagram
+    USERS {
+        uuid id PK
+        citext email UK
+        varchar password_hash
+        user_role role
+        account_status status
+        varchar first_name
+        varchar last_name
+        varchar phone
+        timestamptz email_verified_at
+        timestamptz last_login_at
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    CUSTOMER_PROFILES {
+        uuid user_id PK
+        date date_of_birth
+        varchar address_line
+        varchar city
+        varchar postal_code
+        char country
+        varchar license_number
+        char license_country
+        date license_issued_on
+        date license_expires_on
+    }
+    BRANDS {
+        uuid id PK
+        varchar name UK
+    }
+    CATEGORIES {
+        uuid id PK
+        varchar name UK
+        text description
+    }
+    VEHICLE_MODELS {
+        uuid id PK
+        uuid brand_id FK
+        uuid category_id FK
+        varchar name
+    }
+    VEHICLES {
+        uuid id PK
+        uuid model_id FK
+        smallint manufacture_year
+        varchar license_plate UK
+        char vin UK
+        varchar color
+        transmission_type transmission
+        fuel_type fuel_type
+        smallint seats
+        smallint power_hp
+        numeric daily_price
+        numeric security_deposit
+        integer mileage_km
+        text description
+        varchar engine
+        integer torque_nm
+        numeric acceleration_0_100
+        smallint top_speed_kmh
+        numeric consumption_l_100km
+        boolean is_special
+        boolean is_limited
+        integer edition_size
+        timestamptz announced_at
+        vehicle_status status
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    VEHICLE_IMAGES {
+        uuid id PK
+        uuid vehicle_id FK
+        text storage_path
+        media_type media_type
+        text poster_path
+        varchar alt_text
+        boolean is_primary
+        smallint sort_order
+        timestamptz created_at
+    }
+    NOTIFICATIONS {
+        uuid id PK
+        notification_type type
+        varchar title
+        text message
+        uuid vehicle_id FK
+        boolean is_published
+        timestamptz created_at
+    }
+    RESERVATIONS {
+        uuid id PK
+        varchar reservation_number UK
+        uuid customer_id FK
+        uuid vehicle_id FK
+        timestamptz pickup_at
+        timestamptz return_at
+        tstzrange period
+        integer rental_days
+        numeric daily_price
+        numeric deposit_amount
+        numeric total_amount
+        reservation_status status
+        text customer_notes
+        uuid decided_by FK
+        timestamptz decided_at
+        text decision_reason
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    USERS ||--o| CUSTOMER_PROFILES : "profil 1-1"
+    USERS ||--o{ RESERVATIONS : "decide"
+    CUSTOMER_PROFILES ||--o{ RESERVATIONS : "reserve"
+    BRANDS ||--o{ VEHICLE_MODELS : "possede"
+    CATEGORIES ||--o{ VEHICLE_MODELS : "classe"
+    VEHICLE_MODELS ||--o{ VEHICLES : "decline"
+    VEHICLES ||--o{ VEHICLE_IMAGES : "photos"
+    VEHICLES ||--o{ NOTIFICATIONS : "concerne"
+    VEHICLES ||--o{ RESERVATIONS : "est reservee"
+</pre>
+</div>
+
+<h2 class="page-break">2. Schéma complet — déjà fait ✅ vs à faire 🟡</h2>
+<div class="diagram avoid-break">
+<pre class="mermaid">
+erDiagram
+    USERS { uuid id PK }
+    CUSTOMER_PROFILES { uuid user_id PK }
+    BRANDS { uuid id PK }
+    CATEGORIES { uuid id PK }
+    VEHICLE_MODELS { uuid id PK }
+    VEHICLES { uuid id PK }
+    VEHICLE_IMAGES { uuid id PK }
+    NOTIFICATIONS { uuid id PK }
+    RESERVATIONS { uuid id PK }
+    REFRESH_TOKENS { uuid id PK }
+    ONE_TIME_TOKENS { uuid id PK }
+    VEHICLE_UNAVAILABILITY { uuid id PK }
+    RENTALS { uuid id PK }
+    INSPECTIONS { uuid id PK }
+    INSPECTION_DAMAGES { uuid id PK }
+    SECURITY_DEPOSITS { uuid id PK }
+    PAYMENTS { uuid id PK }
+    ADDITIONAL_CHARGES { uuid id PK }
+    INVOICES { uuid id PK }
+    INVOICE_ITEMS { uuid id PK }
+    DOCUMENTS { uuid id PK }
+    AUDIT_LOGS { bigint id PK }
+    USERS ||--o| CUSTOMER_PROFILES : "1-1"
+    USERS ||--o{ REFRESH_TOKENS : "sessions"
+    USERS ||--o{ ONE_TIME_TOKENS : "reset/verify"
+    BRANDS ||--o{ VEHICLE_MODELS : "possede"
+    CATEGORIES ||--o{ VEHICLE_MODELS : "classe"
+    VEHICLE_MODELS ||--o{ VEHICLES : "decline"
+    VEHICLES ||--o{ VEHICLE_IMAGES : "photos"
+    VEHICLES ||--o{ NOTIFICATIONS : "concerne"
+    VEHICLES ||--o{ VEHICLE_UNAVAILABILITY : "indisponible"
+    CUSTOMER_PROFILES ||--o{ RESERVATIONS : "reserve"
+    VEHICLES ||--o{ RESERVATIONS : "est reservee"
+    RESERVATIONS ||--o| RENTALS : "convertit"
+    RENTALS ||--o{ INSPECTIONS : "controle"
+    INSPECTIONS ||--o{ INSPECTION_DAMAGES : "constate"
+    RENTALS ||--o| SECURITY_DEPOSITS : "caution"
+    RENTALS ||--o{ PAYMENTS : "paiements"
+    RENTALS ||--o{ ADDITIONAL_CHARGES : "frais"
+    INSPECTION_DAMAGES ||--o{ ADDITIONAL_CHARGES : "facture"
+    RENTALS ||--o{ INVOICES : "facture"
+    INVOICES ||--o{ INVOICE_ITEMS : "lignes"
+    ADDITIONAL_CHARGES ||--o{ INVOICE_ITEMS : "refacture"
+    RENTALS ||--o{ DOCUMENTS : "documents"
+    INVOICES ||--o{ DOCUMENTS : "pieces"
+    USERS ||--o{ AUDIT_LOGS : "trace"
+</pre>
+</div>
+
+<h2 class="page-break">3. Détail par domaine</h2>
+
+<h3>A. Authentification &amp; utilisateurs</h3>
+<div class="diagram avoid-break">
+<pre class="mermaid">
+erDiagram
+    USERS {
+        uuid id PK
+        citext email UK
+        text password_hash
+        user_role role
+        account_status status
+        varchar first_name
+        varchar last_name
+        varchar phone
+        timestamptz email_verified_at
+        timestamptz last_login_at
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    CUSTOMER_PROFILES {
+        uuid user_id PK
+        date date_of_birth
+        varchar address_line
+        varchar city
+        varchar postal_code
+        char country
+        varchar license_number
+        char license_country
+        date license_issued_on
+        date license_expires_on
+    }
+    REFRESH_TOKENS {
+        uuid id PK
+        uuid user_id FK
+        text token_hash UK
+        timestamptz expires_at
+        timestamptz revoked_at
+        inet ip_address
+        text user_agent
+        timestamptz created_at
+    }
+    ONE_TIME_TOKENS {
+        uuid id PK
+        uuid user_id FK
+        token_type type
+        text token_hash UK
+        timestamptz expires_at
+        timestamptz used_at
+        timestamptz created_at
+    }
+    USERS ||--o| CUSTOMER_PROFILES : "profil 1-1"
+    USERS ||--o{ REFRESH_TOKENS : "sessions"
+    USERS ||--o{ ONE_TIME_TOKENS : "reset/verify"
+</pre>
+</div>
+
+<h3>B. Catalogue de véhicules</h3>
+<div class="diagram avoid-break">
+<pre class="mermaid">
+erDiagram
+    BRANDS {
+        uuid id PK
+        varchar name UK
+    }
+    CATEGORIES {
+        uuid id PK
+        varchar name UK
+        text description
+    }
+    VEHICLE_MODELS {
+        uuid id PK
+        uuid brand_id FK
+        uuid category_id FK
+        varchar name
+    }
+    VEHICLES {
+        uuid id PK
+        uuid model_id FK
+        smallint manufacture_year
+        varchar license_plate UK
+        char vin UK
+        varchar color
+        transmission_type transmission
+        fuel_type fuel_type
+        smallint seats
+        smallint power_hp
+        numeric daily_price
+        numeric security_deposit
+        integer mileage_km
+        text description
+        varchar engine
+        integer torque_nm
+        numeric acceleration_0_100
+        smallint top_speed_kmh
+        numeric consumption_l_100km
+        boolean is_special
+        boolean is_limited
+        integer edition_size
+        timestamptz announced_at
+        vehicle_status status
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    VEHICLE_IMAGES {
+        uuid id PK
+        uuid vehicle_id FK
+        text storage_path
+        media_type media_type
+        text poster_path
+        varchar alt_text
+        boolean is_primary
+        smallint sort_order
+        timestamptz created_at
+    }
+    VEHICLE_UNAVAILABILITY {
+        uuid id PK
+        uuid vehicle_id FK
+        timestamptz starts_at
+        timestamptz ends_at
+        tstzrange period
+        unavailability_reason reason
+        text notes
+        uuid created_by FK
+        timestamptz created_at
+    }
+    NOTIFICATIONS {
+        uuid id PK
+        notification_type type
+        varchar title
+        text message
+        uuid vehicle_id FK
+        boolean is_published
+        timestamptz created_at
+    }
+    BRANDS ||--o{ VEHICLE_MODELS : "possede"
+    CATEGORIES ||--o{ VEHICLE_MODELS : "classe"
+    VEHICLE_MODELS ||--o{ VEHICLES : "decline"
+    VEHICLES ||--o{ VEHICLE_IMAGES : "photos"
+    VEHICLES ||--o{ VEHICLE_UNAVAILABILITY : "indisponible"
+    VEHICLES ||--o{ NOTIFICATIONS : "concerne"
+</pre>
+</div>
+
+<h3 class="page-break">C. Réservations</h3>
+<div class="diagram avoid-break">
+<pre class="mermaid">
+erDiagram
+    CUSTOMER_PROFILES { uuid user_id PK }
+    VEHICLES { uuid id PK }
+    USERS { uuid id PK }
+    RESERVATIONS {
+        uuid id PK
+        varchar reservation_number UK
+        uuid customer_id FK
+        uuid vehicle_id FK
+        timestamptz pickup_at
+        timestamptz return_at
+        tstzrange period
+        integer rental_days
+        numeric daily_price
+        numeric deposit_amount
+        numeric total_amount
+        reservation_status status
+        text customer_notes
+        uuid decided_by FK
+        timestamptz decided_at
+        text decision_reason
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    CUSTOMER_PROFILES ||--o{ RESERVATIONS : "reserve"
+    VEHICLES ||--o{ RESERVATIONS : "est reservee"
+    USERS ||--o{ RESERVATIONS : "decide"
+</pre>
+</div>
+<div class="note">Contrainte <code>EXCLUDE USING gist</code> : le double booking est interdit (chevauchement de période pour une même voiture, statuts pending/confirmed/converted).</div>
+
+<h3>D. Locations, contrôles et retour</h3>
+<div class="diagram avoid-break">
+<pre class="mermaid">
+erDiagram
+    RESERVATIONS { uuid id PK }
+    USERS { uuid id PK }
+    RENTALS {
+        uuid id PK
+        varchar contract_number UK
+        uuid reservation_id FK
+        rental_status status
+        timestamptz started_at
+        timestamptz expected_return_at
+        timestamptz returned_at
+        timestamptz closed_at
+        uuid opened_by FK
+        uuid closed_by FK
+        text notes
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    INSPECTIONS {
+        uuid id PK
+        uuid rental_id FK
+        inspection_type type
+        timestamptz performed_at
+        uuid performed_by FK
+        integer mileage_km
+        smallint fuel_level_pct
+        condition_rating overall_condition
+        text notes
+    }
+    INSPECTION_DAMAGES {
+        uuid id PK
+        uuid inspection_id FK
+        varchar vehicle_zone
+        text description
+        damage_severity severity
+        numeric estimated_repair_cost
+        text photo_path
+    }
+    RESERVATIONS ||--o| RENTALS : "convertit"
+    USERS ||--o{ RENTALS : "ouvre/ferme"
+    RENTALS ||--o{ INSPECTIONS : "controle"
+    USERS ||--o{ INSPECTIONS : "effectue"
+    INSPECTIONS ||--o{ INSPECTION_DAMAGES : "constate"
+</pre>
+</div>
+
+<h3 class="page-break">E. Argent : cautions, paiements, frais, factures</h3>
+<div class="diagram avoid-break">
+<pre class="mermaid">
+erDiagram
+    RENTALS { uuid id PK }
+    USERS { uuid id PK }
+    INSPECTION_DAMAGES { uuid id PK }
+    SECURITY_DEPOSITS {
+        uuid id PK
+        uuid rental_id FK
+        numeric amount
+        deposit_status status
+        numeric retained_amount
+        text retention_reason
+        timestamptz held_at
+        timestamptz released_at
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    PAYMENTS {
+        uuid id PK
+        uuid rental_id FK
+        payment_type type
+        payment_method method
+        numeric amount
+        char currency
+        timestamptz paid_at
+        varchar reference
+        uuid recorded_by FK
+        text notes
+        timestamptz created_at
+    }
+    ADDITIONAL_CHARGES {
+        uuid id PK
+        uuid rental_id FK
+        charge_type type
+        varchar description
+        numeric amount
+        uuid inspection_damage_id FK
+        uuid created_by FK
+        timestamptz created_at
+    }
+    INVOICES {
+        uuid id PK
+        varchar invoice_number UK
+        uuid rental_id FK
+        invoice_status status
+        char currency
+        numeric subtotal
+        numeric tax_rate
+        numeric tax_amount
+        numeric total_amount
+        timestamptz issued_at
+        uuid issued_by FK
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    INVOICE_ITEMS {
+        uuid id PK
+        uuid invoice_id FK
+        varchar description
+        numeric quantity
+        numeric unit_price
+        numeric line_total
+        uuid additional_charge_id FK
+    }
+    RENTALS ||--o| SECURITY_DEPOSITS : "caution"
+    RENTALS ||--o{ PAYMENTS : "paiements"
+    RENTALS ||--o{ ADDITIONAL_CHARGES : "frais"
+    INSPECTION_DAMAGES ||--o{ ADDITIONAL_CHARGES : "facture"
+    RENTALS ||--o{ INVOICES : "facture"
+    USERS ||--o{ PAYMENTS : "enregistre"
+    USERS ||--o{ INVOICES : "emet"
+    INVOICES ||--o{ INVOICE_ITEMS : "lignes"
+    ADDITIONAL_CHARGES ||--o{ INVOICE_ITEMS : "refacture"
+</pre>
+</div>
+
+<h3>F. Documents &amp; journal d'audit</h3>
+<div class="diagram avoid-break">
+<pre class="mermaid">
+erDiagram
+    RENTALS { uuid id PK }
+    INVOICES { uuid id PK }
+    USERS { uuid id PK }
+    DOCUMENTS {
+        uuid id PK
+        uuid rental_id FK
+        uuid invoice_id FK
+        document_type type
+        varchar file_name
+        text storage_path UK
+        varchar mime_type
+        integer size_bytes
+        char sha256
+        uuid generated_by FK
+        timestamptz created_at
+    }
+    AUDIT_LOGS {
+        bigint id PK
+        uuid actor_id FK
+        varchar action
+        varchar entity_type
+        uuid entity_id
+        jsonb old_values
+        jsonb new_values
+        inet ip_address
+        timestamptz created_at
+    }
+    RENTALS ||--o{ DOCUMENTS : "documents"
+    INVOICES ||--o{ DOCUMENTS : "pieces"
+    USERS ||--o{ DOCUMENTS : "genere"
+    USERS ||--o{ AUDIT_LOGS : "trace"
+</pre>
+</div>
+
+<h2 class="page-break">4. Énumérations PostgreSQL</h2>
+<table>
+<thead><tr><th>Enum</th><th>Valeurs</th></tr></thead>
+<tbody>
+<tr><td><code>user_role</code></td><td>customer, staff, admin</td></tr>
+<tr><td><code>account_status</code></td><td>invited, active, suspended</td></tr>
+<tr><td><code>token_type</code></td><td>password_reset, email_verification</td></tr>
+<tr><td><code>transmission_type</code></td><td>automatic, manual, semi_automatic</td></tr>
+<tr><td><code>fuel_type</code></td><td>petrol, diesel, hybrid, plug_in_hybrid, electric</td></tr>
+<tr><td><code>vehicle_status</code></td><td>active, maintenance, retired</td></tr>
+<tr><td><code>unavailability_reason</code></td><td>maintenance, repair, inspection, other</td></tr>
+<tr><td><code>reservation_status</code></td><td>pending, confirmed, rejected, cancelled, expired, converted</td></tr>
+<tr><td><code>rental_status</code></td><td>active, returned, closed</td></tr>
+<tr><td><code>inspection_type</code></td><td>handover, return</td></tr>
+<tr><td><code>condition_rating</code></td><td>excellent, good, fair, damaged</td></tr>
+<tr><td><code>damage_severity</code></td><td>minor, moderate, major</td></tr>
+<tr><td><code>payment_type</code></td><td>rental_payment, deposit_payment, deposit_refund, charge_payment, refund</td></tr>
+<tr><td><code>payment_method</code></td><td>cash, card, bank_transfer</td></tr>
+<tr><td><code>deposit_status</code></td><td>pending, held, released, partially_retained, retained</td></tr>
+<tr><td><code>charge_type</code></td><td>late_return, fuel, mileage, damage, cleaning, other</td></tr>
+<tr><td><code>invoice_status</code></td><td>draft, issued, paid, void</td></tr>
+<tr><td><code>document_type</code></td><td>contract, invoice, inspection_report, other</td></tr>
+<tr><td><code>notification_type</code></td><td>new_vehicle, special_edition, limited_edition, general</td></tr>
+</tbody>
+</table>
+
+<h2>5. Vues, fonctions &amp; triggers</h2>
+<table>
+<thead><tr><th>Objet</th><th>Type</th><th>Rôle</th></tr></thead>
+<tbody>
+<tr><td><code>find_available_vehicles(p_from, p_to)</code></td><td>Fonction SQL</td><td>Véhicules réservables sur une période</td></tr>
+<tr><td><code>v_dashboard_summary</code></td><td>Vue</td><td>Compteurs admin (véhicules, réservations, locations, clients)</td></tr>
+<tr><td><code>v_monthly_revenue</code></td><td>Vue</td><td>Chiffre d'affaires mensuel (cautions exclues)</td></tr>
+<tr><td><code>set_updated_at()</code></td><td>Trigger function</td><td>Met à jour <code>updated_at</code></td></tr>
+<tr><td><code>trg_reservation_vs_unavailability()</code></td><td>Trigger</td><td>Bloque réservation vs indisponibilité</td></tr>
+<tr><td><code>trg_unavailability_vs_reservation()</code></td><td>Trigger</td><td>Bloque indisponibilité vs réservation</td></tr>
+<tr><td><code>trg_inspection_mileage()</code></td><td>Trigger</td><td>Kilométrage retour ≥ départ</td></tr>
+</tbody>
+</table>
+
+<h2>6. Récapitulatif déjà fait / à faire</h2>
+<table>
+<thead><tr><th>#</th><th>Table</th><th>Domaine</th><th>État</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><code>users</code></td><td>Auth</td><td>✅ Déjà fait</td></tr>
+<tr><td>2</td><td><code>customer_profiles</code></td><td>Auth</td><td>✅ Déjà fait</td></tr>
+<tr><td>3</td><td><code>refresh_tokens</code></td><td>Auth</td><td>🟡 À faire</td></tr>
+<tr><td>4</td><td><code>one_time_tokens</code></td><td>Auth</td><td>🟡 À faire</td></tr>
+<tr><td>5</td><td><code>brands</code></td><td>Catalogue</td><td>✅ Déjà fait</td></tr>
+<tr><td>6</td><td><code>categories</code></td><td>Catalogue</td><td>✅ Déjà fait</td></tr>
+<tr><td>7</td><td><code>vehicle_models</code></td><td>Catalogue</td><td>✅ Déjà fait</td></tr>
+<tr><td>8</td><td><code>vehicles</code></td><td>Catalogue</td><td>✅ Déjà fait</td></tr>
+<tr><td>9</td><td><code>vehicle_images</code></td><td>Catalogue</td><td>✅ Déjà fait (stockage manuel)</td></tr>
+<tr><td>10</td><td><code>vehicle_unavailability</code></td><td>Catalogue</td><td>🟡 À faire</td></tr>
+<tr><td>11</td><td><code>notifications</code></td><td>Catalogue</td><td>✅ Déjà fait</td></tr>
+<tr><td>12</td><td><code>reservations</code></td><td>Réservations</td><td>✅ Déjà fait</td></tr>
+<tr><td>13</td><td><code>rentals</code></td><td>Location</td><td>🟡 À faire</td></tr>
+<tr><td>14</td><td><code>inspections</code></td><td>Location</td><td>🟡 À faire</td></tr>
+<tr><td>15</td><td><code>inspection_damages</code></td><td>Location</td><td>🟡 À faire</td></tr>
+<tr><td>16</td><td><code>security_deposits</code></td><td>Argent</td><td>🟡 À faire</td></tr>
+<tr><td>17</td><td><code>payments</code></td><td>Argent</td><td>🟡 À faire</td></tr>
+<tr><td>18</td><td><code>additional_charges</code></td><td>Argent</td><td>🟡 À faire</td></tr>
+<tr><td>19</td><td><code>invoices</code></td><td>Argent</td><td>🟡 À faire</td></tr>
+<tr><td>20</td><td><code>invoice_items</code></td><td>Argent</td><td>🟡 À faire</td></tr>
+<tr><td>21</td><td><code>documents</code></td><td>Documents</td><td>🟡 À faire</td></tr>
+<tr><td>22</td><td><code>audit_logs</code></td><td>Audit</td><td>🟡 À faire</td></tr>
+</tbody>
+</table>
+
+<footer>LUXURY CARS — Schémas SQL · généré depuis backend/database/schema.sql</footer>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#fbf8f1',
+      primaryTextColor: '#1e1a14',
+      primaryBorderColor: '#c9a96b',
+      lineColor: '#b18d4e',
+      secondaryColor: '#f1ecdf',
+      tertiaryColor: '#ffffff',
+      fontFamily: 'Manrope, Segoe UI, Arial, sans-serif',
+      fontSize: '12px'
+    },
+    er: { diagramPadding: 12, layoutDirection: 'TB', minEntityWidth: 110 }
+  });
+  window.__mermaidReady = false;
+  mermaid.run({ querySelector: '.mermaid' }).then(function () {
+    window.__mermaidReady = true;
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,988 @@
+@startuml LUXURY_CARS_Class_Diagram
+' =====================================================================
+'  LUXURY CARS — Diagramme de classes COMPLET du projet
+'  Backend NestJS + entités TypeORM + DTO + services + contrôleurs
+'  Frontend Next.js (lib, routes API proxy, composants, pages)
+'
+'  Légende :
+'    - Classes pleines        : DÉJÀ RÉALISÉ
+'    - Classes <<à réaliser>> : tables/objets prévus, non développés
+'
+'  Rendu :  plantuml class-diagram-complet.puml
+' =====================================================================
+
+!theme plain
+skinparam backgroundColor #FBF8F1
+skinparam defaultFontName Manrope
+skinparam defaultFontSize 12
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam rectangleBackgroundColor #FFFFFF
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #C9A96B
+skinparam classHeaderBackgroundColor #F1ECDF
+skinparam arrowColor #B18D4E
+skinparam noteBackgroundColor #FFF8E8
+skinparam noteBorderColor #C9A96B
+skinparam stereotypeCBackgroundColor #F1ECDF
+
+title LUXURY CARS — Diagramme de classes complet
+
+' =====================================================================
+'  1. ENUMÉRATIONS
+' =====================================================================
+
+package "Enumerations" as ENUMS {
+
+    enum UserRole {
+        CUSTOMER = 'customer'
+        STAFF = 'staff'
+        ADMIN = 'admin'
+    }
+
+    enum AccountStatus {
+        INVITED = 'invited'
+        ACTIVE = 'active'
+        SUSPENDED = 'suspended'
+    }
+
+    enum TransmissionType {
+        AUTOMATIC = 'automatic'
+        MANUAL = 'manual'
+        SEMI_AUTOMATIC = 'semi_automatic'
+    }
+
+    enum FuelType {
+        PETROL
+        DIESEL
+        HYBRID
+        PLUG_IN_HYBRID
+        ELECTRIC
+    }
+
+    enum VehicleStatus {
+        ACTIVE = 'active'
+        MAINTENANCE = 'maintenance'
+        RETIRED = 'retired'
+    }
+
+    enum ReservationStatus {
+        PENDING = 'pending'
+        CONFIRMED = 'confirmed'
+        REJECTED = 'rejected'
+        CANCELLED = 'cancelled'
+        EXPIRED = 'expired'
+        CONVERTED = 'converted'
+    }
+
+    enum NotificationType {
+        NEW_VEHICLE = 'new_vehicle'
+        SPECIAL_EDITION = 'special_edition'
+        LIMITED_EDITION = 'limited_edition'
+        GENERAL = 'general'
+    }
+}
+
+' =====================================================================
+'  2. DOMAINE — ENTITÉS TYPEORM (DÉJÀ RÉALISÉ)
+' =====================================================================
+
+package "Backend — Domaine (entites TypeORM)" as DOMAIN {
+
+    class User {
+        + id : uuid
+        + email : citext
+        + passwordHash : string
+        + role : UserRole
+        + status : AccountStatus
+        + firstName : string
+        + lastName : string
+        + phone : string
+        + emailVerifiedAt : Date
+        + lastLoginAt : Date
+        + createdAt : Date
+        + updatedAt : Date
+    }
+
+    class CustomerProfile {
+        + userId : uuid {PK}
+        + dateOfBirth : date
+        + addressLine : string
+        + city : string
+        + postalCode : string
+        + country : char(2)
+        + licenseNumber : string
+        + licenseCountry : char(2)
+        + licenseIssuedOn : date
+        + licenseExpiresOn : date
+    }
+
+    class Brand {
+        + id : uuid
+        + name : string
+    }
+
+    class Category {
+        + id : uuid
+        + name : string
+        + description : string
+    }
+
+    class VehicleModel {
+        + id : uuid
+        + brandId : uuid
+        + categoryId : uuid
+        + name : string
+    }
+
+    class Vehicle {
+        + id : uuid
+        + modelId : uuid
+        + manufactureYear : smallint
+        + licensePlate : string
+        + vin : char(17)
+        + color : string
+        + transmission : TransmissionType
+        + fuelType : FuelType
+        + seats : smallint
+        + powerHp : smallint
+        + dailyPrice : numeric(10,2)
+        + securityDeposit : numeric(10,2)
+        + mileageKm : integer
+        + description : text
+        + engine : string
+        + torqueNm : integer
+        + acceleration0To100 : numeric(4,1)
+        + topSpeedKmh : smallint
+        + consumptionL100km : numeric(4,1)
+        + isSpecial : boolean
+        + isLimited : boolean
+        + editionSize : integer
+        + announcedAt : Date
+        + status : VehicleStatus
+        + createdAt : Date
+        + updatedAt : Date
+        + model : VehicleModel
+    }
+
+    class VehicleImage {
+        + id : uuid
+        + vehicleId : uuid
+        + storagePath : text
+        + altText : string
+        + isPrimary : boolean
+        + sortOrder : smallint
+        + createdAt : Date
+    }
+
+    class Notification {
+        + id : uuid
+        + type : NotificationType
+        + title : string
+        + message : text
+        + vehicleId : uuid
+        + isPublished : boolean
+        + createdAt : Date
+    }
+
+    class Reservation {
+        + id : uuid
+        + reservationNumber : string
+        + customerId : uuid
+        + vehicleId : uuid
+        + pickupAt : Date
+        + returnAt : Date
+        + rentalDays : integer
+        + dailyPrice : numeric(10,2)
+        + depositAmount : numeric(10,2)
+        + totalAmount : numeric(12,2)
+        + status : ReservationStatus
+        + customerNotes : text
+        + decidedBy : uuid
+        + decidedAt : Date
+        + decisionReason : text
+        + createdAt : Date
+        + updatedAt : Date
+    }
+}
+
+' =====================================================================
+'  3. DOMAINE — ENTITÉS PRÉVUES (À RÉALISER)
+' =====================================================================
+
+package "Backend — Domaine prevu (a realiser)" as DOMAIN_TODO {
+
+    class RefreshToken <<à réaliser>> {
+        + id : uuid
+        + userId : uuid
+        + tokenHash : text
+        + expiresAt : Date
+        + revokedAt : Date
+        + ipAddress : inet
+        + userAgent : text
+        + createdAt : Date
+    }
+
+    class OneTimeToken <<à réaliser>> {
+        + id : uuid
+        + userId : uuid
+        + type : TokenType
+        + tokenHash : text
+        + expiresAt : Date
+        + usedAt : Date
+        + createdAt : Date
+    }
+
+    class VehicleUnavailability <<à réaliser>> {
+        + id : uuid
+        + vehicleId : uuid
+        + startsAt : Date
+        + endsAt : Date
+        + period : tstzrange
+        + reason : UnavailabilityReason
+        + notes : text
+        + createdBy : uuid
+        + createdAt : Date
+    }
+
+    class Rental <<à réaliser>> {
+        + id : uuid
+        + contractNumber : string
+        + reservationId : uuid
+        + status : RentalStatus
+        + startedAt : Date
+        + expectedReturnAt : Date
+        + returnedAt : Date
+        + closedAt : Date
+        + openedBy : uuid
+        + closedBy : uuid
+        + notes : text
+        + createdAt : Date
+        + updatedAt : Date
+    }
+
+    class Inspection <<à réaliser>> {
+        + id : uuid
+        + rentalId : uuid
+        + type : InspectionType
+        + performedAt : Date
+        + performedBy : uuid
+        + mileageKm : integer
+        + fuelLevelPct : smallint
+        + overallCondition : ConditionRating
+        + notes : text
+    }
+
+    class InspectionDamage <<à réaliser>> {
+        + id : uuid
+        + inspectionId : uuid
+        + vehicleZone : string
+        + description : text
+        + severity : DamageSeverity
+        + estimatedRepairCost : numeric(10,2)
+        + photoPath : text
+    }
+
+    class SecurityDeposit <<à réaliser>> {
+        + id : uuid
+        + rentalId : uuid
+        + amount : numeric(10,2)
+        + status : DepositStatus
+        + retainedAmount : numeric(10,2)
+        + retentionReason : text
+        + heldAt : Date
+        + releasedAt : Date
+        + createdAt : Date
+        + updatedAt : Date
+    }
+
+    class Payment <<à réaliser>> {
+        + id : uuid
+        + rentalId : uuid
+        + type : PaymentType
+        + method : PaymentMethod
+        + amount : numeric(12,2)
+        + currency : char(3)
+        + paidAt : Date
+        + reference : string
+        + recordedBy : uuid
+        + notes : text
+        + createdAt : Date
+    }
+
+    class AdditionalCharge <<à réaliser>> {
+        + id : uuid
+        + rentalId : uuid
+        + type : ChargeType
+        + description : string
+        + amount : numeric(10,2)
+        + inspectionDamageId : uuid
+        + createdBy : uuid
+        + createdAt : Date
+    }
+
+    class Invoice <<à réaliser>> {
+        + id : uuid
+        + invoiceNumber : string
+        + rentalId : uuid
+        + status : InvoiceStatus
+        + currency : char(3)
+        + subtotal : numeric(12,2)
+        + taxRate : numeric(5,2)
+        + taxAmount : numeric(12,2)
+        + totalAmount : numeric(12,2)
+        + issuedAt : Date
+        + issuedBy : uuid
+        + createdAt : Date
+        + updatedAt : Date
+    }
+
+    class InvoiceItem <<à réaliser>> {
+        + id : uuid
+        + invoiceId : uuid
+        + description : string
+        + quantity : numeric(10,2)
+        + unitPrice : numeric(10,2)
+        + lineTotal : numeric(12,2)
+        + additionalChargeId : uuid
+    }
+
+    class Document <<à réaliser>> {
+        + id : uuid
+        + rentalId : uuid
+        + invoiceId : uuid
+        + type : DocumentType
+        + fileName : string
+        + storagePath : text
+        + mimeType : string
+        + sizeBytes : integer
+        + sha256 : char(64)
+        + generatedBy : uuid
+        + createdAt : Date
+    }
+
+    class AuditLog <<à réaliser>> {
+        + id : bigint
+        + actorId : uuid
+        + action : string
+        + entityType : string
+        + entityId : uuid
+        + oldValues : jsonb
+        + newValues : jsonb
+        + ipAddress : inet
+        + createdAt : Date
+    }
+}
+
+' =====================================================================
+'  4. DTO (VALIDATION / TRANSFERT)
+' =====================================================================
+
+package "Backend — DTO" as DTO {
+
+    class LoginDto {
+        + email : string
+        + password : string
+    }
+
+    class RegisterDto {
+        + firstName : string
+        + lastName : string
+        + email : string
+        + password : string
+        + phone : string
+    }
+
+    class CreateCustomerProfileDto {
+        + dateOfBirth : string
+        + addressLine : string
+        + city : string
+        + postalCode : string
+        + country : string
+        + licenseNumber : string
+        + licenseCountry : string
+        + licenseIssuedOn : string
+        + licenseExpiresOn : string
+    }
+
+    class UpdateProfileDto {
+        + firstName : string
+        + lastName : string
+        + phone : string
+    }
+
+    class CreateReservationDto {
+        + brandName : string
+        + modelName : string
+        + pickupDate : string
+        + returnDate : string
+        + customerNotes : string
+    }
+
+    class RejectReservationDto {
+        + reason : string
+    }
+
+    class CreateBrandDto {
+        + name : string
+    }
+
+    class CreateCategoryDto {
+        + name : string
+        + description : string
+    }
+
+    class CreateVehicleModelDto {
+        + brandName : string
+        + categoryName : string
+        + name : string
+    }
+
+    class CreateVehicleDto {
+        + brandName : string
+        + modelName : string
+        + manufactureYear : number
+        + licensePlate : string
+        + vin : string
+        + color : string
+        + transmission : TransmissionType
+        + fuelType : FuelType
+        + seats : number
+        + powerHp : number
+        + dailyPrice : number
+        + securityDeposit : number
+        + mileageKm : number
+        + description : string
+        + engine : string
+        + torqueNm : number
+        + acceleration0To100 : number
+        + topSpeedKmh : number
+        + consumptionL100km : number
+        + isSpecial : boolean
+        + isLimited : boolean
+        + editionSize : number
+    }
+
+    class UpdateVehicleDto {
+        + dailyPrice : number
+        + securityDeposit : number
+        + mileageKm : number
+        + status : VehicleStatus
+        + color : string
+        + description : string
+        + engine : string
+        + torqueNm : number
+        + acceleration0To100 : number
+        + topSpeedKmh : number
+        + consumptionL100km : number
+        + isSpecial : boolean
+        + isLimited : boolean
+        + editionSize : number
+    }
+
+    class CheckAvailabilityDto {
+        + from : string
+        + to : string
+    }
+
+    interface PublicVehicleDto {
+        + id : string
+        + brandName : string
+        + modelName : string
+        + categoryName : string
+        + manufactureYear : number
+        + color : string
+        + transmission : TransmissionType
+        + fuelType : FuelType
+        + seats : number
+        + powerHp : number
+        + dailyPrice : string
+        + securityDeposit : string
+        + description : string
+        + engine : string
+        + torqueNm : number
+        + acceleration0To100 : string
+        + topSpeedKmh : number
+        + consumptionL100km : string
+        + isSpecial : boolean
+        + isLimited : boolean
+        + editionSize : number
+        + announcedAt : Date
+        + imageUrl : string
+        + reservationCount : number
+    }
+
+    interface PublicNotificationDto {
+        + id : string
+        + type : NotificationType
+        + title : string
+        + message : string
+        + vehicleId : string
+        + brandName : string
+        + modelName : string
+        + categoryName : string
+        + isSpecial : boolean
+        + isLimited : boolean
+        + editionSize : number
+        + createdAt : Date
+    }
+
+    interface DashboardSummary {
+        + vehicles : StatusStatistics
+        + reservations : StatusStatistics
+        + customers : { total : number }
+    }
+}
+
+' =====================================================================
+'  5. SERVICES (LOGIQUE MÉTIER)
+' =====================================================================
+
+package "Backend — Services" as SERVICES {
+
+    class AppService {
+        + getHello() : string
+    }
+
+    class AuthService {
+        + register(dto : RegisterDto)
+        + login(dto : LoginDto)
+    }
+
+    class UsersService {
+        + findById(id : string) : User
+        + findByEmail(email : string) : User
+        + createCustomer(input) : User
+        + findByEmailForAuth(email : string) : User
+        + updateMyProfile(userId : string, input) : User
+    }
+
+    class CustomerProfilesService {
+        + createProfile(userId : string, dto : CreateCustomerProfileDto)
+        + updateProfile(userId : string, dto : CreateCustomerProfileDto)
+        + findMyProfile(userId : string)
+        - buildValidatedProfile(...)
+    }
+
+    class VehiclesService {
+        + findAllBrands() : Brand[]
+        + findAllCategories() : Category[]
+        + findAllModels() : VehicleModel[]
+        + createBrand(dto : CreateBrandDto) : Brand
+        + createCategory(dto : CreateCategoryDto) : Category
+        + createModel(dto : CreateVehicleModelDto) : VehicleModel
+        + findAllVehicles() : Vehicle[]
+        + createVehicle(dto : CreateVehicleDto) : Vehicle
+        + updateVehicle(licensePlate : string, dto : UpdateVehicleDto) : Vehicle
+        + findPublicCatalog() : PublicVehicleDto[]
+        + findAvailableVehicles(dto : CheckAvailabilityDto)
+        - publicVehicleQuery()
+        - parseDate(...)
+    }
+
+    class ReservationsService {
+        + createReservation(userId : string, dto : CreateReservationDto)
+        + findMyReservations(userId : string)
+        + cancelMyReservation(userId : string, reservationNumber : string)
+        - parseDate(...)
+    }
+
+    class ReservationsAdminService {
+        + findPendingReservations()
+        + rejectReservation(reservationNumber : string, dto : RejectReservationDto, adminId : string)
+        + confirmReservation(reservationNumber : string, adminId : string)
+    }
+
+    class NotificationsService {
+        + findPublished() : PublicNotificationDto[]
+        + createVehicleNotification(params)
+        + notifyNewVehicle(params)
+    }
+
+    class DashboardService {
+        + getSummary() : DashboardSummary
+        - buildStatistics(rows) : StatusStatistics
+    }
+}
+
+' =====================================================================
+'  6. CONTRÔLEURS (API REST)
+' =====================================================================
+
+package "Backend — Controllers" as CONTROLLERS {
+
+    class AppController {
+        + getHello() : string
+        + health()
+    }
+
+    class AuthController {
+        + register(dto : RegisterDto)
+        + login(dto : LoginDto)
+        + me(user)
+        + adminCheck()
+    }
+
+    class ProfileController {
+        + getMe(user)
+        + updateMe(user, dto : UpdateProfileDto)
+    }
+
+    class CustomerProfilesController {
+        + createMe(user, dto : CreateCustomerProfileDto)
+        + updateMe(user, dto : CreateCustomerProfileDto)
+        + getMe(user)
+    }
+
+    class VehiclesController {
+        + findBrands()
+        + findCategories()
+        + findModels()
+        + createBrand(dto)
+        + createCategory(dto)
+        + createModel(dto)
+        + getCatalog()
+        + getAvailable(dto : CheckAvailabilityDto)
+        + findAll()
+        + create(dto : CreateVehicleDto)
+        + updateByPlate(licensePlate, dto : UpdateVehicleDto)
+    }
+
+    class ReservationsController {
+        + create(user, dto : CreateReservationDto)
+        + findMine(user)
+        + cancel(user, reservationNumber)
+    }
+
+    class ReservationsAdminController {
+        + findPending()
+        + reject(reservationNumber, dto : RejectReservationDto)
+        + confirm(reservationNumber)
+    }
+
+    class NotificationsController {
+        + findPublished()
+    }
+
+    class DashboardController {
+        + getAdmin() : DashboardSummary
+    }
+}
+
+' =====================================================================
+'  7. SÉCURITÉ / CONFIG
+' =====================================================================
+
+package "Backend — Securite & Config" as SECURITY {
+
+    class JwtAuthGuard <<Guard>> {
+        + canActivate(context) : boolean
+    }
+
+    class RolesGuard <<Guard>> {
+        + canActivate(context) : boolean
+    }
+
+    class Roles <<Decorator>> {
+        + metadata : UserRole[]
+    }
+
+    class DatabaseConfig <<Config>> {
+        + type : 'postgres'
+        + host : string
+        + port : number
+        + entities : string[]
+        + migrations : string[]
+    }
+
+    class DataSource <<Config>> {
+        + migrations : string[]
+    }
+}
+
+' =====================================================================
+'  8. FRONTEND — LIB
+' =====================================================================
+
+package "Frontend — lib" as FELIB {
+
+    class api <<module>> {
+        + API_BASE_URL : string
+        + buildApiUrl(path) : string
+        + apiRequest<T>(endpoint, options) : Promise<T>
+    }
+
+    interface VehicleItem {
+        + id : string
+        + brandName : string
+        + modelName : string
+        + categoryName : string
+        + manufactureYear : number
+        + color : string
+        + transmission : string
+        + fuelType : string
+        + seats : number
+        + powerHp : number
+        + dailyPrice : string
+        + securityDeposit : string
+        + description : string
+        + engine : string
+        + torqueNm : number
+        + acceleration0To100 : string
+        + topSpeedKmh : number
+        + consumptionL100km : string
+        + isSpecial : boolean
+        + isLimited : boolean
+        + editionSize : number
+        + announcedAt : string
+        + imageUrl : string
+        + reservationCount : number
+    }
+
+    interface NotificationItem {
+        + id : string
+        + type : string
+        + title : string
+        + message : string
+        + vehicleId : string
+        + brandName : string
+        + modelName : string
+        + categoryName : string
+        + isSpecial : boolean
+        + isLimited : boolean
+        + editionSize : number
+        + createdAt : string
+    }
+}
+
+' =====================================================================
+'  9. FRONTEND — ROUTES API (PROXY NEXT.JS)
+' =====================================================================
+
+package "Frontend — Routes API (proxy)" as FEROUTES {
+
+    class AuthRoutes <<route handlers>> {
+        + POST /api/auth/register
+        + POST /api/auth/login
+        + POST /api/auth/logout
+        + GET  /api/auth/me
+        + GET  /api/auth/session
+    }
+
+    class VehicleRoutes <<route handlers>> {
+        + GET  /api/vehicles/catalog
+        + GET  /api/vehicles/available
+        + GET  /api/admin/vehicles
+    }
+
+    class ReservationRoutes <<route handlers>> {
+        + POST /api/reservations
+        + PATCH /api/reservations/by-number/:num/cancel
+        + GET  /api/admin/reservations
+    }
+
+    class OtherRoutes <<route handlers>> {
+        + GET  /api/customer-profile
+        + GET  /api/notifications
+    }
+}
+
+' =====================================================================
+'  10. FRONTEND — COMPOSANTS & PAGES
+' =====================================================================
+
+package "Frontend — Composants" as FECOMP {
+
+    class SiteChrome {
+        + children
+    }
+    class SiteHeader
+    class SiteFooter
+    class ThemeToggle
+    class NotificationBell
+    class LuxeVideo {
+        + src
+        + poster
+    }
+    class VehicleCard {
+        + vehicle : VehicleItem
+        + cta
+    }
+    class Highlights
+}
+
+package "Frontend — Pages (App Router)" as FEPAGES {
+
+    class PublicPages <<pages>> {
+        + /                (Home)
+        + /vehicles        (Catalogue)
+        + /availability    (Disponibilite)
+        + /notifications
+        + /login
+        + /register
+    }
+
+    class AccountPages <<pages>> {
+        + /account
+        + /account/profile
+        + /account/reservations
+        + /reservations/new
+    }
+
+    class AdminPages <<pages>> {
+        + /admin
+        + /admin/vehicles
+        + /admin/reservations
+    }
+}
+
+' =====================================================================
+'  RELATIONS — DOMAINE
+' =====================================================================
+
+User "1" -- "0..1" CustomerProfile : possede
+User "1" -- "0..*" Reservation : decide (decidedBy)
+CustomerProfile "1" -- "0..*" Reservation : reserve
+Brand "1" -- "0..*" VehicleModel : possede
+Category "1" -- "0..*" VehicleModel : classe
+VehicleModel "1" -- "0..*" Vehicle : decline
+Vehicle "1" -- "0..*" VehicleImage : photos
+Vehicle "1" -- "0..*" Notification : concerne
+Vehicle "1" -- "0..*" Reservation : est reservee
+
+' Relations prévues (à réaliser)
+User "1" -- "0..*" RefreshToken : sessions
+User "1" -- "0..*" OneTimeToken : reset_verify
+Vehicle "1" -- "0..*" VehicleUnavailability : indisponible
+Reservation "1" -- "0..1" Rental : convertit
+Rental "1" -- "0..*" Inspection : controle
+Inspection "1" -- "0..*" InspectionDamage : constate
+Rental "1" -- "0..1" SecurityDeposit : caution
+Rental "1" -- "0..*" Payment : paiements
+Rental "1" -- "0..*" AdditionalCharge : frais
+InspectionDamage "1" -- "0..*" AdditionalCharge : facture
+Rental "1" -- "0..*" Invoice : facture
+Invoice "1" -- "0..*" InvoiceItem : lignes
+AdditionalCharge "1" -- "0..*" InvoiceItem : refacture
+Rental "1" -- "0..*" Document : documents
+Invoice "1" -- "0..*" Document : pieces
+User "1" -- "0..*" AuditLog : trace
+
+' =====================================================================
+'  RELATIONS — DÉPENDANCES SERVICES / DTO / ENTITÉS
+' =====================================================================
+
+AuthService ..> UsersService : utilise
+AuthService ..> RegisterDto : <validate>
+AuthService ..> LoginDto : <validate>
+AuthService ..> User : cree/lit
+AuthService ..> UserRole : <enum>
+AuthService ..> AccountStatus : <enum>
+
+UsersService ..> User : repository
+UsersService ..> CustomerProfile : cree
+
+CustomerProfilesService ..> CustomerProfile : repository
+CustomerProfilesService ..> CreateCustomerProfileDto : <validate>
+
+VehiclesService ..> Vehicle : repository
+VehiclesService ..> VehicleModel : repository
+VehiclesService ..> Brand : repository
+VehiclesService ..> Category : repository
+VehiclesService ..> PublicVehicleDto : produit
+VehiclesService ..> CreateVehicleDto : <validate>
+VehiclesService ..> UpdateVehicleDto : <validate>
+VehiclesService ..> NotificationsService : notifie
+
+ReservationsService ..> Reservation : repository
+ReservationsService ..> Vehicle : verifie
+ReservationsService ..> CustomerProfile : verifie
+ReservationsService ..> CreateReservationDto : <validate>
+
+ReservationsAdminService ..> Reservation : repository
+ReservationsAdminService ..> CustomerProfile : verifie
+ReservationsAdminService ..> RejectReservationDto : <validate>
+
+NotificationsService ..> Notification : repository
+NotificationsService ..> Vehicle : lit
+NotificationsService ..> PublicNotificationDto : produit
+
+DashboardService ..> Vehicle : compte
+DashboardService ..> Reservation : compte
+DashboardService ..> User : compte
+DashboardService ..> DashboardSummary : produit
+
+' =====================================================================
+'  RELATIONS — CONTRÔLEURS → SERVICES
+' =====================================================================
+
+AppController ..> AppService : delegue
+AuthController ..> AuthService : delegue
+AuthController ..> JwtAuthGuard : protege
+ProfileController ..> UsersService : delegue
+ProfileController ..> JwtAuthGuard : protege
+CustomerProfilesController ..> CustomerProfilesService : delegue
+CustomerProfilesController ..> JwtAuthGuard : protege
+VehiclesController ..> VehiclesService : delegue
+VehiclesController ..> RolesGuard : protege (admin)
+VehiclesController ..> CreateVehicleDto : <body>
+VehiclesController ..> UpdateVehicleDto : <body>
+VehiclesController ..> CheckAvailabilityDto : <query>
+ReservationsController ..> ReservationsService : delegue
+ReservationsController ..> JwtAuthGuard : protege
+ReservationsController ..> CreateReservationDto : <body>
+ReservationsAdminController ..> ReservationsAdminService : delegue
+ReservationsAdminController ..> RolesGuard : protege (admin)
+ReservationsAdminController ..> RejectReservationDto : <body>
+NotificationsController ..> NotificationsService : delegue
+DashboardController ..> DashboardService : delegue
+DashboardController ..> RolesGuard : protege (admin)
+
+RolesGuard ..> Roles : lit metadata
+JwtAuthGuard ..> User : charge
+
+' =====================================================================
+'  RELATIONS — FRONTEND
+' =====================================================================
+
+api ..> VehicleItem : <type>
+api ..> NotificationItem : <type>
+
+AuthRoutes ..> api : proxy vers backend
+VehicleRoutes ..> api : proxy vers backend
+ReservationRoutes ..> api : proxy vers backend
+OtherRoutes ..> api : proxy vers backend
+
+SiteChrome ..> SiteHeader
+SiteChrome ..> SiteFooter
+SiteHeader ..> ThemeToggle
+SiteHeader ..> NotificationBell
+VehicleCard ..> VehicleItem : <type>
+VehicleCard ..> LuxeVideo : fallback video
+
+PublicPages ..> VehicleCard : utilise
+PublicPages ..> api : appelle
+AccountPages ..> api : appelle
+AdminPages ..> api : appelle
+AdminPages ..> VehicleItem : <type>
+
+' =====================================================================
+'  LÉGENDE / NOTES
+' =====================================================================
+
+note bottom of DOMAIN_TODO
+  Tables déjà créées en base (schema.sql)
+  mais fonctionnalités applicatives non développées.
+  Le schéma complet compte 22 tables.
+end note
+
+note bottom of DOMAIN
+  9 entités réellement mappées par l'application
+  (TypeORM) : User, CustomerProfile, Brand,
+  Category, VehicleModel, Vehicle, VehicleImage,
+  Notification, Reservation.
+end note
+
+@enduml

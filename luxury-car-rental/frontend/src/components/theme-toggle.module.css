@@ -1,0 +1,30 @@
+/* ==============================================================
+   BASCULE CLAIR / SOMBRE
+   ============================================================== */
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--champagne-line);
+  background: transparent;
+  color: var(--champagne-2);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.toggle:hover {
+  background: var(--champagne-soft);
+  border-color: var(--champagne);
+  color: var(--champagne);
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--champagne);
+  outline-offset: 3px;
+}
