@@ -31,6 +31,28 @@
 $ npm install
 ```
 
+## Database setup (provisioning)
+
+TypeORM runs with `synchronize: false` and `migrationsRun: false`: the
+schema is never altered automatically. A database is provisioned once,
+in this exact order:
+
+1. Create the database (e.g. `luxury_car_rental`).
+2. Apply the base schema: `database/schema.sql`.
+3. Apply every numbered patch in `database/patches/` **in ascending
+   numeric order** (e.g. `002-…` → `022-…`). Each patch is idempotent
+   (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, …) and
+   transactional, so re-running it is safe and never rewrites existing
+   data. Use `node scripts/apply-patch.mjs <patch-file>` per patch.
+
+Patch `018-maintenance-release-audit.sql` creates the maintenance
+release audit journal `vehicle_unavailability_audit`, which the backend
+depends on. It is applied like any other patch and must never be
+skipped. The integration suite
+`test/maintenance-audit.e2e-spec.ts` reproduces the whole procedure on a
+throwaway database (schema + all patches, sorted) and asserts that the
+audit table, its unique index and the exclusion constraints are present.
+
 ## Compile and run the project
 
 ```bash

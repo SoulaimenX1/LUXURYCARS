@@ -1,0 +1,16 @@
+# ============================================================
+# Backend — dépendances, builds et secrets ne sont pas versionnés
+# ============================================================
+
+/node_modules
+/dist
+/coverage
+*.tsbuildinfo
+
+# Secrets : seul .env.example est versionné.
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log

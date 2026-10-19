@@ -36,8 +36,8 @@ export default function SiteFooter() {
                         Our fleet
                     </Link>
 
-                    <Link href="/availability">
-                        Availability
+                    <Link href="/contact">
+                        Contact
                     </Link>
                 </div>
 
@@ -59,6 +59,9 @@ export default function SiteFooter() {
                     <Link href="/account/reservations">
                         My reservations
                     </Link>
+
+                    <Link href="/account/rentals">My rentals</Link>
+                    <Link href="/account/premium">My premium collection</Link>
                 </div>
 
             </div>
@@ -71,7 +74,7 @@ export default function SiteFooter() {
                     Management System
                 </span>
 
-                <span>University of Debrecen</span>
+                <span>Prices recorded in EUR · Other currencies are indicative</span>
             </div>
         </footer>
     );

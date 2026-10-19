@@ -13,6 +13,8 @@ import {
 import styles from './vehicles.module.css';
 
 import { formatAmount } from '@/lib/format';
+import { useConfirm } from '@/components/confirm-dialog';
+import { useToast } from '@/components/toast';
 
 // ==========================================================
 // TYPES DES DONNÉES DU BACKEND
@@ -60,6 +62,7 @@ interface Vehicle {
 
     dailyPrice: string;
     securityDeposit: string;
+    vehicleValue: string;
     mileageKm: number;
 
     description: string | null;
@@ -117,12 +120,196 @@ async function readError(
     return `Request failed (HTTP ${response.status}).`;
 }
 
+// Accord simple (« 1 model » / « 3 models »).
+function pluralize(count: number, singular: string): string {
+    return `${count} ${singular}${count === 1 ? '' : 's'}`;
+}
+
+// Photo de couverture d'un véhicule : la photo principale si
+// elle existe, sinon la première photo disponible. Renvoie
+// `null` lorsqu'aucune photo n'est associée.
+function primaryImageOf(vehicle: Vehicle): VehiclePhoto | null {
+    const images = vehicle.images ?? [];
+
+    return (
+        images.find(
+            (item) => item.mediaType === 'image' && item.isPrimary,
+        ) ??
+        images.find((item) => item.mediaType === 'image') ??
+        null
+    );
+}
+
+// Nombre de photos associées à un véhicule.
+function imageCountOf(vehicle: Vehicle): number {
+    return (vehicle.images ?? []).filter(
+        (item) => item.mediaType === 'image',
+    ).length;
+}
+
+// Nombre de vidéos associées à un véhicule.
+function videoCountOf(vehicle: Vehicle): number {
+    return (vehicle.images ?? []).filter(
+        (item) => item.mediaType === 'video',
+    ).length;
+}
+
+// ==========================================================
+// CATALOGUE : LIGNES ET GESTIONNAIRE
+// ==========================================================
+
+// Une entrée supprimable du catalogue (marque, catégorie ou
+// modèle), enrichie des informations utiles à l'administrateur.
+interface CatalogRow {
+    id: string;
+    name: string;
+    // Clé de chargement, au format « <ressource>:<libellé> ».
+    key: string;
+    // Utilisation par la flotte (« Used by 3 models »).
+    usage: string;
+    // Vrai si l'entrée est encore référencée : la suppression
+    // entraîne alors la suppression (cascade) des éléments liés.
+    cascade: boolean;
+    // Résumé des éléments liés, « 5 models and 5 vehicles ».
+    cascadeSummary: string;
+}
+
+// Trie les entrées du catalogue : les éléments supprimables
+// (non utilisés) d'abord, puis par ordre alphabétique.
+function compareCatalogRows(a: CatalogRow, b: CatalogRow): number {
+    if (a.cascade !== b.cascade) {
+        return a.cascade ? 1 : -1;
+    }
+
+    return a.name.localeCompare(b.name);
+}
+
+// Carte de gestion d'un type d'entrée du catalogue : recherche
+// instantanée, nombre d'éléments et suppression par ligne.
+function CatalogManager({
+    title,
+    emptyMessage,
+    searchPlaceholder,
+    rows,
+    deletingKey,
+    onDelete,
+}: {
+    title: string;
+    emptyMessage: string;
+    searchPlaceholder: string;
+    rows: CatalogRow[];
+    deletingKey: string;
+    onDelete: (row: CatalogRow) => void;
+}) {
+    const [query, setQuery] = useState('');
+
+    const visibleRows = useMemo(() => {
+        const needle = query.trim().toLowerCase();
+
+        if (needle === '') {
+            return rows;
+        }
+
+        return rows.filter((row) =>
+            row.name.toLowerCase().includes(needle),
+        );
+    }, [rows, query]);
+
+    return (
+        <>
+            <header className={styles.catalogHead}>
+                <h3>{title}</h3>
+                <span className={styles.catalogCount}>
+                    {rows.length}
+                </span>
+            </header>
+
+            {rows.length === 0 ? (
+                <p className={styles.catalogEmpty}>
+                    {emptyMessage}
+                </p>
+            ) : (
+                <>
+                    <input
+                        type="search"
+                        className={styles.catalogSearch}
+                        value={query}
+                        placeholder={searchPlaceholder}
+                        aria-label={searchPlaceholder}
+                        onChange={(event) =>
+                            setQuery(event.target.value)
+                        }
+                    />
+
+                    {visibleRows.length === 0 ? (
+                        <p className={styles.catalogEmpty}>
+                            No match for &quot;{query.trim()}&quot;.
+                        </p>
+                    ) : (
+                        <ul className={styles.catalogList}>
+                            {visibleRows.map((row) => (
+                                <li
+                                    key={row.id}
+                                    className={styles.catalogItem}
+                                >
+                                    <div className={styles.catalogInfo}>
+                                        <span
+                                            className={styles.catalogName}
+                                            title={row.name}
+                                        >
+                                            {row.name}
+                                        </span>
+
+                                        <span
+                                            className={
+                                                row.cascade
+                                                    ? styles.catalogUsageLocked
+                                                    : styles.catalogUsage
+                                            }
+                                        >
+                                            {row.usage}
+                                        </span>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        className={
+                                            row.cascade
+                                                ? `${styles.catalogDelete} ${styles.catalogDeleteCascade}`
+                                                : styles.catalogDelete
+                                        }
+                                        disabled={
+                                            deletingKey === row.key
+                                        }
+                                        title={
+                                            row.cascade
+                                                ? `Delete "${row.name}" and its ${row.cascadeSummary}`
+                                                : `Delete ${row.name}`
+                                        }
+                                        onClick={() => onDelete(row)}
+                                    >
+                                        {deletingKey === row.key
+                                            ? 'Deleting...'
+                                            : 'Delete'}
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </>
+            )}
+        </>
+    );
+}
+
 // ==========================================================
 // PAGE ADMIN VEHICLES
 // ==========================================================
 
 export default function AdminVehiclesPage() {
     const router = useRouter();
+    const confirm = useConfirm();
+    const toast = useToast();
 
     // ========================================================
     // DONNÉES PRINCIPALES
@@ -182,6 +369,7 @@ export default function AdminVehiclesPage() {
     const [dailyPrice, setDailyPrice] = useState('');
     const [securityDeposit, setSecurityDeposit] =
         useState('');
+    const [vehicleValue, setVehicleValue] = useState('');
     const [mileageKm, setMileageKm] = useState('0');
     const [description, setDescription] = useState('');
 
@@ -206,10 +394,12 @@ export default function AdminVehiclesPage() {
     const [editDailyPrice, setEditDailyPrice] =
         useState('');
     const [editDeposit, setEditDeposit] = useState('');
+    const [editValue, setEditValue] = useState('');
     const [editMileage, setEditMileage] = useState('');
     const [editColor, setEditColor] = useState('');
     const [editDescription, setEditDescription] =
         useState('');
+    const [editStatus, setEditStatus] = useState('active');
 
     // ========================================================
     // FILTRES DE LA FLOTTE
@@ -219,6 +409,24 @@ export default function AdminVehiclesPage() {
     const [fleetBrand, setFleetBrand] = useState('all');
     const [fleetCategory, setFleetCategory] = useState('all');
     const [fleetStatus, setFleetStatus] = useState('all');
+
+    // ========================================================
+    // FILTRES DU STUDIO MÉDIA
+    // ========================================================
+
+    // Recherche libre (marque, modèle, plaque, VIN).
+    const [mediaSearch, setMediaSearch] = useState('');
+
+    // Portée : tous les véhicules, avec ou sans photo.
+    const [mediaScope, setMediaScope] = useState<
+        'all' | 'with' | 'without'
+    >('all');
+
+    // Véhicule retenu dans l'atelier média. La sélection est
+    // identifiée par l'identifiant unique du véhicule (jamais par
+    // marque ou modèle), afin de cibler la bonne voiture physique.
+    const [selectedMediaVehicleId, setSelectedMediaVehicleId] =
+        useState('');
 
     // ========================================================
     // PHOTOS DES VÉHICULES (GESTION DE FLOTTE)
@@ -351,6 +559,156 @@ export default function AdminVehiclesPage() {
     );
 
     // ========================================================
+    // UTILISATION DU CATALOGUE
+    // ========================================================
+    //
+    // Une marque / catégorie / modèle ne peut être supprimé que
+    // s'il n'est plus utilisé par la flotte. On pré-calcule ces
+    // compteurs pour verrouiller les lignes concernées et éviter
+    // à l'administrateur une suppression refusée par le serveur.
+
+    const modelsPerBrand = useMemo(() => {
+        const counts = new Map<string, number>();
+
+        for (const model of data.models) {
+            counts.set(
+                model.brandId,
+                (counts.get(model.brandId) ?? 0) + 1,
+            );
+        }
+
+        return counts;
+    }, [data.models]);
+
+    const modelsPerCategory = useMemo(() => {
+        const counts = new Map<string, number>();
+
+        for (const model of data.models) {
+            counts.set(
+                model.categoryId,
+                (counts.get(model.categoryId) ?? 0) + 1,
+            );
+        }
+
+        return counts;
+    }, [data.models]);
+
+    const vehiclesPerModel = useMemo(() => {
+        const counts = new Map<string, number>();
+
+        for (const vehicle of data.vehicles) {
+            counts.set(
+                vehicle.modelId,
+                (counts.get(vehicle.modelId) ?? 0) + 1,
+            );
+        }
+
+        return counts;
+    }, [data.vehicles]);
+
+    // Nombre de véhicules par marque (via le modèle du véhicule).
+    const vehiclesPerBrand = useMemo(() => {
+        const counts = new Map<string, number>();
+
+        for (const vehicle of data.vehicles) {
+            const brandId = vehicle.model.brandId;
+
+            counts.set(
+                brandId,
+                (counts.get(brandId) ?? 0) + 1,
+            );
+        }
+
+        return counts;
+    }, [data.vehicles]);
+
+    // Nombre de véhicules par catégorie.
+    const vehiclesPerCategory = useMemo(() => {
+        const counts = new Map<string, number>();
+
+        for (const vehicle of data.vehicles) {
+            const categoryId = vehicle.model.categoryId;
+
+            counts.set(
+                categoryId,
+                (counts.get(categoryId) ?? 0) + 1,
+            );
+        }
+
+        return counts;
+    }, [data.vehicles]);
+
+    const brandRows: CatalogRow[] = data.brands
+        .map((brand) => {
+            const models = modelsPerBrand.get(brand.id) ?? 0;
+            const vehicles =
+                vehiclesPerBrand.get(brand.id) ?? 0;
+
+            return {
+                id: brand.id,
+                name: brand.name,
+                key: `brand:${brand.name}`,
+                usage:
+                    models === 0
+                        ? 'Unused'
+                        : `Used by ${pluralize(models, 'model')}`,
+                cascade: models > 0,
+                cascadeSummary: `${pluralize(
+                    models,
+                    'model',
+                )} and ${pluralize(vehicles, 'vehicle')}`,
+            };
+        })
+        .sort(compareCatalogRows);
+
+    const categoryRows: CatalogRow[] = data.categories
+        .map((category) => {
+            const models =
+                modelsPerCategory.get(category.id) ?? 0;
+            const vehicles =
+                vehiclesPerCategory.get(category.id) ?? 0;
+
+            return {
+                id: category.id,
+                name: category.name,
+                key: `category:${category.name}`,
+                usage:
+                    models === 0
+                        ? 'Unused'
+                        : `Used by ${pluralize(models, 'model')}`,
+                cascade: models > 0,
+                cascadeSummary: `${pluralize(
+                    models,
+                    'model',
+                )} and ${pluralize(vehicles, 'vehicle')}`,
+            };
+        })
+        .sort(compareCatalogRows);
+
+    const modelRows: CatalogRow[] = data.models
+        .map((model) => {
+            const used = vehiclesPerModel.get(model.id) ?? 0;
+
+            const brandName =
+                brandsById.get(model.brandId)?.name ?? '';
+
+            const label = `${brandName} ${model.name}`.trim();
+
+            return {
+                id: model.id,
+                name: label,
+                key: `model:${label}`,
+                usage:
+                    used === 0
+                        ? 'Unused'
+                        : `Used by ${pluralize(used, 'vehicle')}`,
+                cascade: used > 0,
+                cascadeSummary: pluralize(used, 'vehicle'),
+            };
+        })
+        .sort(compareCatalogRows);
+
+    // ========================================================
     // FILTRAGE DE LA FLOTTE
     // ========================================================
 
@@ -437,6 +795,139 @@ export default function AdminVehiclesPage() {
     }
 
     // ========================================================
+    // FILTRAGE DU STUDIO MÉDIA
+    // ========================================================
+
+    const hasMediaFilters =
+        mediaSearch.trim() !== '' ||
+        mediaScope !== 'all';
+
+    const filteredMedia = useMemo(() => {
+        const query = mediaSearch.trim().toLowerCase();
+
+        return data.vehicles.filter((vehicle) => {
+            const brandName =
+                brandsById.get(
+                    vehicle.model.brandId,
+                )?.name ?? '';
+
+            const searchableText = [
+                brandName,
+                vehicle.model.name,
+                vehicle.licensePlate,
+                vehicle.vin,
+            ]
+                .join(' ')
+                .toLowerCase();
+
+            const matchesSearch =
+                query === '' ||
+                searchableText.includes(query);
+
+            const media = vehicle.images ?? [];
+
+            const hasPhoto = media.some(
+                (item) => item.mediaType === 'image',
+            );
+
+            const matchesScope =
+                mediaScope === 'all' ||
+                (mediaScope === 'with'
+                    ? hasPhoto
+                    : !hasPhoto);
+
+            return matchesSearch && matchesScope;
+        });
+    }, [
+        data.vehicles,
+        mediaSearch,
+        mediaScope,
+        brandsById,
+    ]);
+
+    function resetMediaFilters() {
+        setMediaSearch('');
+        setMediaScope('all');
+    }
+
+    // ========================================================
+    // ATELIER MÉDIA : VÉHICULE RETENU ET MÉDIAS ASSOCIÉS
+    // ========================================================
+    //
+    // La sélection est dérivée de la liste filtrée : si le
+    // véhicule retenu quitte le filtre, on retombe sur le
+    // premier résultat (sans effet secondaire ni état fantôme).
+
+    const selectedMediaVehicle = useMemo(() => {
+        if (filteredMedia.length === 0) {
+            return null;
+        }
+
+        return (
+            filteredMedia.find(
+                (vehicle) => vehicle.id === selectedMediaVehicleId,
+            ) ??
+            filteredMedia[0] ??
+            null
+        );
+    }, [filteredMedia, selectedMediaVehicleId]);
+
+    const selectedMediaBrand = selectedMediaVehicle
+        ? brandsById.get(selectedMediaVehicle.model.brandId)
+        : undefined;
+
+    // Toutes les photos (couverture + galerie) et vidéos du
+    // véhicule retenu, telles que renvoyées par le backend.
+    const selectedMediaImages = useMemo(
+        () =>
+            (selectedMediaVehicle?.images ?? []).filter(
+                (item) => item.mediaType === 'image',
+            ),
+        [selectedMediaVehicle],
+    );
+
+    const selectedMediaVideos = useMemo(
+        () =>
+            (selectedMediaVehicle?.images ?? []).filter(
+                (item) => item.mediaType === 'video',
+            ),
+        [selectedMediaVehicle],
+    );
+
+    const selectedMediaCover =
+        selectedMediaImages.find((item) => item.isPrimary) ??
+        selectedMediaImages[0] ??
+        null;
+
+    const selectedMediaGallery = selectedMediaCover
+        ? selectedMediaImages.filter(
+              (item) => item.id !== selectedMediaCover.id,
+          )
+        : selectedMediaImages;
+
+    const selectedMediaPlate = selectedMediaVehicle?.licensePlate ?? '';
+
+    const selectedMediaUploading =
+        selectedMediaPlate !== '' &&
+        uploadingKey === `${selectedMediaPlate}:image`;
+
+    const selectedMediaDeleting =
+        selectedMediaPlate !== '' &&
+        deletingKey === `${selectedMediaPlate}:image`;
+
+    const selectedMediaFile = selectedMediaPlate
+        ? imageFiles[selectedMediaPlate] ?? null
+        : null;
+
+    // Valeurs scalaires prêtes à l'affichage (évite toute
+    // dépendance au rétrécissement de type dans les rappels).
+    const selectedMediaId = selectedMediaVehicle?.id ?? '';
+    const selectedMediaBrandName = selectedMediaBrand?.name ?? 'Luxury';
+    const selectedMediaModelName = selectedMediaVehicle?.model.name ?? '';
+    const selectedMediaYear = selectedMediaVehicle?.manufactureYear ?? null;
+    const selectedMediaColor = selectedMediaVehicle?.color ?? '';
+
+    // ========================================================
     // VÉHICULE SÉLECTIONNÉ POUR MODIFICATION
     // ========================================================
 
@@ -484,14 +975,16 @@ export default function AdminVehiclesPage() {
             }
 
             setSuccess(successMessage);
+            toast.success(successMessage, 'Catalogue');
 
             await loadData();
         } catch (caught) {
-            setError(
+            const message =
                 caught instanceof Error
                     ? caught.message
-                    : 'Operation failed.',
-            );
+                    : 'Operation failed.';
+            setError(message);
+            toast.error(message, 'Catalogue');
         } finally {
             setActionLoading(false);
         }
@@ -612,6 +1105,18 @@ export default function AdminVehiclesPage() {
             return;
         }
 
+        // La valeur du véhicule doit toujours être un nombre réel > 0.
+        if (
+            !vehicleValue.trim() ||
+            !Number.isFinite(Number(vehicleValue)) ||
+            Number(vehicleValue) <= 0
+        ) {
+            setError(
+                'Vehicle value is required and must be a positive number.',
+            );
+            return;
+        }
+
         const brand = brandsById.get(
             selectedModel.brandId,
         );
@@ -647,6 +1152,9 @@ export default function AdminVehiclesPage() {
 
             securityDeposit:
                 Number(securityDeposit),
+
+            vehicleValue:
+                Number(vehicleValue),
 
             mileageKm:
                 Number(mileageKm),
@@ -713,6 +1221,7 @@ export default function AdminVehiclesPage() {
         setPowerHp('');
         setDailyPrice('');
         setSecurityDeposit('');
+        setVehicleValue('');
         setMileageKm('0');
         setDescription('');
         setEngine('');
@@ -742,6 +1251,7 @@ export default function AdminVehiclesPage() {
 
         setEditDailyPrice(vehicle.dailyPrice);
         setEditDeposit(vehicle.securityDeposit);
+        setEditValue(vehicle.vehicleValue);
         setEditMileage(
             String(vehicle.mileageKm),
         );
@@ -749,6 +1259,84 @@ export default function AdminVehiclesPage() {
         setEditDescription(
             vehicle.description ?? '',
         );
+        setEditStatus(vehicle.status);
+    }
+
+    // ========================================================
+    // ACTIVER / DÉSACTIVER UN VÉHICULE (RACCOURCI)
+    // ========================================================
+
+    async function toggleVehicleStatus(vehicle: Vehicle) {
+        const nextStatus =
+            vehicle.status === 'active'
+                ? 'inactive'
+                : 'active';
+
+        const approved = await confirm({
+            title:
+                nextStatus === 'active'
+                    ? 'Activate vehicle'
+                    : 'Deactivate vehicle',
+            message:
+                nextStatus === 'active'
+                    ? `${vehicle.licensePlate} will become available to customers again.`
+                    : `${vehicle.licensePlate} will be hidden from customers. Existing reservations and history are preserved.`,
+            confirmLabel:
+                nextStatus === 'active'
+                    ? 'Activate'
+                    : 'Deactivate',
+            tone: nextStatus === 'active' ? 'success' : 'danger',
+        });
+        if (!approved) {
+            return;
+        }
+
+        setActionLoading(true);
+        setError('');
+        setSuccess('');
+
+        try {
+            const response = await fetch(
+                '/api/admin/vehicles',
+                {
+                    method: 'PATCH',
+
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+
+                    body: JSON.stringify({
+                        licensePlate: vehicle.licensePlate,
+
+                        data: {
+                            status: nextStatus,
+                        },
+                    }),
+                },
+            );
+
+            if (!response.ok) {
+                throw new Error(await readError(response));
+            }
+
+            const message =
+                nextStatus === 'active'
+                    ? `${vehicle.licensePlate} is now available to customers.`
+                    : `${vehicle.licensePlate} is now inactive and hidden from customers.`;
+            setSuccess(message);
+            toast.success(message, 'Fleet status');
+
+            await loadData();
+        } catch (caught) {
+            const failure =
+                caught instanceof Error
+                    ? caught.message
+                    : 'Unable to update vehicle status.';
+            setError(failure);
+            toast.error(failure, 'Fleet status');
+        } finally {
+            setActionLoading(false);
+        }
     }
 
     // ========================================================
@@ -790,6 +1378,9 @@ export default function AdminVehiclesPage() {
                             securityDeposit:
                                 Number(editDeposit),
 
+                            vehicleValue:
+                                Number(editValue),
+
                             mileageKm:
                                 Number(editMileage),
 
@@ -798,6 +1389,8 @@ export default function AdminVehiclesPage() {
 
                             description:
                                 editDescription.trim(),
+
+                            status: editStatus,
                         },
                     }),
                 },
@@ -807,17 +1400,18 @@ export default function AdminVehiclesPage() {
                 throw new Error(await readError(response));
             }
 
-            setSuccess(
-                `${selectedEditVehicle.licensePlate} updated successfully.`,
-            );
+            const message = `${selectedEditVehicle.licensePlate} updated successfully.`;
+            setSuccess(message);
+            toast.success(message, 'Vehicle updated');
 
             await loadData();
         } catch (caught) {
-            setError(
+            const failure =
                 caught instanceof Error
                     ? caught.message
-                    : 'Unable to update vehicle.',
-            );
+                    : 'Unable to update vehicle.';
+            setError(failure);
+            toast.error(failure, 'Vehicle updated');
         } finally {
             setActionLoading(false);
         }
@@ -879,11 +1473,12 @@ export default function AdminVehiclesPage() {
                 throw new Error(await readError(response));
             }
 
-            setSuccess(
+            const message =
                 kind === 'video'
                     ? `Video updated for ${plate}.`
-                    : `Photo updated for ${plate}.`,
-            );
+                    : `Photo updated for ${plate}.`;
+            setSuccess(message);
+            toast.success(message, 'Vehicle media');
 
             // Vider la sélection de cette ligne.
             if (kind === 'video') {
@@ -900,11 +1495,12 @@ export default function AdminVehiclesPage() {
 
             await loadData();
         } catch (caught) {
-            setError(
+            const failure =
                 caught instanceof Error
                     ? caught.message
-                    : 'Unable to upload file.',
-            );
+                    : 'Unable to upload file.';
+            setError(failure);
+            toast.error(failure, 'Vehicle media');
         } finally {
             setUploadingKey('');
         }
@@ -917,14 +1513,28 @@ export default function AdminVehiclesPage() {
     async function deleteVehicleMedia(
         plate: string,
         kind: 'image' | 'video',
+        count = 1,
     ) {
         const label = kind === 'video' ? 'video' : 'photo';
 
-        if (
-            !window.confirm(
-                `Delete the ${label} of ${plate}?`,
-            )
-        ) {
+        // Le point d'entrée « by-plate » supprime TOUS les médias
+        // du même type pour la voiture (couverture + galerie). Le
+        // message doit donc refléter exactement ce qui sera effacé.
+        const message =
+            count > 1
+                ? `All ${count} ${label}s of ${plate} will be permanently removed, including gallery images. This action cannot be undone.`
+                : `The ${label} of ${plate} will be permanently removed. This action cannot be undone.`;
+
+        const approved = await confirm({
+            title:
+                count > 1
+                    ? `Delete all ${label}s`
+                    : `Delete ${label}`,
+            message,
+            confirmLabel: 'Delete',
+            tone: 'danger',
+        });
+        if (!approved) {
             return;
         }
 
@@ -956,19 +1566,128 @@ export default function AdminVehiclesPage() {
                 throw new Error(await readError(response));
             }
 
-            setSuccess(
+            const message =
                 kind === 'video'
                     ? `Video removed for ${plate}.`
-                    : `Photo removed for ${plate}.`,
-            );
+                    : `Photo removed for ${plate}.`;
+            setSuccess(message);
+            toast.success(message, 'Vehicle media');
 
             await loadData();
         } catch (caught) {
-            setError(
+            const failure =
                 caught instanceof Error
                     ? caught.message
-                    : 'Unable to delete file.',
+                    : 'Unable to delete file.';
+            setError(failure);
+            toast.error(failure, 'Vehicle media');
+        } finally {
+            setDeletingKey('');
+        }
+    }
+
+    // ========================================================
+    // SUPPRIMER UNE RESSOURCE DU CATALOGUE OU UN VÉHICULE
+    // ========================================================
+    //
+    // - brand / category / model : suppression du catalogue.
+    // - vehicle : suppression d'une voiture de la flotte.
+    //
+    // Le backend refuse (409) une suppression qui violerait
+    // une contrainte de clé étrangère (RESTRICT).
+
+    async function deleteResource(
+        resource:
+            | 'brand'
+            | 'category'
+            | 'model'
+            | 'vehicle',
+        label: string,
+        params: {
+            id?: string;
+            licensePlate?: string;
+        },
+        options?: {
+            force?: boolean;
+            cascadeSummary?: string;
+        },
+    ) {
+        const isVehicle = resource === 'vehicle';
+
+        const approved = await confirm({
+            title: `Delete ${label}?`,
+            message: isVehicle
+                ? `Vehicle "${label}" will be removed from the fleet permanently. This action cannot be undone.`
+                : options?.force
+                    ? `"${label}" is still used by ${
+                          options.cascadeSummary ??
+                          'related items'
+                      }. Deleting it will also permanently remove those linked items. Vehicles with reservations or reviews are protected and will block the deletion. This action cannot be undone.`
+                    : `"${label}" will be removed from the collection permanently. This action cannot be undone.`,
+            confirmLabel: 'Delete',
+            tone: 'danger',
+        });
+
+        if (!approved) {
+            return;
+        }
+
+        setDeletingKey(`${resource}:${label}`);
+        setError('');
+        setSuccess('');
+
+        const query = new URLSearchParams({ resource });
+
+        if (params.id) {
+            query.set('id', params.id);
+        }
+
+        if (params.licensePlate) {
+            query.set(
+                'licensePlate',
+                params.licensePlate,
             );
+        }
+
+        // Demande la suppression en cascade au serveur.
+        if (options?.force && !isVehicle) {
+            query.set('force', 'true');
+        }
+
+        try {
+            const response = await fetch(
+                `/api/admin/vehicles?${query.toString()}`,
+                {
+                    method: 'DELETE',
+                },
+            );
+
+            if (response.status === 401) {
+                router.replace('/login');
+                return;
+            }
+
+            if (response.status === 403) {
+                router.replace('/account');
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(await readError(response));
+            }
+
+            const message = `${label} deleted successfully.`;
+            setSuccess(message);
+            toast.success(message, 'Catalogue');
+
+            await loadData();
+        } catch (caught) {
+            const failure =
+                caught instanceof Error
+                    ? caught.message
+                    : 'Unable to delete resource.';
+            setError(failure);
+            toast.error(failure, 'Catalogue');
         } finally {
             setDeletingKey('');
         }
@@ -1020,7 +1739,7 @@ export default function AdminVehiclesPage() {
                         </p>
 
                         <h1>
-                            Fleet <em>atelier.</em>
+                            Fleet <em>atelier</em>
                         </h1>
 
                         <p className={styles.subtitle}>
@@ -1299,124 +2018,235 @@ export default function AdminVehiclesPage() {
                                                 vehicle.model.categoryId,
                                             );
 
+                                        const brandLabel =
+                                            brand?.name ?? 'Luxury';
+
+                                        const primaryImage =
+                                            (vehicle.images ?? []).find(
+                                                (item) =>
+                                                    item.mediaType ===
+                                                        'image' &&
+                                                    item.isPrimary,
+                                            ) ??
+                                            (vehicle.images ?? []).find(
+                                                (item) =>
+                                                    item.mediaType ===
+                                                    'image',
+                                            );
+
                                         return (
                                             <article
                                                 key={vehicle.id}
                                                 className={styles.vehicleCard}
                                             >
-
-                                                <div className={styles.vehicleTop}>
-                                                    <span>
+                                                <figure
+                                                    className={
+                                                        styles.vehicleFigure
+                                                    }
+                                                >
+                                                    <button
+                                                        type="button"
+                                                        className={`${styles.statusButton} ${
+                                                            vehicle.status ===
+                                                            'active'
+                                                                ? styles.statusButtonActive
+                                                                : styles.statusButtonInactive
+                                                        }`}
+                                                        disabled={actionLoading}
+                                                        aria-pressed={
+                                                            vehicle.status ===
+                                                            'active'
+                                                        }
+                                                        title={
+                                                            vehicle.status ===
+                                                            'active'
+                                                                ? 'Active — click to hide this car from customers'
+                                                                : 'Hidden from customers — click to activate'
+                                                        }
+                                                        onClick={() =>
+                                                            void toggleVehicleStatus(
+                                                                vehicle,
+                                                            )
+                                                        }
+                                                    >
                                                         {vehicle.status}
-                                                    </span>
+                                                    </button>
 
-                                                    <small>
-                                                        {vehicle.manufactureYear}
-                                                    </small>
-                                                </div>
+                                                    {primaryImage ? (
+                                                        <img
+                                                            className={
+                                                                styles.vehiclePhoto
+                                                            }
+                                                            src={
+                                                                primaryImage.storagePath
+                                                            }
+                                                            alt={
+                                                                primaryImage.altText ??
+                                                                `${brandLabel} ${vehicle.model.name}`
+                                                            }
+                                                            loading="lazy"
+                                                        />
+                                                    ) : (
+                                                        <span
+                                                            className={
+                                                                styles.vehiclePhotoEmpty
+                                                            }
+                                                            aria-hidden="true"
+                                                        >
+                                                            {brandLabel}
+                                                        </span>
+                                                    )}
 
-                                                <h3>
-                                                    {brand?.name ??
-                                                        'Luxury'}{' '}
-                                                    {vehicle.model.name}
-                                                </h3>
+                                                    <figcaption
+                                                        className={
+                                                            styles.vehicleYear
+                                                        }
+                                                    >
+                                                        {
+                                                            vehicle.manufactureYear
+                                                        }
+                                                    </figcaption>
+                                                </figure>
 
-                                                <p className={styles.category}>
-                                                    {category?.name ??
-                                                        'Premium'}
-                                                </p>
+                                                <div
+                                                    className={
+                                                        styles.vehicleBody
+                                                    }
+                                                >
+                                                    <p
+                                                        className={
+                                                            styles.category
+                                                        }
+                                                    >
+                                                        {category?.name ??
+                                                            'Premium'}
+                                                    </p>
 
-                                                <div className={styles.vehicleDetails}>
-                                                    <div>
-                                                        <span>Color</span>
-                                                        <strong>
-                                                            {vehicle.color ||
-                                                                '—'}
-                                                        </strong>
-                                                    </div>
+                                                    <h3>
+                                                        {brandLabel}{' '}
+                                                        {vehicle.model.name}
+                                                    </h3>
 
-                                                    <div>
-                                                        <span>Year</span>
-                                                        <strong>
-                                                            {vehicle.manufactureYear}
-                                                        </strong>
-                                                    </div>
+                                                    <p
+                                                        className={
+                                                            styles.vehicleIdentity
+                                                        }
+                                                    >
+                                                        <span
+                                                            className={
+                                                                styles.plate
+                                                            }
+                                                        >
+                                                            {
+                                                                vehicle.licensePlate
+                                                            }
+                                                        </span>
 
-                                                    <div>
-                                                        <span>Transmission</span>
-                                                        <strong>
-                                                            {vehicle.transmission}
-                                                        </strong>
-                                                    </div>
-
-                                                    <div>
-                                                        <span>Fuel</span>
-                                                        <strong>
-                                                            {vehicle.fuelType}
-                                                        </strong>
-                                                    </div>
-
-                                                    <div>
-                                                        <span>Seats</span>
-                                                        <strong>
-                                                            {vehicle.seats}
-                                                        </strong>
-                                                    </div>
-
-                                                    <div>
-                                                        <span>Power</span>
-                                                        <strong>
-                                                            {vehicle.powerHp
-                                                                ? `${vehicle.powerHp} hp`
-                                                                : '—'}
-                                                        </strong>
-                                                    </div>
-
-                                                    <div>
-                                                        <span>Configuration</span>
-                                                        <strong>
-                                                            {vehicle.transmission}
-                                                            {' / '}
-                                                            {vehicle.fuelType}
-                                                        </strong>
-                                                    </div>
-
-                                                    <div>
-                                                        <span>Plate</span>
-                                                        <strong>
-                                                            {vehicle.licensePlate}
-                                                        </strong>
-                                                    </div>
-
-                                                    <div>
-                                                        <span>VIN</span>
-                                                        <strong>
+                                                        <span
+                                                            className={
+                                                                styles.vin
+                                                            }
+                                                            title={vehicle.vin}
+                                                        >
                                                             {vehicle.vin}
-                                                        </strong>
-                                                    </div>
+                                                        </span>
+                                                    </p>
 
-                                                    <div>
-                                                        <span>Mileage</span>
-                                                        <strong>
-                                                            {vehicle.mileageKm.toLocaleString()}
-                                                            {' '}km
-                                                        </strong>
-                                                    </div>
-                                                </div>
-
-                                                <div style={{ marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid var(--line)' }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', minHeight: '42px' }}>
-                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                            <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '1.2px', textTransform: 'uppercase', color: 'var(--muted-text)', minHeight: '14px' }}>Daily rate</span>
-                                                            <strong style={{ fontSize: '18px', fontWeight: 700, color: 'var(--gold-text)', lineHeight: '1.2' }}>{formatAmount(vehicle.dailyPrice)}</strong>
+                                                    <dl
+                                                        className={
+                                                            styles.vehicleSpecs
+                                                        }
+                                                    >
+                                                        <div>
+                                                            <dt>
+                                                                Transmission
+                                                            </dt>
+                                                            <dd>
+                                                                {
+                                                                    vehicle.transmission
+                                                                }
+                                                            </dd>
                                                         </div>
-                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-end' }}>
-                                                            <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '1.2px', textTransform: 'uppercase', color: 'var(--muted-text)', minHeight: '14px' }}>Security deposit</span>
-                                                            <strong style={{ fontSize: '13px', fontWeight: 600, color: 'var(--ink)', lineHeight: '1.2' }}>{formatAmount(vehicle.securityDeposit)}</strong>
-                                                        </div>
-                                                    </div>
-                                                </div>
 
+                                                        <div>
+                                                            <dt>Fuel</dt>
+                                                            <dd>
+                                                                {
+                                                                    vehicle.fuelType
+                                                                }
+                                                            </dd>
+                                                        </div>
+
+                                                        <div>
+                                                            <dt>Power</dt>
+                                                            <dd>
+                                                                {vehicle.powerHp
+                                                                    ? `${vehicle.powerHp} hp`
+                                                                    : '—'}
+                                                            </dd>
+                                                        </div>
+
+                                                        <div>
+                                                            <dt>Seats</dt>
+                                                            <dd>
+                                                                {vehicle.seats}
+                                                            </dd>
+                                                        </div>
+
+                                                        <div>
+                                                            <dt>Colour</dt>
+                                                            <dd>
+                                                                {vehicle.color ||
+                                                                    '—'}
+                                                            </dd>
+                                                        </div>
+
+                                                        <div>
+                                                            <dt>Mileage</dt>
+                                                            <dd>
+                                                                {vehicle.mileageKm.toLocaleString()}
+                                                                {' km'}
+                                                            </dd>
+                                                        </div>
+                                                    </dl>
+
+                                                    <dl
+                                                        className={
+                                                            styles.vehiclePricing
+                                                        }
+                                                    >
+                                                        <div>
+                                                            <dt>
+                                                                Daily rate
+                                                            </dt>
+                                                            <dd>
+                                                                {formatAmount(
+                                                                    vehicle.dailyPrice,
+                                                                )}
+                                                            </dd>
+                                                        </div>
+
+                                                        <div>
+                                                            <dt>
+                                                                Vehicle value
+                                                            </dt>
+                                                            <dd>
+                                                                {formatAmount(
+                                                                    vehicle.vehicleValue,
+                                                                )}
+                                                            </dd>
+                                                        </div>
+
+                                                        <div>
+                                                            <dt>Deposit</dt>
+                                                            <dd>
+                                                                {formatAmount(
+                                                                    vehicle.securityDeposit,
+                                                                )}
+                                                            </dd>
+                                                        </div>
+                                                    </dl>
+                                                </div>
                                             </article>
                                         );
                                     })}
@@ -1432,25 +2262,39 @@ export default function AdminVehiclesPage() {
                 {/* PHOTOS DES VÉHICULES                             */}
                 {/* ================================================= */}
 
-                <section className={tabClass('media')}>
+                <section
+                    className={`${tabClass('media')} ${styles.mediaTab}`}
+                >
 
-                    <div className={styles.sectionHeader}>
-                        <p className={styles.eyebrow}>
-                            FLEET GALLERY
-                        </p>
+                    <div className={styles.mediaHeader}>
+                        <div className={styles.sectionHeader}>
+                            <p className={styles.eyebrow}>
+                                FLEET GALLERY
+                            </p>
 
-                        <h2>
-                            Vehicle media
-                        </h2>
+                            <h2>
+                                Vehicle media
+                            </h2>
+                        </div>
+
+                        <Link
+                            className={styles.studioButton}
+                            href="/admin/media"
+                        >
+                            Open Media studio / 3D
+                            <span aria-hidden="true">
+                                &#8594;
+                            </span>
+                        </Link>
                     </div>
 
                     <p className={styles.photoHint}>
-                        Associez une photo et/ou une vidéo à
-                        chaque voiture. Sélectionnez un fichier
-                        depuis votre ordinateur, puis cliquez sur
-                        « Upload ». Photos&nbsp;: JPEG, PNG, WEBP,
-                        AVIF, GIF (8&nbsp;Mo maximum). Vidéos&nbsp;:
-                        MP4, WEBM, OGG ou MOV (80&nbsp;Mo maximum).
+                        Sélectionnez un véhicule dans la collection
+                        pour remplacer sa photo de couverture.
+                        Photos&nbsp;: JPEG, PNG, WEBP, AVIF ou GIF
+                        (8&nbsp;Mo maximum). Les galeries complètes,
+                        les vidéos et les modèles 3D se gèrent dans
+                        le Media studio.
                     </p>
 
                     {data.vehicles.length === 0 ? (
@@ -1460,388 +2304,606 @@ export default function AdminVehiclesPage() {
                             </p>
                         </div>
                     ) : (
-                        <div className={styles.photoTableWrap}>
-                            <table className={styles.photoTable}>
-                                <thead>
-                                    <tr>
-                                        <th>Vehicle</th>
-                                        <th>Plate</th>
-                                        <th>Photo</th>
-                                        <th>Video</th>
-                                        <th>Upload media</th>
-                                    </tr>
-                                </thead>
+                        <div className={styles.mediaStudio}>
 
-                                <tbody>
-                                    {data.vehicles.map(
-                                        (vehicle) => {
-                                            const brand =
-                                                brandsById.get(
-                                                    vehicle.model.brandId,
-                                                );
+                            {/* ---------------------------------- */}
+                            {/* COLLECTION DE VÉHICULES            */}
+                            {/* ---------------------------------- */}
 
-                                            const brandName =
-                                                brand?.name ??
-                                                'Luxury';
+                            <aside
+                                className={styles.mediaCollection}
+                                aria-label="Vehicle collection"
+                            >
+                                <div
+                                    className={
+                                        styles.mediaCollectionHead
+                                    }
+                                >
+                                    <div
+                                        className={
+                                            styles.mediaSearchRow
+                                        }
+                                    >
+                                        <div className={styles.field}>
+                                            <label htmlFor="media-search">
+                                                Search
+                                            </label>
 
-                                            const media =
-                                                vehicle.images ?? [];
+                                            <input
+                                                id="media-search"
+                                                type="search"
+                                                placeholder="Brand, model, plate or VIN..."
+                                                value={mediaSearch}
+                                                onChange={(event) =>
+                                                    setMediaSearch(
+                                                        event.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </div>
 
-                                            const primaryImage =
-                                                media.find(
-                                                    (item) =>
-                                                        item.mediaType ===
-                                                            'image' &&
-                                                        item.isPrimary,
-                                                ) ??
-                                                media.find(
-                                                    (item) =>
-                                                        item.mediaType ===
-                                                        'image',
-                                                );
+                                        <div className={styles.field}>
+                                            <label htmlFor="media-scope">
+                                                Media
+                                            </label>
 
-                                            const primaryVideo =
-                                                media.find(
-                                                    (item) =>
-                                                        item.mediaType ===
-                                                            'video' &&
-                                                        item.isPrimary,
-                                                ) ??
-                                                media.find(
-                                                    (item) =>
-                                                        item.mediaType ===
-                                                        'video',
-                                                );
+                                            <select
+                                                id="media-scope"
+                                                value={mediaScope}
+                                                onChange={(event) =>
+                                                    setMediaScope(
+                                                        event.target.value as
+                                                            | 'all'
+                                                            | 'with'
+                                                            | 'without',
+                                                    )
+                                                }
+                                            >
+                                                <option value="all">
+                                                    All vehicles
+                                                </option>
 
-                                            const imageFile =
-                                                imageFiles[
-                                                    vehicle.licensePlate
-                                                ] ?? null;
+                                                <option value="with">
+                                                    With photo
+                                                </option>
 
-                                            const videoFile =
-                                                videoFiles[
-                                                    vehicle.licensePlate
-                                                ] ?? null;
+                                                <option value="without">
+                                                    Without photo
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
 
-                                            const uploadingImage =
-                                                uploadingKey ===
-                                                `${vehicle.licensePlate}:image`;
+                                    <div
+                                        className={
+                                            styles.mediaCollectionMeta
+                                        }
+                                    >
+                                        <span>
+                                            Showing{' '}
+                                            {filteredMedia.length} of{' '}
+                                            {data.vehicles.length}{' '}
+                                            vehicles
+                                        </span>
 
-                                            const uploadingVideo =
-                                                uploadingKey ===
-                                                `${vehicle.licensePlate}:video`;
+                                        {hasMediaFilters && (
+                                            <button
+                                                type="button"
+                                                onClick={resetMediaFilters}
+                                            >
+                                                Clear filters
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
 
-                                            const deletingImage =
-                                                deletingKey ===
-                                                `${vehicle.licensePlate}:image`;
+                                {filteredMedia.length === 0 ? (
+                                    <div
+                                        className={styles.mediaListEmpty}
+                                    >
+                                        <p>
+                                            No vehicles match your
+                                            search.
+                                        </p>
 
-                                            const deletingVideo =
-                                                deletingKey ===
-                                                `${vehicle.licensePlate}:video`;
+                                        <button
+                                            type="button"
+                                            onClick={resetMediaFilters}
+                                        >
+                                            Clear filters
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className={styles.mediaListWrap}>
+                                        <ul className={styles.mediaList}>
+                                            {filteredMedia.map(
+                                                (vehicle) => {
+                                                    const brand =
+                                                        brandsById.get(
+                                                            vehicle.model
+                                                                .brandId,
+                                                        );
 
-                                            return (
-                                                <tr key={vehicle.id}>
-                                                    <td
+                                                    const brandName =
+                                                        brand?.name ??
+                                                        'Luxury';
+
+                                                    const photo =
+                                                        primaryImageOf(
+                                                            vehicle,
+                                                        );
+
+                                                    const imageCount =
+                                                        imageCountOf(
+                                                            vehicle,
+                                                        );
+
+                                                    const videoCount =
+                                                        videoCountOf(
+                                                            vehicle,
+                                                        );
+
+                                                    const isSelected =
+                                                        selectedMediaVehicle?.id ===
+                                                        vehicle.id;
+
+                                                    return (
+                                                        <li
+                                                            key={
+                                                                vehicle.id
+                                                            }
+                                                        >
+                                                            <button
+                                                                type="button"
+                                                                className={
+                                                                    isSelected
+                                                                        ? styles.mediaItemActive
+                                                                        : styles.mediaItem
+                                                                }
+                                                                aria-current={
+                                                                    isSelected
+                                                                        ? 'true'
+                                                                        : undefined
+                                                                }
+                                                                onClick={() =>
+                                                                    setSelectedMediaVehicleId(
+                                                                        vehicle.id,
+                                                                    )
+                                                                }
+                                                            >
+                                                                <span
+                                                                    className={
+                                                                        styles.mediaItemThumb
+                                                                    }
+                                                                >
+                                                                    {photo ? (
+                                                                        <img
+                                                                            src={
+                                                                                photo.storagePath
+                                                                            }
+                                                                            alt=""
+                                                                            loading="lazy"
+                                                                        />
+                                                                    ) : (
+                                                                        <span
+                                                                            className={
+                                                                                styles.mediaItemThumbEmpty
+                                                                            }
+                                                                            aria-hidden="true"
+                                                                        >
+                                                                            &#9679;
+                                                                        </span>
+                                                                    )}
+                                                                </span>
+
+                                                                <span
+                                                                    className={
+                                                                        styles.mediaItemBody
+                                                                    }
+                                                                >
+                                                                    <strong>
+                                                                        {brandName}
+                                                                        {' '}
+                                                                        {
+                                                                            vehicle
+                                                                                .model
+                                                                                .name
+                                                                        }
+                                                                    </strong>
+
+                                                                    <small>
+                                                                        {
+                                                                            vehicle.manufactureYear
+                                                                        }
+                                                                        {' · '}
+                                                                        {
+                                                                            vehicle.licensePlate
+                                                                        }
+                                                                    </small>
+                                                                </span>
+
+                                                                <span
+                                                                    className={
+                                                                        styles.mediaItemIndicator
+                                                                    }
+                                                                    title={`${pluralize(imageCount, 'photo')} · ${pluralize(videoCount, 'video')}`}
+                                                                >
+                                                                    <span
+                                                                        className={
+                                                                            imageCount >
+                                                                            0
+                                                                                ? styles.mediaDotOn
+                                                                                : styles.mediaDot
+                                                                        }
+                                                                    />
+
+                                                                    <span
+                                                                        className={
+                                                                            styles.mediaItemCount
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            imageCount
+                                                                        }
+                                                                    </span>
+                                                                </span>
+                                                            </button>
+                                                        </li>
+                                                    );
+                                                },
+                                            )}
+                                        </ul>
+                                    </div>
+                                )}
+                            </aside>
+
+                            {/* ---------------------------------- */}
+                            {/* ATELIER MÉDIA DU VÉHICULE          */}
+                            {/* ---------------------------------- */}
+
+                            <div className={styles.mediaWorkspace}>
+                                {selectedMediaVehicle === null ? (
+                                    <div className={styles.fleetEmpty}>
+                                        <p>
+                                            Select a vehicle to
+                                            manage its media.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <header
+                                            className={styles.workspaceHead}
+                                        >
+                                            <div
+                                                className={
+                                                    styles.workspaceIdentity
+                                                }
+                                            >
+                                                <p
+                                                    className={
+                                                        styles.workspaceEyebrow
+                                                    }
+                                                >
+                                                    {selectedMediaBrandName}
+                                                </p>
+
+                                                <h3
+                                                    className={
+                                                        styles.workspaceTitle
+                                                    }
+                                                >
+                                                    {selectedMediaModelName}
+                                                    <span
                                                         className={
-                                                            styles.photoIdentity
+                                                            styles.workspaceYear
                                                         }
                                                     >
-                                                        <strong>
-                                                            {brandName}
-                                                            {' '}
-                                                            {
-                                                                vehicle
-                                                                    .model
-                                                                    .name
-                                                            }
-                                                        </strong>
+                                                        {selectedMediaYear}
+                                                    </span>
+                                                </h3>
 
-                                                        <span>
-                                                            {
-                                                                vehicle.manufactureYear
-                                                            }
-                                                        </span>
-                                                    </td>
-
-                                                    <td
+                                                <p
+                                                    className={
+                                                        styles.workspaceMeta
+                                                    }
+                                                >
+                                                    <span
                                                         className={
-                                                            styles.photoPlate
+                                                            styles.workspacePlate
                                                         }
                                                     >
                                                         {
-                                                            vehicle.licensePlate
+                                                            selectedMediaVehicle.licensePlate
                                                         }
-                                                    </td>
+                                                    </span>
 
-                                                    <td>
-                                                        {primaryImage ? (
-                                                            <div
+                                                    {selectedMediaColor && (
+                                                        <span>
+                                                            {
+                                                                selectedMediaColor
+                                                            }
+                                                        </span>
+                                                    )}
+                                                </p>
+                                            </div>
+
+                                            <span
+                                                className={
+                                                    selectedMediaCover
+                                                        ? styles.workspaceStatusOn
+                                                        : styles.workspaceStatusOff
+                                                }
+                                            >
+                                                {selectedMediaCover
+                                                    ? 'Cover photo'
+                                                    : 'No cover photo'}
+                                            </span>
+                                        </header>
+
+                                        <figure
+                                            className={styles.previewStage}
+                                        >
+                                            {selectedMediaCover ? (
+                                                <img
+                                                    className={
+                                                        styles.previewImage
+                                                    }
+                                                    src={
+                                                        selectedMediaCover.storagePath
+                                                    }
+                                                    alt={
+                                                        selectedMediaCover.altText ??
+                                                        `${selectedMediaBrandName} ${selectedMediaModelName}`
+                                                    }
+                                                />
+                                            ) : (
+                                                <figcaption
+                                                    className={
+                                                        styles.previewEmpty
+                                                    }
+                                                >
+                                                    No cover photo yet
+                                                </figcaption>
+                                            )}
+                                        </figure>
+
+                                        <div
+                                            className={styles.workspaceChips}
+                                        >
+                                            <span
+                                                className={styles.mediaChip}
+                                            >
+                                                {pluralize(
+                                                    selectedMediaImages.length,
+                                                    'photo',
+                                                )}
+                                            </span>
+
+                                            <span
+                                                className={styles.mediaChip}
+                                            >
+                                                {pluralize(
+                                                    selectedMediaVideos.length,
+                                                    'video',
+                                                )}
+                                            </span>
+                                        </div>
+
+                                        {selectedMediaGallery.length > 0 && (
+                                            <section
+                                                className={
+                                                    styles.gallerySection
+                                                }
+                                                aria-label="Gallery"
+                                            >
+                                                <div
+                                                    className={
+                                                        styles.galleryHead
+                                                    }
+                                                >
+                                                    <p
+                                                        className={
+                                                            styles.galleryLabel
+                                                        }
+                                                    >
+                                                        Gallery
+                                                    </p>
+
+                                                    <Link
+                                                        className={
+                                                            styles.galleryLink
+                                                        }
+                                                        href="/admin/media"
+                                                    >
+                                                        Manage in Media
+                                                        studio →
+                                                    </Link>
+                                                </div>
+
+                                                <div
+                                                    className={
+                                                        styles.galleryGrid
+                                                    }
+                                                >
+                                                    {selectedMediaGallery.map(
+                                                        (item) => (
+                                                            <figure
+                                                                key={item.id}
                                                                 className={
-                                                                    styles.mediaPreview
+                                                                    styles.galleryItem
                                                                 }
                                                             >
                                                                 <img
-                                                                    className={
-                                                                        styles.photoThumb
-                                                                    }
                                                                     src={
-                                                                        primaryImage.storagePath
+                                                                        item.storagePath
                                                                     }
                                                                     alt={
-                                                                        primaryImage.altText ??
-                                                                        `${brandName} ${vehicle.model.name}`
+                                                                        item.altText ??
+                                                                        'Vehicle media'
                                                                     }
                                                                     loading="lazy"
                                                                 />
+                                                            </figure>
+                                                        ),
+                                                    )}
+                                                </div>
 
-                                                                <button
-                                                                    type="button"
-                                                                    className={
-                                                                        styles.photoRemove
-                                                                    }
-                                                                    disabled={
-                                                                        deletingImage
-                                                                    }
-                                                                    onClick={() =>
-                                                                        void deleteVehicleMedia(
-                                                                            vehicle.licensePlate,
-                                                                            'image',
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    {deletingImage
-                                                                        ? 'Removing…'
-                                                                        : 'Remove'}
-                                                                </button>
-                                                            </div>
-                                                        ) : (
-                                                            <span
-                                                                className={
-                                                                    styles.photoEmpty
-                                                                }
-                                                            >
-                                                                No photo
-                                                            </span>
-                                                        )}
-                                                    </td>
+                                                <p
+                                                    className={
+                                                        styles.galleryNote
+                                                    }
+                                                >
+                                                    Additional gallery
+                                                    images are managed in
+                                                    the Media studio.
+                                                </p>
+                                            </section>
+                                        )}
 
-                                                    <td>
-                                                        {primaryVideo ? (
-                                                            <div
-                                                                className={
-                                                                    styles.mediaPreview
-                                                                }
-                                                            >
-                                                                <video
-                                                                    className={
-                                                                        styles.photoThumb
-                                                                    }
-                                                                    src={
-                                                                        primaryVideo.storagePath
-                                                                    }
-                                                                    poster={
-                                                                        primaryImage?.storagePath ??
-                                                                        undefined
-                                                                    }
-                                                                    muted
-                                                                    playsInline
-                                                                    preload="metadata"
-                                                                />
+                                        <section
+                                            className={styles.uploadPanel}
+                                            aria-label="Replace cover photo"
+                                        >
+                                            <div
+                                                className={styles.uploadHead}
+                                            >
+                                                <p
+                                                    className={
+                                                        styles.uploadLabel
+                                                    }
+                                                >
+                                                    Replace cover photo
+                                                </p>
 
-                                                                <button
-                                                                    type="button"
-                                                                    className={
-                                                                        styles.photoRemove
-                                                                    }
-                                                                    disabled={
-                                                                        deletingVideo
-                                                                    }
-                                                                    onClick={() =>
-                                                                        void deleteVehicleMedia(
-                                                                            vehicle.licensePlate,
-                                                                            'video',
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    {deletingVideo
-                                                                        ? 'Removing…'
-                                                                        : 'Remove'}
-                                                                </button>
-                                                            </div>
-                                                        ) : (
-                                                            <span
-                                                                className={
-                                                                    styles.photoEmpty
-                                                                }
-                                                            >
-                                                                No video
-                                                            </span>
-                                                        )}
-                                                    </td>
+                                                <p
+                                                    className={
+                                                        styles.uploadNote
+                                                    }
+                                                >
+                                                    JPEG, PNG, WEBP,
+                                                    AVIF or GIF · 8 MB
+                                                    maximum.
+                                                </p>
+                                            </div>
 
-                                                    <td>
-                                                        <div
-                                                            className={
-                                                                styles.mediaStack
-                                                            }
-                                                        >
-                                                            <div
-                                                                className={
-                                                                    styles.mediaField
-                                                                }
-                                                            >
-                                                                <span
-                                                                    className={
-                                                                        styles.mediaLabel
-                                                                    }
-                                                                >
-                                                                    Photo
-                                                                </span>
+                                            <input
+                                                key={selectedMediaId}
+                                                className={
+                                                    styles.photoInput
+                                                }
+                                                type="file"
+                                                accept="image/png,image/jpeg,image/webp,image/avif,image/gif"
+                                                onChange={(event) => {
+                                                    const file =
+                                                        event.target
+                                                            .files?.[0] ??
+                                                        null;
 
-                                                                <input
-                                                                    className={
-                                                                        styles.photoInput
-                                                                    }
-                                                                    type="file"
-                                                                    accept="image/png,image/jpeg,image/webp,image/avif,image/gif"
-                                                                    onChange={(
-                                                                        event,
-                                                                    ) => {
-                                                                        const file =
-                                                                            event
-                                                                                .target
-                                                                                .files?.[0] ??
-                                                                            null;
+                                                    setImageFiles(
+                                                        (previous) => ({
+                                                            ...previous,
+                                                            [selectedMediaPlate]:
+                                                                file,
+                                                        }),
+                                                    );
+                                                }}
+                                            />
 
-                                                                        setImageFiles(
-                                                                            (
-                                                                                previous,
-                                                                            ) => ({
-                                                                                ...previous,
-                                                                                [vehicle.licensePlate]:
-                                                                                    file,
-                                                                            }),
-                                                                        );
-                                                                    }}
-                                                                />
+                                            {selectedMediaFile && (
+                                                <span
+                                                    className={
+                                                        styles.photoFileName
+                                                    }
+                                                >
+                                                    {
+                                                        selectedMediaFile.name
+                                                    }
+                                                </span>
+                                            )}
 
-                                                                {imageFile && (
-                                                                    <span
-                                                                        className={
-                                                                            styles.photoFileName
-                                                                        }
-                                                                    >
-                                                                        {
-                                                                            imageFile.name
-                                                                        }
-                                                                    </span>
-                                                                )}
+                                            <div
+                                                className={
+                                                    styles.uploadActions
+                                                }
+                                            >
+                                                <button
+                                                    type="button"
+                                                    className={
+                                                        styles.photoButton
+                                                    }
+                                                    disabled={
+                                                        !selectedMediaFile ||
+                                                        selectedMediaUploading ||
+                                                        selectedMediaDeleting
+                                                    }
+                                                    onClick={() =>
+                                                        void uploadVehicleMedia(
+                                                            selectedMediaPlate,
+                                                            'image',
+                                                        )
+                                                    }
+                                                >
+                                                    {selectedMediaUploading
+                                                        ? 'Uploading…'
+                                                        : 'Upload photo'}
+                                                </button>
 
-                                                                <button
-                                                                    type="button"
-                                                                    className={
-                                                                        styles.photoButton
-                                                                    }
-                                                                    disabled={
-                                                                        !imageFile ||
-                                                                        uploadingImage ||
-                                                                        deletingImage
-                                                                    }
-                                                                    onClick={() =>
-                                                                        void uploadVehicleMedia(
-                                                                            vehicle.licensePlate,
-                                                                            'image',
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    {uploadingImage
-                                                                        ? 'Uploading…'
-                                                                        : 'Upload photo'}
-                                                                </button>
-                                                            </div>
+                                                {selectedMediaCover && (
+                                                    <button
+                                                        type="button"
+                                                        className={
+                                                            styles.photoButtonSecondary
+                                                        }
+                                                        disabled={
+                                                            selectedMediaUploading ||
+                                                            selectedMediaDeleting
+                                                        }
+                                                        onClick={() =>
+                                                            void deleteVehicleMedia(
+                                                                selectedMediaPlate,
+                                                                'image',
+                                                                selectedMediaImages.length,
+                                                            )
+                                                        }
+                                                    >
+                                                        {selectedMediaDeleting
+                                                            ? 'Removing…'
+                                                            : 'Remove photo'}
+                                                    </button>
+                                                )}
+                                            </div>
 
-                                                            <div
-                                                                className={
-                                                                    styles.mediaField
-                                                                }
-                                                            >
-                                                                <span
-                                                                    className={
-                                                                        styles.mediaLabel
-                                                                    }
-                                                                >
-                                                                    Video
-                                                                </span>
+                                            {(selectedMediaUploading ||
+                                                selectedMediaDeleting) && (
+                                                <div
+                                                    className={
+                                                        styles.progress
+                                                    }
+                                                    role="status"
+                                                    aria-live="polite"
+                                                >
+                                                    <span
+                                                        className={
+                                                            styles.progressBar
+                                                        }
+                                                        aria-hidden="true"
+                                                    />
 
-                                                                <input
-                                                                    className={
-                                                                        styles.photoInput
-                                                                    }
-                                                                    type="file"
-                                                                    accept="video/mp4,video/webm,video/ogg,video/quicktime"
-                                                                    onChange={(
-                                                                        event,
-                                                                    ) => {
-                                                                        const file =
-                                                                            event
-                                                                                .target
-                                                                                .files?.[0] ??
-                                                                            null;
-
-                                                                        setVideoFiles(
-                                                                            (
-                                                                                previous,
-                                                                            ) => ({
-                                                                                ...previous,
-                                                                                [vehicle.licensePlate]:
-                                                                                    file,
-                                                                            }),
-                                                                        );
-                                                                    }}
-                                                                />
-
-                                                                {videoFile && (
-                                                                    <span
-                                                                        className={
-                                                                            styles.photoFileName
-                                                                        }
-                                                                    >
-                                                                        {
-                                                                            videoFile.name
-                                                                        }
-                                                                    </span>
-                                                                )}
-
-                                                                <button
-                                                                    type="button"
-                                                                    className={
-                                                                        styles.photoButtonSecondary
-                                                                    }
-                                                                    disabled={
-                                                                        !videoFile ||
-                                                                        uploadingVideo ||
-                                                                        deletingVideo
-                                                                    }
-                                                                    onClick={() =>
-                                                                        void uploadVehicleMedia(
-                                                                            vehicle.licensePlate,
-                                                                            'video',
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    {uploadingVideo
-                                                                        ? 'Uploading…'
-                                                                        : 'Upload video'}
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        },
-                                    )}
-                                </tbody>
-                            </table>
+                                                    <span
+                                                        className={
+                                                            styles.progressText
+                                                        }
+                                                    >
+                                                        {selectedMediaUploading
+                                                            ? 'Uploading photo…'
+                                                            : 'Removing photo…'}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </section>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     )}
 
@@ -2058,6 +3120,104 @@ export default function AdminVehiclesPage() {
                                 Add model
                             </button>
                         </form>
+
+                    </div>
+
+                    {/* ============================================= */}
+                    {/* SUPPRESSION : MARQUES / CATÉGORIES / MODÈLES  */}
+                    {/* ============================================= */}
+
+                    <div className={styles.catalogIntro}>
+                        <p className={styles.eyebrow}>
+                            MANAGE COLLECTION
+                        </p>
+
+                        <h3>
+                            Delete a brand, category or model
+                        </h3>
+
+                        <p className={styles.catalogHint}>
+                            Entries used by the fleet can still be
+                            deleted — the related models and
+                            vehicles go with them. Only vehicles
+                            that hold reservations or reviews stay
+                            protected, to preserve rental history.
+                        </p>
+                    </div>
+
+                    <div className={styles.catalogPanel}>
+
+                        {/* MARQUES */}
+
+                        <div className={styles.catalogCard}>
+                            <CatalogManager
+                                title="Brands"
+                                emptyMessage="No brand yet."
+                                searchPlaceholder="Search brands"
+                                rows={brandRows}
+                                deletingKey={deletingKey}
+                                onDelete={(row) =>
+                                    void deleteResource(
+                                        'brand',
+                                        row.name,
+                                        { id: row.id },
+                                        {
+                                            force: row.cascade,
+                                            cascadeSummary:
+                                                row.cascadeSummary,
+                                        },
+                                    )
+                                }
+                            />
+                        </div>
+
+                        {/* CATA%GORIES */}
+
+                        <div className={styles.catalogCard}>
+                            <CatalogManager
+                                title="Categories"
+                                emptyMessage="No category yet."
+                                searchPlaceholder="Search categories"
+                                rows={categoryRows}
+                                deletingKey={deletingKey}
+                                onDelete={(row) =>
+                                    void deleteResource(
+                                        'category',
+                                        row.name,
+                                        { id: row.id },
+                                        {
+                                            force: row.cascade,
+                                            cascadeSummary:
+                                                row.cascadeSummary,
+                                        },
+                                    )
+                                }
+                            />
+                        </div>
+
+                        {/* MODA^LES */}
+
+                        <div className={styles.catalogCard}>
+                            <CatalogManager
+                                title="Models"
+                                emptyMessage="No model yet."
+                                searchPlaceholder="Search models"
+                                rows={modelRows}
+                                deletingKey={deletingKey}
+                                onDelete={(row) =>
+                                    void deleteResource(
+                                        'model',
+                                        row.name,
+                                        { id: row.id },
+                                        {
+                                            force: row.cascade,
+                                            cascadeSummary:
+                                                row.cascadeSummary,
+                                        },
+                                    )
+                                }
+                            />
+                        </div>
 
                     </div>
                 </section>
@@ -2339,6 +3499,27 @@ export default function AdminVehiclesPage() {
                         </div>
 
                         <div className={styles.field}>
+                            <label htmlFor="vehicle-value">
+                                Vehicle value
+                            </label>
+
+                            <input
+                                id="vehicle-value"
+                                type="number"
+                                min="0.01"
+                                step="0.01"
+                                required
+                                placeholder="Vehicle value"
+                                value={vehicleValue}
+                                onChange={(event) =>
+                                    setVehicleValue(
+                                        event.target.value,
+                                    )
+                                }
+                            />
+                        </div>
+
+                        <div className={styles.field}>
                             <label htmlFor="mileage">
                                 Mileage (km)
                             </label>
@@ -2612,6 +3793,20 @@ export default function AdminVehiclesPage() {
 
                                 <input
                                     type="number"
+                                    min="0.01"
+                                    step="0.01"
+                                    required
+                                    placeholder="Vehicle value"
+                                    value={editValue}
+                                    onChange={(event) =>
+                                        setEditValue(
+                                            event.target.value,
+                                        )
+                                    }
+                                />
+
+                                <input
+                                    type="number"
                                     min={
                                         selectedEditVehicle.mileageKm
                                     }
@@ -2646,6 +3841,36 @@ export default function AdminVehiclesPage() {
                                         )
                                     }
                                 />
+
+                                <div className={styles.editStatus}>
+                                    <span>Status</span>
+
+                                    <select
+                                        aria-label="Vehicle status"
+                                        value={editStatus}
+                                        onChange={(event) =>
+                                            setEditStatus(
+                                                event.target.value,
+                                            )
+                                        }
+                                    >
+                                        <option value="active">
+                                            Active — visible to customers
+                                        </option>
+
+                                        <option value="inactive">
+                                            Inactive — hidden from customers
+                                        </option>
+
+                                        <option value="maintenance">
+                                            Maintenance — hidden
+                                        </option>
+
+                                        <option value="retired">
+                                            Retired — hidden
+                                        </option>
+                                    </select>
+                                </div>
 
                                 <button
                                     type="submit"

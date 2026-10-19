@@ -1,5 +1,5 @@
 
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 
 import {
   ConfigModule,
@@ -11,6 +11,10 @@ import { JwtModule } from '@nestjs/jwt';
 import {
   UsersModule,
 } from '../users/users.module.js';
+
+import {
+  NotificationsModule,
+} from '../notifications/notifications.module.js';
 
 import {
   AuthController,
@@ -28,9 +32,27 @@ import {
   RolesGuard,
 } from './guards/roles.guard.js';
 
+import {
+  AuthRateLimiter,
+} from './rate-limit/auth-rate-limiter.service.js';
+
+import {
+  AuthRateLimitGuard,
+} from './rate-limit/auth-rate-limit.guard.js';
+
+import {
+  AUTH_RATE_LIMIT_OPTIONS,
+  authRateLimitOptionsFromEnv,
+} from './rate-limit/auth-rate-limit.options.js';
+
 @Module({
   imports: [
     UsersModule,
+
+    // Rappel de permis à la connexion : dépendance
+    // bidirectionnelle avec les notifications (les contrôleurs
+    // de notifications utilisent les guards d'authentification).
+    forwardRef(() => NotificationsModule),
 
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -61,6 +83,14 @@ import {
     AuthService,
     JwtAuthGuard,
     RolesGuard,
+
+    // Limitation de débit de l'authentification (login/inscription).
+    AuthRateLimiter,
+    AuthRateLimitGuard,
+    {
+      provide: AUTH_RATE_LIMIT_OPTIONS,
+      useFactory: () => authRateLimitOptionsFromEnv(),
+    },
   ],
 
   exports: [

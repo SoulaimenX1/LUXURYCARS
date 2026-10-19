@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import { cookies } from 'next/headers';
+
+import { buildApiUrl } from '@/lib/api';
 
 import {
   EDITORIAL_VIDEO,
@@ -129,7 +132,7 @@ const faqs = [
     question:
       'How do I check if a vehicle is available?',
     answer:
-      'Open the availability page and select your pickup and return dates. The system displays the vehicles available for that rental period.',
+      'Open a vehicle page and select your pickup and return dates. The booking calendar shows the periods you can reserve for that vehicle.',
   },
   {
     question:
@@ -144,6 +147,18 @@ const faqs = [
       'A pending reservation can be cancelled from your account while the scheduled pickup date is still in the future.',
   },
   {
+    question: 'Is the security deposit included in the rental price?',
+    answer: 'No. The daily rate, estimated rental total and security deposit are shown separately in the vehicle information and reservation summary.',
+  },
+  {
+    question: 'Are the prices shown in other currencies final?',
+    answer: 'No. The currency selector shows reference-rate estimates. Rental rates and deposits are recorded in EUR, and your final reservation summary is calculated by the system.',
+  },
+  {
+    question: 'When is my reservation confirmed?',
+    answer: 'Submitting a request does not automatically confirm the booking. You can follow its status in My Reservations until an administrator confirms it.',
+  },
+  {
     question:
       'Where can I follow my reservation?',
     answer:
@@ -151,7 +166,34 @@ const faqs = [
   },
 ] as const;
 
-export default function HomePage() {
+// Vérifier la session côté serveur pour éviter tout affichage fugitif
+// du bouton d'inscription lorsqu'un utilisateur est déjà connecté.
+async function isAuthenticated(): Promise<boolean> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('access_token')?.value;
+
+  if (!accessToken) {
+    return false;
+  }
+
+  try {
+    // Réutiliser la vérification JWT du backend, comme /api/auth/session.
+    const response = await fetch(buildApiUrl('/auth/me'), {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      cache: 'no-store',
+    });
+
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+export default async function HomePage() {
+  const authenticated = await isAuthenticated();
+
   return (
     <main className={styles.page}>
       <section className={styles.hero}>
@@ -179,7 +221,7 @@ export default function HomePage() {
 
             <h1>
               Luxury car rental,
-              <span>redefined.</span>
+              <span>redefined</span>
             </h1>
 
             <p className={styles.heroDescription}>
@@ -199,10 +241,10 @@ export default function HomePage() {
               </Link>
 
               <Link
-                href="/availability"
+                href="/contact"
                 className={styles.secondaryButton}
               >
-                Check availability
+                Contact us
                 <span>→</span>
               </Link>
             </div>
@@ -220,10 +262,10 @@ export default function HomePage() {
             </div>
 
             <Link
-              href="/availability"
+              href="/vehicles"
               className={styles.bookingButton}
             >
-              SEARCH AVAILABILITY
+              EXPLORE THE FLEET
               <span>↗</span>
             </Link>
           </div>
@@ -264,7 +306,7 @@ export default function HomePage() {
 
               <h2>
                 Choose your
-                <em> driving style.</em>
+                <em> driving style</em>
               </h2>
             </div>
 
@@ -348,7 +390,7 @@ export default function HomePage() {
             <br />
             Secure.
             <br />
-            <em>Exceptional.</em>
+            <em>Exceptional</em>
           </h2>
 
           <p className={styles.experienceLead}>
@@ -360,7 +402,7 @@ export default function HomePage() {
           </p>
 
           <Link
-            href="/availability"
+            href="/vehicles"
             className={styles.darkTextLink}
           >
             Start your reservation
@@ -378,7 +420,7 @@ export default function HomePage() {
 
             <h2>
               Designed around
-              <em> your journey.</em>
+              <em> your journey</em>
             </h2>
           </div>
 
@@ -415,7 +457,7 @@ export default function HomePage() {
             <h2>
               From discovery
               <br />
-              to <em>reservation.</em>
+              to <em>reservation</em>
             </h2>
           </div>
 
@@ -442,17 +484,17 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div className={styles.journeyAction}>
-            <Link
-              href="/register"
-              className={
-                styles.outlineDarkButton
-              }
-            >
-              Create your account
-              <span>↗</span>
-            </Link>
-          </div>
+          {!authenticated && (
+            <div className={styles.journeyAction}>
+              <Link
+                href="/register"
+                className={styles.outlineDarkButton}
+              >
+                Create your account
+                <span>↗</span>
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
@@ -476,7 +518,7 @@ export default function HomePage() {
           <h2>
             Some drives are
             <br />
-            impossible to forget.
+            impossible to forget
           </h2>
 
           <Link
@@ -506,7 +548,7 @@ export default function HomePage() {
 
               <h2>
                 Everything you need
-                <em> before the drive.</em>
+                <em> before the drive</em>
               </h2>
 
               <p>
@@ -569,22 +611,22 @@ export default function HomePage() {
 
           <div className={styles.finalCtaActions}>
             <Link
-              href="/availability"
+              href="/vehicles"
               className={
                 styles.primaryDarkButton
               }
             >
-              Check availability
+              Explore the fleet
               <span>↗</span>
             </Link>
 
             <Link
-              href="/vehicles"
+              href="/contact"
               className={
                 styles.secondaryDarkButton
               }
             >
-              Discover the fleet
+              Contact us
             </Link>
           </div>
         </div>

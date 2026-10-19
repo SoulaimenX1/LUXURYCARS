@@ -1,0 +1,348 @@
+/* ==============================================================
+   ADMIN — SERVICES PREMIUM  ·  CONTROL CENTRE
+   Gestion des extras, protections et codes promotionnels.
+   Charte joaillerie (or / ivoire / noir).
+   ============================================================== */
+
+.page {
+  min-width: 0;
+  display: grid;
+  gap: 15px;
+  color: var(--ink);
+}
+
+/* ==============================================================
+   EN-TÊTE
+   ============================================================== */
+
+.hero {
+  padding-bottom: 30px;
+  border-bottom: 1px solid var(--line);
+}
+
+.eyebrow {
+  color: var(--gold-text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.8px;
+  text-transform: uppercase;
+}
+
+.title {
+  margin-top: 14px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(34px, 4.4vw, 56px);
+  font-weight: 400;
+  letter-spacing: -1.6px;
+  line-height: 1.05;
+}
+
+.intro {
+  max-width: 620px;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 14.5px;
+  line-height: 1.8;
+}
+
+/* ==============================================================
+   FORMULAIRES
+   ============================================================== */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.grid form {
+  display: grid;
+  gap: 14px;
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.grid form:hover {
+  border-color: var(--champagne-line);
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+
+.grid h2 {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+}
+
+.grid label {
+  display: grid;
+  gap: 7px;
+  color: var(--gold-text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.grid :is(input, textarea, select) {
+  min-height: 44px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--white);
+  color: var(--ink);
+  font-size: 13px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.grid :is(input, textarea, select):focus {
+  outline: none;
+  border-color: var(--champagne);
+  box-shadow: 0 0 0 3px var(--champagne-soft);
+}
+
+.grid textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.grid label.check {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.grid label.check input {
+  min-height: unset;
+  width: 16px;
+  height: 16px;
+}
+
+.grid button {
+  min-height: 46px;
+  padding: 0 22px;
+  border: 1px solid var(--champagne);
+  border-radius: var(--radius-button);
+  background: var(--champagne);
+  color: var(--noir);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.grid button:hover:not(:disabled) {
+  border-color: var(--noir);
+  background: var(--noir);
+  color: var(--champagne-3);
+}
+
+.grid button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.grid .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.grid .actions .secondary {
+  border-color: var(--line);
+  background: var(--white);
+  color: var(--gold-text);
+}
+
+.grid .actions .secondary:hover:not(:disabled) {
+  border-color: var(--champagne);
+  background: var(--champagne-soft);
+  color: var(--gold-text);
+}
+
+/* ==============================================================
+   CATALOGUE — listes existantes
+   ============================================================== */
+
+.catalogue {
+  padding: 24px 26px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+
+.catalogueTitle {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.4px;
+}
+
+.empty {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--surface-glass);
+}
+
+.rowInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.rowInfo strong {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  font-size: 13.5px;
+}
+
+.rowInfo .code {
+  padding: 2px 8px;
+  border: 1px solid var(--champagne-line);
+  border-radius: 999px;
+  background: var(--champagne-soft);
+  color: var(--gold-text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+}
+
+.rowInfo small {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.rowActions {
+  display: flex;
+  gap: 10px;
+}
+
+.rowActions button {
+  min-height: 40px;
+  padding: 0 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--white);
+  color: var(--gold-text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.rowActions button:hover:not(:disabled) {
+  border-color: var(--champagne);
+  background: var(--champagne-soft);
+}
+
+.rowActions .danger {
+  color: var(--danger-text);
+  border-color: var(--danger-line);
+}
+
+.rowActions .danger:hover:not(:disabled) {
+  background: var(--danger-bg);
+  border-color: var(--danger);
+}
+
+.rowActions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error {
+  padding: 15px 18px;
+  border: 1px solid var(--danger-line);
+  border-left: 3px solid var(--danger);
+  border-radius: var(--radius-card);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  font-size: 12.5px;
+  line-height: 1.6;
+  box-shadow: var(--shadow-soft);
+}
+
+/* ==============================================================
+   MESSAGE
+   ============================================================== */
+
+.notice {
+  padding: 15px 18px;
+  border: 1px solid var(--champagne-line);
+  border-left: 3px solid var(--champagne);
+  border-radius: var(--radius-card);
+  background: var(--champagne-soft);
+  color: var(--gold-text);
+  font-size: 12.5px;
+  line-height: 1.6;
+  box-shadow: var(--shadow-soft);
+}
+
+/* ==============================================================
+   ACCESSIBILITÉ
+   ============================================================== */
+
+.page :is(input, textarea, select, button):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* ==============================================================
+   RESPONSIVE
+   ============================================================== */
+
+@media (max-width: 560px) {
+  .grid form {
+    padding: 20px 18px;
+  }
+}

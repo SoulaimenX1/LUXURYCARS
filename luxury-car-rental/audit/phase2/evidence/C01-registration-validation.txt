@@ -1,0 +1,105 @@
+- banner:
+  - link "L LUXURY CARS PREMIUM CAR RENTAL":
+    - /url: /
+    - generic: L
+    - strong:
+      - text: LUXURY
+      - emphasis: CARS
+    - generic: PREMIUM CAR RENTAL
+  - navigation:
+    - link "Home":
+      - /url: /
+    - link "Fleet":
+      - /url: /vehicles
+    - link "Contact":
+      - /url: /contact
+  - 'button "Display currency: EUR. Prices billed in EUR"':
+    - generic: €
+    - generic: EUR
+    - generic: ▾
+  - button "Activer le thème clair":
+  - link "Sign in":
+    - /url: /login
+  - link "Create account":
+    - /url: /register
+- main:
+  - link "L LUXURY CAR RENTAL":
+    - /url: /
+    - generic: L
+    - strong: LUXURY
+    - generic: CAR RENTAL
+  - generic: JOIN THE EXPERIENCE
+  - heading "Your journey starts here" [level=1]:
+    - text: Your journey
+    - generic: starts here
+  - generic: CUSTOMER REGISTRATION · SECURE ACCOUNT
+  - link "← Back to home":
+    - /url: /
+  - generic: CREATE ACCOUNT
+  - heading "Become a customer" [level=2]
+  - paragraph: Create your account before completing your driving licence and reservation profile.
+  - generic: First name
+  - textbox "First name": Browser
+  - generic: Last name
+  - textbox "Last name": Audit
+  - generic: Email address
+  - textbox "Email address":
+    - /placeholder: name@example.com
+    - text: <redacted>
+  - generic: Phone number (optional)
+  - textbox "Phone number (optional)":
+    - /placeholder: +36 ...
+  - generic: Password
+  - textbox "Password":
+    - /placeholder: Minimum 12 characters
+    - text: <redacted>
+  - generic: Your password must contain at least 12 characters.
+  - generic: Confirm password
+  - textbox "Confirm password":
+    - /placeholder: Repeat your password
+    - text: <redacted>
+  - generic: Passwords do not match.
+  - button "Create account" [active]
+  - paragraph:
+    - text: Already registered?
+    - link "Sign in":
+      - /url: /login
+- contentinfo:
+  - link "LUXURY CARS":
+    - /url: /
+    - text: LUXURY
+    - emphasis: CARS
+  - paragraph:
+    - text: Premium vehicles.
+    - text: Exceptional journeys.
+  - strong: EXPLORE
+  - link "Home":
+    - /url: /
+  - link "Our fleet":
+    - /url: /vehicles
+  - link "Contact":
+    - /url: /contact
+  - strong: ACCOUNT
+  - link "Sign in":
+    - /url: /login
+  - link "Create account":
+    - /url: /register
+  - link "My account":
+    - /url: /account
+  - link "My reservations":
+    - /url: /account/reservations
+  - link "My rentals":
+    - /url: /account/rentals
+  - link "My premium collection":
+    - /url: /account/premium
+  - generic: © 2026 LUXURY CARS
+  - generic: Web-Based Luxury Car Rental Management System
+  - generic: Prices recorded in EUR · Other currencies are indicative
+- region "Notifications":
+  - list:
+    - alert:
+      - paragraph: Create account
+      - paragraph: Passwords do not match.
+      - button "Dismiss notification": ×
+- button "Open Next.js Dev Tools":
+- alert: Your journey starts here

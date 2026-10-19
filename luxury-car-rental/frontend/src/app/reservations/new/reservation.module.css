@@ -308,3 +308,140 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* MAISON — Réservation client, finition des champs et surfaces. */
+.title { font-family: var(--serif); font-weight: 400; letter-spacing: -.035em; }
+.card { border-radius: var(--radius-card); box-shadow: var(--shadow-soft); }
+.field input, .field select, .details textarea, .primaryLink, .button { border-radius: var(--radius-field); }
+
+/* Récapitulatif premium : mêmes surfaces de confiance en clair et sombre. */
+.card, .success { border-color:var(--panel-border); box-shadow:var(--shadow-soft); }
+.card :is(dt, .muted), .success :is(dt, .muted) { color:var(--muted-text); }
+html[data-theme="dark"] .card, html[data-theme="dark"] .success { background:var(--white); }
+
+
+/* Personnalisation : mêmes contrastes en modes Porcelain et Onyx. */
+.premiumOptions {display:grid;gap:15px;margin-top:28px;padding-top:23px;border-top:1px solid var(--line);}
+.premiumOptions h3{font-family:var(--serif);font-size:22px;font-weight:500;}
+.premiumCheck{display:flex;gap:12px;align-items:center;padding:14px;border:1px solid var(--panel-border);border-radius:var(--radius-card);background:var(--white-2);cursor:pointer;}
+.premiumCheck input{accent-color:var(--champagne-2);width:18px;height:18px;flex:none;}
+.premiumCheck span{flex:1;min-width:0;display:grid;}
+.premiumCheck small{font-size:12px;color:var(--muted-text);}
+.premiumCheck>strong{font-size:12px;color:var(--gold-text);white-space:nowrap;}
+.premiumField{display:grid;gap:7px;color:var(--gold-text);font-size:12px;font-weight:600;}
+.premiumField select,.premiumField input{width:100%;min-height:45px;padding:11px 13px;border:1px solid var(--panel-border);border-radius:var(--radius-field);background:var(--white);color:var(--ink);font:inherit;}
+.premiumField :is(select,input):focus-visible,.premiumCheck:focus-within{outline:2px solid var(--focus-ring);outline-offset:2px;}
+.premiumTerms{color:var(--muted-text);font-size:12px;border-top:1px solid var(--line);padding-top:12px;}
+.premiumTerms summary{cursor:pointer;color:var(--gold-text);font-weight:600;}
+.premiumTerms ul{padding:12px 0 0 20px;line-height:1.7;}
+@media(max-width:520px){.premiumCheck{flex-wrap:wrap;}.premiumCheck>strong{margin-left:30px;}}
+
+/* Sélection des points de livraison intégrée au devis sécurisé. */
+.locationSection{display:grid;gap:14px;padding:22px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.locationSection h3{font-family:var(--serif);font-size:26px;font-weight:400;color:var(--ink);}
+.locationGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
+.locationGrid select{width:100%;max-width:100%;}
+.locationToggle{display:flex;gap:10px;align-items:center;cursor:pointer;font-size:13px;color:var(--ink);}
+.locationToggle input{accent-color:var(--champagne);}
+@media(max-width:700px){.locationGrid{grid-template-columns:1fr;}}
+
+/* FINITIONS — surfaces et libellés alignés sur le reste de la maison. */
+.details { border-radius: var(--radius-card); overflow: hidden; }
+.details dt { color: var(--gold-text); font-size: 9px; letter-spacing: .12em; }
+.error { border-radius: var(--radius-field); }
+.notice { color: var(--muted-text); }
+.button { border-radius: var(--radius-button); box-shadow: var(--button-shadow); }
+.textarea { border-radius: var(--radius-field); }
+.premiumOptions h3, .locationSection h3, .card h2, .success h2 { letter-spacing: -.03em; }
+
+/* ==============================================================
+   COUTURE 2026 — NOUVELLE RÉSERVATION
+   ============================================================== */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  letter-spacing: .26em;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 30px;
+  height: 1px;
+  background: var(--gold-rule);
+}
+
+.title {
+  font-size: clamp(40px, 5.4vw, 70px);
+  letter-spacing: -.045em;
+}
+
+.card,
+.success {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.card::before,
+.success::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gold-rule);
+}
+
+.details {
+  border-radius: var(--radius-card);
+}
+
+.button {
+  position: relative;
+  overflow: hidden;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--sheen);
+  transform: translateX(-140%);
+  transition: transform .75s ease;
+}
+
+.button:hover:not(:disabled)::after {
+  transform: translateX(140%);
+}
+
+.premiumCheck {
+  border-radius: var(--radius-card);
+  transition: border-color .25s ease, background .25s ease;
+}
+
+.premiumCheck:hover {
+  border-color: var(--champagne-line);
+}
+
+.premiumCheck input {
+  accent-color: var(--champagne-2);
+}
+
+.locationSection h3 {
+  font-family: var(--serif);
+}
+
+.primaryLink {
+  border-bottom-color: var(--gold-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button::after { transition: none !important; }
+}

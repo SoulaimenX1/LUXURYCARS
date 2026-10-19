@@ -6,6 +6,9 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 
+import {randomUUID} from 'node:crypto';
+import {mkdir,writeFile,unlink,readdir,access} from 'node:fs/promises';
+import {join,basename} from 'node:path';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import {
@@ -14,6 +17,10 @@ import {
     QueryFailedError,
     Repository,
     SelectQueryBuilder,
+} from 'typeorm';
+
+import type {
+    EntityManager,
 } from 'typeorm';
 
 // ==========================================
@@ -55,6 +62,7 @@ import {
     isAllowedVideoMime,
     removeStoredVehicleMedia,
     storeVehicleMedia,
+    vehicleImagesDir,
 } from './vehicle-images.storage.js';
 
 // ==========================================
@@ -361,6 +369,263 @@ export class VehiclesService {
     }
 
     // ==========================================
+    // 6bis. OUTILS DE SUPPRESSION
+    // ==========================================
+    //
+    // Une marque, une catégorie ou un modèle est protégé
+    // par des contraintes PostgreSQL RESTRICT.
+    //
+    // - Sans « force », on refuse avec un message clair.
+    // - Avec « force », on supprime aussi les modèles et
+    //   les véhicules liés (cascade), MAIS tout véhicule
+    //   porteur de réservations ou d'avis reste protégé
+    //   afin de préserver l'historique de location.
+
+    // Détecte une violation de clé étrangère PostgreSQL
+    // (code 23503) renvoyée par le moteur.
+    private isForeignKeyViolation(error: unknown): boolean {
+        return (
+            error instanceof QueryFailedError &&
+            (error.driverError as { code?: string }).code ===
+                '23503'
+        );
+    }
+
+    // Refuse la suppression d'une entrée encore utilisée
+    // lorsque l'administrateur n'a pas demandé « force ».
+    private assertNotInUse(
+        label: string,
+        dependents: number,
+        dependentLabel: string,
+    ): void {
+        if (dependents > 0) {
+            throw new ConflictException(
+                `This ${label} is used by ${dependents} ${dependentLabel}. Use a forced delete to remove it together with them.`,
+            );
+        }
+    }
+
+    // Supprime, dans une seule transaction, les modèles
+    // fournis puis les véhicules qui les utilisent.
+    // « finish » supprime ensuite l'entrée d'origine
+    // (marque ou catégorie) dans la même transaction.
+    private async deleteModelsCascade(
+        models: VehicleModel[],
+        entityLabel: string,
+        finish: (manager: EntityManager) => Promise<unknown>,
+    ): Promise<void> {
+        const modelIds = models.map((model) => model.id);
+
+        try {
+            await this.modelsRepository.manager.transaction(
+                async (manager) => {
+                    if (modelIds.length > 0) {
+                        // Les véhicules liés partent d'abord ;
+                        // s'ils portent des réservations ou des
+                        // avis, PostgreSQL lève 23503 et toute
+                        // la transaction est annulée.
+                        await manager.delete(Vehicle, {
+                            modelId: In(modelIds),
+                        });
+
+                        await manager.delete(VehicleModel, {
+                            id: In(modelIds),
+                        });
+                    }
+
+                    await finish(manager);
+                },
+            );
+        } catch (error) {
+            if (this.isForeignKeyViolation(error)) {
+                throw new ConflictException(
+                    `This ${entityLabel} contains vehicles with reservations or reviews. Delete those vehicles first to preserve rental history.`,
+                );
+            }
+
+            throw error;
+        }
+    }
+
+    // ==========================================
+    // 6ter. SUPPRIMER UNE MARQUE
+    // ==========================================
+
+    async deleteBrand(
+        id: string,
+        force = false,
+    ): Promise<{ deleted: true }> {
+        // Vérifier que la marque existe.
+        const brand = await this.brandsRepository.findOne({
+            where: { id },
+        });
+
+        if (!brand) {
+            throw new NotFoundException(
+                'Brand not found',
+            );
+        }
+
+        // Modèles rattachés à la marque.
+        const linkedModels =
+            await this.modelsRepository.find({
+                where: { brandId: id },
+            });
+
+        // Sans « force » : refus explicite si utilisée.
+        if (!force) {
+            this.assertNotInUse(
+                'brand',
+                linkedModels.length,
+                'vehicle model(s)',
+            );
+        }
+
+        // Avec « force » : suppression en cascade des
+        // modèles et véhicules liés, puis de la marque.
+        await this.deleteModelsCascade(
+            linkedModels,
+            'brand',
+            (manager) =>
+                manager.delete(Brand, { id: brand.id }),
+        );
+
+        return { deleted: true };
+    }
+
+    // ==========================================
+    // 6quater. SUPPRIMER UNE CATÉGORIE
+    // ==========================================
+
+    async deleteCategory(
+        id: string,
+        force = false,
+    ): Promise<{ deleted: true }> {
+        // Vérifier que la catégorie existe.
+        const category =
+            await this.categoriesRepository.findOne({
+                where: { id },
+            });
+
+        if (!category) {
+            throw new NotFoundException(
+                'Category not found',
+            );
+        }
+
+        // Modèles rattachés à la catégorie.
+        const linkedModels =
+            await this.modelsRepository.find({
+                where: { categoryId: id },
+            });
+
+        // Même logique que pour les marques.
+        if (!force) {
+            this.assertNotInUse(
+                'category',
+                linkedModels.length,
+                'vehicle model(s)',
+            );
+        }
+
+        await this.deleteModelsCascade(
+            linkedModels,
+            'category',
+            (manager) =>
+                manager.delete(Category, { id: category.id }),
+        );
+
+        return { deleted: true };
+    }
+
+    // ==========================================
+    // 6quinquies. SUPPRIMER UN MODÈLE
+    // ==========================================
+
+    async deleteModel(
+        id: string,
+        force = false,
+    ): Promise<{ deleted: true }> {
+        // Vérifier que le modèle existe.
+        const model = await this.modelsRepository.findOne({
+            where: { id },
+        });
+
+        if (!model) {
+            throw new NotFoundException(
+                'Vehicle model not found',
+            );
+        }
+
+        // Véhicules rattachés au modèle.
+        const linkedVehicles =
+            await this.vehiclesRepository.count({
+                where: { modelId: id },
+            });
+
+        // Sans « force » : refus si le modèle est utilisé.
+        if (!force) {
+            this.assertNotInUse(
+                'model',
+                linkedVehicles,
+                'vehicle(s)',
+            );
+        }
+
+        // Avec « force » : suppression des véhicules liés
+        // puis du modèle. « finish » n'a rien à faire, le
+        // modèle est déjà retiré par la cascade.
+        await this.deleteModelsCascade(
+            [model],
+            'model',
+            async () => undefined,
+        );
+
+        return { deleted: true };
+    }
+
+    // ==========================================
+    // 6sexies. SUPPRIMER UN VÉHICULE
+    // ==========================================
+
+    async deleteVehicle(
+        licensePlate: string,
+    ): Promise<{ deleted: true }> {
+        // Normaliser l'immatriculation.
+        const plate = licensePlate.trim().toUpperCase();
+
+        const vehicle =
+            await this.vehiclesRepository.findOne({
+                where: { licensePlate: plate },
+            });
+
+        if (!vehicle) {
+            throw new NotFoundException(
+                'Vehicle not found',
+            );
+        }
+
+        try {
+            // Les médias, favoris, notifications et
+            // indisponibilités liés sont supprimés en
+            // cascade par PostgreSQL.
+            await this.vehiclesRepository.remove(vehicle);
+        } catch (error) {
+            // Le code 23503 signale une contrainte de clé
+            // étrangère (réservations, avis clients...).
+            if (this.isForeignKeyViolation(error)) {
+                throw new ConflictException(
+                    'This vehicle has reservations or reviews and cannot be deleted.',
+                );
+            }
+
+            throw error;
+        }
+
+        return { deleted: true };
+    }
+
+    // ==========================================
     // 7. CONSULTER LES VOITURES (ADMIN)
     // ==========================================
 
@@ -554,6 +819,10 @@ export class VehiclesService {
                 securityDeposit:
                     dto.securityDeposit.toFixed(2),
 
+                // Valeur du véhicule (toujours un nombre réel > 0).
+                vehicleValue:
+                    dto.vehicleValue.toFixed(2),
+
                 mileageKm:
                     dto.mileageKm ?? 0,
 
@@ -669,6 +938,7 @@ export class VehiclesService {
         const hasChanges = [
             dto.dailyPrice,
             dto.securityDeposit,
+            dto.vehicleValue,
             dto.mileageKm,
             dto.status,
             dto.color,
@@ -713,6 +983,12 @@ export class VehiclesService {
         ) {
             vehicle.securityDeposit =
                 dto.securityDeposit.toFixed(2);
+        }
+
+        // Modifier la valeur du véhicule si nécessaire.
+        if (dto.vehicleValue !== undefined) {
+            vehicle.vehicleValue =
+                dto.vehicleValue.toFixed(2);
         }
 
         // Modifier le kilométrage si nécessaire.
@@ -794,6 +1070,79 @@ export class VehiclesService {
         return await this.vehiclesRepository.save(
             vehicle,
         );
+    }
+
+    // Médias publics d'une voiture : la galerie utilise les fichiers réels.
+    async getPublicMedia(vehicleId:string) {
+        const vehicle=await this.vehiclesRepository.findOne({where:{id:vehicleId,status:VehicleStatus.ACTIVE}});
+        if(!vehicle) throw new NotFoundException('Vehicle not found');
+        const media=await this.vehicleImagesRepository.find({where:{vehicleId},order:{isPrimary:'DESC',sortOrder:'ASC',createdAt:'DESC'}});
+        const model=await this.model3dState(vehicleId);
+        return {
+          photos:media.filter(m=>m.mediaType===MediaType.IMAGE).map(m=>({id:m.id,url:m.storagePath,alt:m.altText??'Vehicle photo'})),
+          videos:media.filter(m=>m.mediaType===MediaType.VIDEO).map(m=>({id:m.id,url:m.storagePath,poster:m.posterPath})),
+          ...model,
+        };
+    }
+
+    // Référence 3D courante du véhicule (GLB local), sans restriction de statut.
+    private async model3dState(vehicleId:string): Promise<{modelUrl:string|null}> {
+        const models:{model_path:string}[]=await this.vehiclesRepository.manager.query(
+          `SELECT model_path FROM vehicle_3d_models WHERE vehicle_id=$1::uuid`,[vehicleId]);
+        return {modelUrl:models[0]?.model_path??null};
+    }
+
+    // Showroom 3D courant (admin), lu par immatriculation.
+    async getModel3dState(licensePlate:string) {
+        const vehicle=await this.vehiclesRepository.findOne({where:{licensePlate:licensePlate.trim().toUpperCase()}});
+        if(!vehicle) throw new NotFoundException('Vehicle not found');
+        return {vehicleId:vehicle.id,...await this.model3dState(vehicle.id)};
+    }
+
+    // Galerie supplémentaire : ne remplace pas la photo/vidéo principale.
+    async addGalleryMedia(licensePlate:string, kind:'image'|'video', file:UploadedImageFile|undefined) {
+        if(!file?.buffer?.length) throw new BadRequestException('A media file is required');
+        if(kind==='image' && !isAllowedImageMime(file.mimetype)) throw new BadRequestException('Invalid image MIME type');
+        if(kind==='video' && !isAllowedVideoMime(file.mimetype)) throw new BadRequestException('Invalid video MIME type');
+        const vehicle=await this.vehiclesRepository.findOne({where:{licensePlate:licensePlate.trim().toUpperCase()}});
+        if(!vehicle) throw new NotFoundException('Vehicle not found');
+        const storagePath=await storeVehicleMedia(file,vehicle.licensePlate,kind);
+        try {
+          const count=await this.vehicleImagesRepository.count({where:{vehicleId:vehicle.id,mediaType:kind=== 'image'?MediaType.IMAGE:MediaType.VIDEO}});
+          const row=this.vehicleImagesRepository.create({vehicleId:vehicle.id,storagePath,
+            mediaType:kind==='image'?MediaType.IMAGE:MediaType.VIDEO,
+            altText:`${vehicle.licensePlate} — ${kind} ${count+1}`,isPrimary:count===0,sortOrder:count});
+          return await this.vehicleImagesRepository.save(row);
+        } catch(error){await removeStoredVehicleMedia(storagePath);throw error;}
+    }
+
+    // Stockage GLB sécurisé, vérifié par signature glTF et servi depuis Next.js.
+    async saveVehicle3d(licensePlate:string,file:UploadedImageFile|undefined) {
+        if(!file?.buffer || file.buffer.length<20 || file.buffer.length>40*1024*1024 ||
+            file.buffer.toString('ascii',0,4)!=='glTF' || file.buffer.readUInt32LE(4)!==2 ||
+            file.buffer.readUInt32LE(8)!==file.buffer.length) {
+          throw new BadRequestException('A valid GLB v2 file (max 40 MB) is required');
+        }
+        const vehicle=await this.vehiclesRepository.findOne({where:{licensePlate:licensePlate.trim().toUpperCase()}});
+        if(!vehicle) throw new NotFoundException('Vehicle not found');
+        const dir=join(vehicleImagesDir(),'models');await mkdir(dir,{recursive:true});
+        const filename=`${randomUUID()}.glb`;
+        const absolute=join(dir,filename);
+        await writeFile(absolute,file.buffer,{flag:'wx'});
+        const url=`/vehicles/models/${filename}`;
+        try {
+          const old=await this.vehiclesRepository.manager.transaction(async (manager) => {
+            const previous:{model_path:string}[]=await manager.query(
+              `SELECT model_path FROM vehicle_3d_models WHERE vehicle_id=$1::uuid`,[vehicle.id]);
+            await manager.query(
+              `INSERT INTO vehicle_3d_models(vehicle_id,model_path) VALUES($1,$2)
+               ON CONFLICT(vehicle_id) DO UPDATE SET model_path=excluded.model_path,uploaded_at=now()`,[vehicle.id,url]);
+            return previous[0]?.model_path ?? null;
+          });
+          if(old && /^\/vehicles\/models\/[0-9a-f-]{36}\.glb$/.test(old))
+            await unlink(join(dir,old.split('/').pop()!)).catch(()=>{});
+        } catch(error){await unlink(absolute).catch(()=>{});throw error;}
+        return {vehicleId:vehicle.id,modelUrl:url};
     }
 
     // ==========================================
@@ -990,6 +1339,97 @@ export class VehiclesService {
     }
 
     // ==========================================
+    // 9 sexies bis. SUPPRIMER UN MÉDIA PAR SON ID
+    // ==========================================
+    //
+    // Supprime UNE SEULE photo (ou vidéo) de la galerie
+    // d'un véhicule : le fichier sur le disque et la ligne
+    // correspondante en base.
+    //
+    // Si le média supprimé était le média principal, le média
+    // restant du même type le plus ancien est promu principal
+    // afin que le catalogue conserve un visuel.
+
+    async deleteVehicleMediaById(
+        mediaId: string,
+    ): Promise<{
+        deleted: number;
+        id: string;
+        vehicleId: string;
+        mediaType: MediaType;
+    }> {
+        // ------------------------------------------
+        // A. RETROUVER LE MÉDIA
+        // ------------------------------------------
+
+        const media =
+            await this.vehicleImagesRepository.findOne({
+                where: {
+                    id: mediaId,
+                },
+            });
+
+        if (!media) {
+            throw new NotFoundException(
+                'Media not found',
+            );
+        }
+
+        const { id: mediaRowId, vehicleId, mediaType, isPrimary } =
+            media;
+
+        // ------------------------------------------
+        // B. EFFACER LE FICHIER SUR LE DISQUE
+        // ------------------------------------------
+
+        await removeStoredVehicleMedia(
+            media.storagePath,
+        );
+
+        // ------------------------------------------
+        // C. EFFACER LA LIGNE EN BASE
+        // ------------------------------------------
+
+        await this.vehicleImagesRepository.remove(
+            media,
+        );
+
+        // ------------------------------------------
+        // D. PROMOUVOIR UNE NOUVELLE PHOTO PRINCIPALE
+        // ------------------------------------------
+
+        if (isPrimary) {
+            const remaining =
+                await this.vehicleImagesRepository.find({
+                    where: {
+                        vehicleId,
+                        mediaType,
+                    },
+
+                    order: {
+                        sortOrder: 'ASC',
+                        createdAt: 'ASC',
+                    },
+                });
+
+            if (remaining.length > 0) {
+                remaining[0].isPrimary = true;
+
+                await this.vehicleImagesRepository.save(
+                    remaining[0],
+                );
+            }
+        }
+
+        return {
+            deleted: 1,
+            id: mediaRowId,
+            vehicleId,
+            mediaType,
+        };
+    }
+
+    // ==========================================
     // 9 septies. SUPPRIMER UN MÉDIA D'UN VÉHICULE
     // ==========================================
     //
@@ -1174,6 +1614,11 @@ export class VehiclesService {
             )
 
             .addSelect(
+                'vehicle.vehicleValue',
+                'vehicleValue',
+            )
+
+            .addSelect(
                 'vehicle.description',
                 'description',
             )
@@ -1266,6 +1711,59 @@ export class VehiclesService {
             );
     }
 
+    // ============================================================
+    // RÉCUPÉRATION NON DESTRUCTIVE DES PHOTOS EXISTANTES
+    // ============================================================
+    // Certaines anciennes installations possèdent les photos
+    // frontend/public/vehicles/lc-0001-....png sans ligne correspondante
+    // dans vehicle_images. Nous ne modifions JAMAIS la base ici :
+    // une photo locale est utilisée uniquement en secours.
+    // L'immatriculation temporaire utilisée pour la recherche
+    // n'est jamais envoyée au navigateur.
+    private async restoreLocalCatalogPhotos(
+        rows: Array<PublicVehicleDto & { _localPhotoPlate: string }>,
+    ): Promise<PublicVehicleDto[]> {
+        const photoDir = vehicleImagesDir();
+        let filenames: string[];
+        try {
+            filenames = (await readdir(photoDir))
+                .filter(name => /\.(png|jpe?g|webp|avif|gif)$/i.test(name))
+                .sort((a, b) => b.localeCompare(a));
+        } catch {
+            // Le catalogue doit rester consultable sans le dossier public.
+            filenames = [];
+        }
+
+        const matches = new Map<string, string>();
+        for (const filename of filenames) {
+            const match = /^(lc-\d{4})-(?:image-)?\d+\.(?:png|jpe?g|webp|avif|gif)$/i.exec(filename);
+            if (match && !matches.has(match[1].toLowerCase())) {
+                matches.set(match[1].toLowerCase(), filename);
+            }
+        }
+
+        return Promise.all(rows.map(async ({ _localPhotoPlate, ...vehicle }) => {
+            const plate = (_localPhotoPlate ?? '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+            const filename = matches.get(plate);
+            if (!filename) return vehicle;
+
+            // Une URL distante ou une photo locale existante a priorité.
+            if (vehicle.imageUrl && !vehicle.imageUrl.startsWith('/vehicles/')) {
+                return vehicle;
+            }
+            if (vehicle.imageUrl?.startsWith('/vehicles/')) {
+                const imageFilename = basename(vehicle.imageUrl);
+                try {
+                    await access(join(photoDir, imageFilename));
+                    return vehicle;
+                } catch {
+                    // Photo référencée absente : secours par immatriculation.
+                }
+            }
+            return { ...vehicle, imageUrl: `/vehicles/${filename}` };
+        }));
+    }
+
     // ==========================================
     // 10. CONSULTER LE CATALOGUE PUBLIC
     // ==========================================
@@ -1279,7 +1777,8 @@ export class VehiclesService {
         // Il ne vérifie pas encore si elles sont
         // libres pendant une période précise.
 
-        return this.publicVehicleQuery()
+        const rows = await this.publicVehicleQuery()
+            .addSelect('vehicle.licensePlate', '_localPhotoPlate')
 
             .where(
                 'vehicle.status = :status',
@@ -1298,7 +1797,9 @@ export class VehiclesService {
                 'ASC',
             )
 
-            .getRawMany<PublicVehicleDto>();
+            .getRawMany<PublicVehicleDto & { _localPhotoPlate: string }>();
+
+        return this.restoreLocalCatalogPhotos(rows);
     }
 
     // ==========================================
@@ -1384,7 +1885,8 @@ export class VehiclesService {
         // afin de ne jamais construire une requête SQL
         // avec des dates concaténées manuellement.
 
-        return this.publicVehicleQuery()
+        const rows = await this.publicVehicleQuery()
+            .addSelect('vehicle.licensePlate', '_localPhotoPlate')
 
             .where(
                 'vehicle.status = :status',
@@ -1421,6 +1923,8 @@ export class VehiclesService {
 
             // Retourner uniquement les
             // informations du catalogue public.
-            .getRawMany<PublicVehicleDto>();
+            .getRawMany<PublicVehicleDto & { _localPhotoPlate: string }>();
+
+        return this.restoreLocalCatalogPhotos(rows);
     }
 }

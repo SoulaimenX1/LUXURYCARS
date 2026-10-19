@@ -1,10 +1,12 @@
 
 import {
+    BadRequestException,
     Body,
     Controller,
     Delete,
     Get,
     Param,
+    ParseUUIDPipe,
     Patch,
     Post,
     Query,
@@ -159,6 +161,70 @@ export class VehiclesController {
     }
 
     // ==========================================
+    // 6ter. SUPPRIMER UNE MARQUE
+    // ==========================================
+
+    // Réservé aux administrateurs.
+    //
+    // ?force=true : supprime aussi les modèles et
+    // véhicules liés (les véhicules porteurs de
+    // réservations ou d'avis restent protégés).
+    @Delete('brands/:id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN)
+    deleteBrand(
+        @Param('id', ParseUUIDPipe) id: string,
+        @Query('force') force?: string,
+    ) {
+        return this.vehiclesService.deleteBrand(
+            id,
+            force === 'true',
+        );
+    }
+
+    // ==========================================
+    // 6quater. SUPPRIMER UNE CATÉGORIE
+    // ==========================================
+
+    // Réservé aux administrateurs.
+    //
+    // ?force=true : supprime aussi les modèles et
+    // véhicules liés (véhicules réservés protégés).
+    @Delete('categories/:id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN)
+    deleteCategory(
+        @Param('id', ParseUUIDPipe) id: string,
+        @Query('force') force?: string,
+    ) {
+        return this.vehiclesService.deleteCategory(
+            id,
+            force === 'true',
+        );
+    }
+
+    // ==========================================
+    // 6quinquies. SUPPRIMER UN MODÈLE
+    // ==========================================
+
+    // Réservé aux administrateurs.
+    //
+    // ?force=true : supprime aussi les véhicules liés
+    // (véhicules réservés ou évalués protégés).
+    @Delete('models/:id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN)
+    deleteModel(
+        @Param('id', ParseUUIDPipe) id: string,
+        @Query('force') force?: string,
+    ) {
+        return this.vehiclesService.deleteModel(
+            id,
+            force === 'true',
+        );
+    }
+
+    // ==========================================
     // 7. CONSULTER LE CATALOGUE PUBLIC
     // ==========================================
 
@@ -166,6 +232,38 @@ export class VehiclesController {
     @Get('catalog')
     getPublicCatalog() {
         return this.vehiclesService.findPublicCatalog();
+    }
+
+    // Galerie et 3D publiques : aucun JWT sur les médias publiés.
+    @Get('media/:vehicleId')
+    publicMedia(@Param('vehicleId') vehicleId:string) {
+      // Validation UUID stricte avant interrogation de PostgreSQL.
+      if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(vehicleId))
+        throw new BadRequestException('Invalid vehicle ID');
+      return this.vehiclesService.getPublicMedia(vehicleId);
+    }
+
+    @Post('by-plate/:licensePlate/gallery/:kind')
+    @UseGuards(JwtAuthGuard,RolesGuard) @Roles(UserRole.ADMIN)
+    @UseInterceptors(FileInterceptor('file',{limits:{fileSize:300*1024*1024}}))
+    galleryUpload(@Param('licensePlate') plate:string,@Param('kind') kind:string,@UploadedFile() file:UploadedImageFile|undefined) {
+      if(kind!=='image' && kind!=='video') throw new BadRequestException('Unsupported media type');
+      if(kind==='image' && (file?.size??0)>8*1024*1024) throw new BadRequestException('Image exceeds 8 MB');
+      return this.vehiclesService.addGalleryMedia(plate,kind,file);
+    }
+
+    @Post('by-plate/:licensePlate/model3d')
+    @UseGuards(JwtAuthGuard,RolesGuard) @Roles(UserRole.ADMIN)
+    @UseInterceptors(FileInterceptor('model',{limits:{fileSize:40*1024*1024}}))
+    modelUpload(@Param('licensePlate') plate:string,@UploadedFile() file:UploadedImageFile|undefined) {
+      return this.vehiclesService.saveVehicle3d(plate,file);
+    }
+
+    // Lecture de l'état 3D courant du véhicule (admin).
+    @Get('by-plate/:licensePlate/model3d')
+    @UseGuards(JwtAuthGuard,RolesGuard) @Roles(UserRole.ADMIN)
+    getModel3d(@Param('licensePlate') plate:string) {
+      return this.vehiclesService.getModel3dState(plate);
     }
 
     // ==========================================
@@ -286,8 +384,8 @@ export class VehiclesController {
     @UseInterceptors(
         FileInterceptor('video', {
             limits: {
-                // Taille maximale : 80 Mo.
-                fileSize: 80 * 1024 * 1024,
+                // Taille maximale : 300 Mo.
+                fileSize: 300 * 1024 * 1024,
             },
         }),
     )
@@ -338,6 +436,51 @@ export class VehiclesController {
         licensePlate: string,
     ) {
         return this.vehiclesService.deleteVehicleVideo(
+            licensePlate,
+        );
+    }
+
+    // ==========================================
+    // 15 bis. SUPPRIMER UN MÉDIA PRÉCIS (PAR ID)
+    // ==========================================
+    //
+    // Supprime une seule photo (ou vidéo) de la galerie
+    // d'un véhicule depuis le studio média.
+    //
+    // Exemple :
+    // DELETE /vehicles/media/2f1c…-uuid
+
+    @Delete('media/:mediaId')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN)
+    deleteGalleryMedia(
+        @Param('mediaId', ParseUUIDPipe)
+        mediaId: string,
+    ) {
+        return this.vehiclesService.deleteVehicleMediaById(
+            mediaId,
+        );
+    }
+
+    // ==========================================
+    // 6quinquies. SUPPRIMER UN VÉHICULE
+    // ==========================================
+    //
+    // Exemple :
+    // DELETE /vehicles/by-plate/TUN-488-FR
+    //
+    // Les médias, favoris et indisponibilités sont
+    // supprimés en cascade. Une voiture liée à une
+    // réservation ou à un avis est refusée (409).
+
+    @Delete('by-plate/:licensePlate')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN)
+    deleteVehicle(
+        @Param('licensePlate')
+        licensePlate: string,
+    ) {
+        return this.vehiclesService.deleteVehicle(
             licensePlate,
         );
     }

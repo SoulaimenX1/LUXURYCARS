@@ -1,9 +1,12 @@
 
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import Link from 'next/link';
+import { Price } from '@/components/currency-provider';
 
 import styles from './vehicles.module.css';
+import { useToast } from '@/components/toast';
 
 import cardStyles from '@/components/vehicles/vehicle-card.module.css';
 import VehicleCard from '@/components/vehicles/vehicle-card';
@@ -33,16 +36,118 @@ function isVehicle(value: unknown): value is VehicleItem {
 }
 
 // ==========================================================
+// COMPARAISON — MEILLEURE VALEUR PAR CARACTÉRISTIQUE
+// ==========================================================
+//
+// Chaque ligne comparable reçoit une direction :
+//   - « low »  : la valeur la plus basse est la meilleure
+//     (tarif journalier, caution — le moins cher gagne) ;
+//   - « high » : la valeur la plus haute est la meilleure
+//     (puissance, valeur du véhicule, places).
+//
+// Les caractéristiques sans « meilleur » objectif (boîte de
+// vitesses, carburant) ne sont pas mises en évidence. La
+// comparaison fonctionne pour 2 ou 3 voitures : seule la
+// meilleure valeur de la ligne est stylée.
+
+type CompareDirection = 'high' | 'low';
+
+interface CompareRow {
+    label: string;
+    cell: (vehicle: VehicleItem) => ReactNode;
+    value?: (vehicle: VehicleItem) => number | null;
+    better?: CompareDirection;
+}
+
+function toNumber(value: string | number | null | undefined): number | null {
+    if (value === null || value === undefined || value === '') {
+        return null;
+    }
+
+    const amount = Number(value);
+
+    return Number.isFinite(amount) ? amount : null;
+}
+
+const compareRows: CompareRow[] = [
+    {
+        label: 'Daily rate',
+        cell: (vehicle) => <Price value={vehicle.dailyPrice} />,
+        value: (vehicle) => toNumber(vehicle.dailyPrice),
+        better: 'low',
+    },
+    {
+        label: 'Deposit',
+        cell: (vehicle) => <Price value={vehicle.securityDeposit} />,
+        value: (vehicle) => toNumber(vehicle.securityDeposit),
+        better: 'low',
+    },
+    {
+        label: 'Value',
+        cell: (vehicle) => <Price value={vehicle.vehicleValue} />,
+        value: (vehicle) => toNumber(vehicle.vehicleValue),
+        better: 'high',
+    },
+    {
+        label: 'Seats',
+        cell: (vehicle) => vehicle.seats,
+        value: (vehicle) => toNumber(vehicle.seats),
+        better: 'high',
+    },
+    {
+        label: 'Power',
+        cell: (vehicle) => `${vehicle.powerHp} HP`,
+        value: (vehicle) => toNumber(vehicle.powerHp),
+        better: 'high',
+    },
+    {
+        label: 'Transmission',
+        cell: (vehicle) => vehicle.transmission,
+    },
+    {
+        label: 'Fuel',
+        cell: (vehicle) => vehicle.fuelType,
+    },
+];
+
+// Index de la meilleure valeur de la ligne.
+// Renvoie -1 si aucune valeur ne se démarque : moins de deux
+// valeurs comparables, ou valeurs identiques.
+function bestCompareIndex(
+    values: (number | null)[],
+    direction: CompareDirection,
+): number {
+    const numeric = values.filter((value): value is number => value !== null);
+
+    if (numeric.length < 2 || numeric.every((value) => value === numeric[0])) {
+        return -1;
+    }
+
+    const best =
+        direction === 'high' ? Math.max(...numeric) : Math.min(...numeric);
+
+    return values.findIndex((value) => value === best);
+}
+
+// ==========================================================
 // PAGE DU CATALOGUE
 // ==========================================================
 
 export default function VehiclesPage() {
+    const toast = useToast();
+
     // Liste reçue depuis PostgreSQL via NestJS.
     const [vehicles, setVehicles] = useState<VehicleItem[]>([]);
 
     // États de chargement et d'erreur.
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [comparedIds,setComparedIds] = useState<string[]>([]);
+    const [favoriteIds,setFavoriteIds] = useState<string[]>([]);
+    // Vrai uniquement si un client est connecté : le bouton
+    // « Save » est réservé aux comptes clients.
+    const [isCustomer,setIsCustomer] = useState(false);
+    const [premiumError,setPremiumError] = useState('');
 
     // Permet de relancer un chargement après une erreur.
     const [retryCount, setRetryCount] = useState(0);
@@ -184,6 +289,69 @@ export default function VehiclesPage() {
         };
     }, [retryCount]);
 
+    // Déterminer si le visiteur est un client connecté.
+    // Les visiteurs sans compte ne voient aucun bouton « Save ».
+    useEffect(()=>{
+      const controller=new AbortController();
+      void fetch('/api/auth/session',{signal:controller.signal,cache:'no-store'})
+        .then(r=>r.ok?r.json():{user:null})
+        .then((data:{user?:{role?:string}|null})=>{if(!controller.signal.aborted) setIsCustomer(data.user?.role==='customer');})
+        .catch(()=>{});
+      return ()=>controller.abort();
+    },[]);
+
+    // Les favoris sont conservés par compte côté PostgreSQL.
+    // La liste n'est chargée que pour un client connecté.
+    useEffect(()=>{
+      if(!isCustomer) return;
+      const controller=new AbortController();
+      void fetch('/api/premium/me/favorites',{signal:controller.signal,cache:'no-store'})
+        .then(r=>r.ok?r.json():[])
+        .then((items:{vehicleId:string}[])=>{if(!controller.signal.aborted) setFavoriteIds(items.map(i=>i.vehicleId));})
+        .catch(()=>{});
+      return ()=>controller.abort();
+    },[isCustomer]);
+
+    // Anti double-clic : un seul appel réseau par véhicule à la fois,
+    // pour éviter des enregistrements/suppressions contradictoires.
+    const favoriteRequestRef=useRef<Set<string>>(new Set());
+
+    async function toggleFavorite(vehicleId:string){
+      if(favoriteRequestRef.current.has(vehicleId)) return;
+      favoriteRequestRef.current.add(vehicleId);
+      setPremiumError('');
+      try{
+        const r=await fetch(`/api/premium/me/favorites/${vehicleId}`,{
+          method:'POST',headers:{'Content-Type':'application/json'},body:'{}'
+        });
+        if(r.status===401){setPremiumError('Sign in as a customer to save vehicles.');toast.error('Sign in as a customer to save vehicles.','Saved vehicles');return;}
+        if(!r.ok) throw new Error('Unable to update favorites.');
+        const data:{favorite:boolean}=await r.json();
+        setFavoriteIds(previous=>data.favorite?[...new Set([...previous,vehicleId])]:previous.filter(id=>id!==vehicleId));
+        toast.success(data.favorite?'Added to your saved vehicles.':'Removed from your saved vehicles.','Saved vehicles');
+      } catch{setPremiumError('Could not save your selection.');toast.error('Could not save your selection.','Saved vehicles');}
+      finally{favoriteRequestRef.current.delete(vehicleId);}
+    }
+    function toggleCompare(vehicleId:string){
+      setPremiumError('');
+      setComparedIds(previous=>{
+        if(previous.includes(vehicleId)) return previous.filter(id=>id!==vehicleId);
+        if(previous.length>=3){setPremiumError('You can compare up to three vehicles.');toast.info('You can compare up to three vehicles.','Compare');return previous;}
+        return [...previous,vehicleId];
+      });
+    }
+    const comparedVehicles=vehicles.filter(item=>comparedIds.includes(item.id));
+
+    // Voitures sauvegardées par le client connecté, dans l'ordre
+    // du plus récemment ajouté. Alimente la section « Ma sélection ».
+    const savedVehicles = useMemo(
+        () =>
+            favoriteIds
+                .map((id) => vehicles.find((item) => item.id === id))
+                .filter((item): item is VehicleItem => Boolean(item)),
+        [favoriteIds, vehicles],
+    );
+
     // ========================================================
     // RÉCUPÉRER LES MARQUES DISPONIBLES
     // ========================================================
@@ -292,7 +460,7 @@ export default function VehiclesPage() {
 
                     <h1>
                         Discover our
-                        <span> recommended fleet.</span>
+                        <span> recommended fleet</span>
                     </h1>
 
                     <p>
@@ -350,6 +518,87 @@ export default function VehiclesPage() {
                                 : 'selected'}
                         </p>
                     </div>
+
+                    {/* ============================================= */}
+                    {/* MA SÉLECTION                                  */}
+                    {/* Voitures sauvegardées par le client connecté. */}
+                    {/* Mise à jour en direct après chaque « Save ».  */}
+                    {/* ============================================= */}
+
+                    {isCustomer && (
+                        <section
+                            className={styles.savedSection}
+                            aria-label="Saved vehicles"
+                        >
+                            <div className={styles.savedHeading}>
+                                <div>
+                                    <span className={styles.eyebrow}>
+                                        MY SELECTION
+                                    </span>
+
+                                    <h2>Your saved cars</h2>
+                                </div>
+
+                                <p>
+                                    {savedVehicles.length === 0
+                                        ? 'Tap ♡ Save on any car to add it here.'
+                                        : `${savedVehicles.length} saved`}
+                                </p>
+                            </div>
+
+                            {savedVehicles.length > 0 && (
+                                <div className={styles.savedGrid}>
+                                    {savedVehicles.map((vehicle) => (
+                                        <article
+                                            key={vehicle.id}
+                                            className={styles.savedCard}
+                                        >
+                                            <div className={styles.savedMedia}>
+                                                {vehicle.imageUrl ? (
+                                                    <img
+                                                        src={vehicle.imageUrl}
+                                                        alt={`${vehicle.brandName} ${vehicle.modelName}`}
+                                                        loading="lazy"
+                                                    />
+                                                ) : (
+                                                    <span className={styles.savedInitial}>
+                                                        {vehicle.brandName.charAt(0)}
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            <div className={styles.savedBody}>
+                                                <span>{vehicle.brandName}</span>
+
+                                                <h3>{vehicle.modelName}</h3>
+
+                                                <strong>
+                                                    <Price value={vehicle.dailyPrice} />
+                                                </strong>
+
+                                                <div className={styles.savedActions}>
+                                                    <Link
+                                                        href={`/vehicles/${encodeURIComponent(vehicle.id)}`}
+                                                    >
+                                                        View
+                                                    </Link>
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            void toggleFavorite(vehicle.id)
+                                                        }
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </article>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+                    )}
 
                     {/* ============================================= */}
                     {/* FILTRES                                      */}
@@ -529,6 +778,57 @@ export default function VehiclesPage() {
                             </div>
                         )}
 
+                    {premiumError && <p className={styles.premiumError} role="alert">{premiumError}</p>}
+                    {comparedVehicles.length>0 && (
+                      <section className={styles.comparePanel} aria-label="Vehicle comparison">
+                        <div className={styles.compareHeading}>
+                          <h2>Compare the collection</h2>
+                          <button type="button" onClick={()=>setComparedIds([])}>Clear</button>
+                        </div>
+                        <div className={styles.compareScroll}>
+                          <table><thead><tr><th>Specification</th>{comparedVehicles.map(v=><th key={v.id}>{v.brandName} {v.modelName}</th>)}</tr></thead>
+                          <tbody>
+                            {compareRows.map((row) => {
+                              const values = comparedVehicles.map((vehicle) =>
+                                row.value ? row.value(vehicle) : null,
+                              );
+                              const best = row.better
+                                ? bestCompareIndex(values, row.better)
+                                : -1;
+
+                              return (
+                                <tr key={row.label}>
+                                  <th>{row.label}</th>
+                                  {comparedVehicles.map((vehicle, index) => (
+                                    <td
+                                      key={vehicle.id}
+                                      className={
+                                        index === best
+                                          ? styles.compareBest
+                                          : undefined
+                                      }
+                                      title={
+                                        index === best
+                                          ? 'Best value'
+                                          : undefined
+                                      }
+                                    >
+                                      {row.cell(vehicle)}
+                                    </td>
+                                  ))}
+                                </tr>
+                              );
+                            })}
+                          </tbody></table>
+                        </div>
+                        {comparedVehicles.length > 1 && (
+                          <p className={styles.compareLegend}>
+                            <span aria-hidden="true">✓</span> Better value
+                          </p>
+                        )}
+                      </section>
+                    )}
+
                     {/* ============================================= */}
                     {/* CARTES DES VÉHICULES                          */}
                     {/* ============================================= */}
@@ -542,9 +842,16 @@ export default function VehiclesPage() {
                                         key={vehicle.id}
                                         vehicle={vehicle}
                                         index={index}
+                                        premiumActions={{
+                                          compared:comparedIds.includes(vehicle.id),
+                                          favorite:favoriteIds.includes(vehicle.id),
+                                          canFavorite:isCustomer,
+                                          onCompare:()=>toggleCompare(vehicle.id),
+                                          onFavorite:()=>void toggleFavorite(vehicle.id),
+                                        }}
                                         cta={{
-                                            label: 'Reserve this vehicle →',
-                                            href: '/availability',
+                                            label: 'Discover & reserve →',
+                                            href: `/vehicles/${encodeURIComponent(vehicle.id)}`,
                                         }}
                                     />
                                 ))}

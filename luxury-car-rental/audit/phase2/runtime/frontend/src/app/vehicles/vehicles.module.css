@@ -1,0 +1,496 @@
+/* ==============================================================
+   FLOTTE / CATALOGUE — LUXURY CARS
+   ==============================================================
+   NB : la carte véhicule (grid, tilt 3D, vidéo, spécifications,
+   tarifs, bouton) vit dans components/vehicles/vehicle-card.module.css.
+   ============================================================== */
+
+.page {
+  min-height: 100vh;
+  background: var(--ivory);
+  color: var(--ink);
+}
+
+.container {
+  width: min(calc(100% - 64px), var(--container));
+  margin: 0 auto;
+}
+
+/* ==============================================================
+   HERO
+   ============================================================== */
+
+.hero {
+  padding: 92px 0 70px;
+  border-bottom: 1px solid var(--line);
+  background:
+    radial-gradient(ellipse at 78% 0%, rgba(141, 117, 80, 0.1), transparent 55%),
+    var(--ivory);
+}
+
+.eyebrow {
+  color: var(--gold-text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.8px;
+}
+
+.hero h1 {
+  max-width: 820px;
+  margin-top: 22px;
+  color: var(--ink);
+  font-size: clamp(46px, 6vw, 84px);
+  letter-spacing: -2.4px;
+  line-height: 1.03;
+}
+
+.hero h1 span {
+  font-style: italic;
+  color: var(--gold-text);
+}
+
+.hero > .container > p {
+  max-width: 520px;
+  margin-top: 26px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+.heroDivider {
+  width: 100%;
+  height: 1px;
+  margin: 56px 0 34px;
+  background: var(--line);
+}
+
+.heroStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(40px, 8vw, 110px);
+}
+
+.heroStats > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.heroStats strong {
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(34px, 4vw, 52px);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.heroStats span {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+/* ==============================================================
+   CATALOGUE
+   ============================================================== */
+
+.catalogue {
+  padding: 80px 0 110px;
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.sectionHeading h2 {
+  margin-top: 14px;
+  color: var(--ink);
+  font-size: clamp(30px, 3.4vw, 46px);
+  letter-spacing: -1.2px;
+}
+
+.sectionHeading > p {
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.4px;
+}
+
+/* Messages */
+
+.messageBox {
+  padding: 54px 30px;
+  border: 1px solid var(--line);
+  background: var(--surface-glass);
+  text-align: center;
+}
+
+.messageBox h3 {
+  color: var(--ink);
+  font-size: 26px;
+}
+
+.messageBox p {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.retryButton {
+  margin-top: 24px;
+  padding: 14px 24px;
+  border: 1px solid var(--champagne);
+  background: var(--champagne);
+  color: var(--noir);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.retryButton:hover {
+  background: var(--noir);
+  border-color: var(--noir);
+  color: var(--champagne-3);
+}
+
+/* Filtres */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 22px 30px;
+  margin-bottom: 40px;
+  padding: 22px 24px;
+  border: 1px solid var(--line);
+  background: var(--surface-glass);
+}
+
+.filterGroup {
+  flex: 1 1 420px;
+  min-width: 0;
+}
+
+.filterLabel {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--gold-text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill,
+.pillActive {
+  padding: 9px 15px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.pill:hover {
+  border-color: var(--champagne-line);
+  color: var(--ink);
+}
+
+.pillActive {
+  background: var(--champagne);
+  border-color: var(--champagne);
+  color: var(--noir);
+  font-weight: 600;
+}
+
+.filterControls {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.selectField select {
+  min-width: 190px;
+  padding: 10px 14px;
+  border: 1px solid var(--line-strong);
+  background: var(--white-2);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.selectField select:focus {
+  outline: none;
+  border-color: var(--champagne);
+}
+
+.editionToggle,
+.editionToggleActive {
+  padding: 11px 16px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--ink-2);
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.editionToggle:hover {
+  border-color: var(--champagne-line);
+  color: var(--ink);
+}
+
+.editionToggleActive {
+  background: var(--champagne);
+  border-color: var(--champagne);
+  color: var(--noir);
+  font-weight: 600;
+}
+
+/* ==============================================================
+   RESPONSIVE
+   ============================================================== */
+
+@media (max-width: 760px) {
+  .container {
+    width: min(calc(100% - 36px), var(--container));
+  }
+
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filterControls {
+    width: 100%;
+  }
+
+  .selectField,
+  .selectField select {
+    width: 100%;
+  }
+
+  .hero {
+    padding: 64px 0 50px;
+  }
+
+  .heroDivider {
+    margin: 40px 0 28px;
+  }
+
+  .heroStats {
+    gap: 36px;
+  }
+
+  .sectionHeading {
+    display: block;
+  }
+
+  .sectionHeading > p {
+    margin-top: 14px;
+  }
+
+  .catalogue {
+    padding: 60px 0 80px;
+  }
+}
+
+
+/* MAISON — Catalogue, filtres et collections automobiles. */
+.hero h1, .sectionHeading h2 { font-family: var(--serif); font-weight: 400; letter-spacing: -.045em; }
+.filters, .messageBox { border-radius: var(--radius-card); }
+.pill, .selectField, .retryButton { border-radius: var(--radius-button); }
+
+/* Comparateur premium — surfaces harmonisées dans les deux thèmes. */
+.comparePanel {border:1px solid var(--panel-border);background:var(--white);border-radius:var(--radius-card);padding:24px;margin:30px 0;box-shadow:var(--shadow-soft);}
+.compareHeading{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:20px;}
+.compareHeading h2{font-family:var(--serif);font-weight:400;font-size:25px;color:var(--ink);}
+.compareHeading button{border:1px solid var(--panel-border);background:var(--white-2);color:var(--gold-text);border-radius:var(--radius-button);padding:9px 17px;cursor:pointer;}
+.compareScroll{overflow-x:auto;}
+.compareScroll table{width:100%;border-collapse:collapse;min-width:480px;}
+.compareScroll th,.compareScroll td{text-align:left;padding:14px 17px;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink);}
+.compareScroll th{font-weight:650;color:var(--gold-text);}
+.compareScroll td.compareBest{color:var(--ink);font-weight:700;background:var(--champagne-soft);}
+.compareScroll td.compareBest::before{content:'✓';margin-right:7px;color:var(--champagne);font-size:11px;font-weight:700;vertical-align:1px;}
+.compareLegend{margin-top:12px;color:var(--muted);font-size:12px;}
+.compareLegend span{color:var(--champagne);font-weight:700;margin-right:4px;}
+.premiumError{color:var(--danger-text);background:var(--danger-bg);padding:12px;border:1px solid var(--danger-line);margin:14px 0;border-radius:var(--radius-field);}
+
+/* ==============================================================
+   MA SÉLECTION — voitures sauvegardées par le client connecté.
+   Mise à jour en direct après chaque clic sur « Save ».
+   ============================================================== */
+.savedSection {border:1px solid var(--panel-border);background:var(--white);border-radius:var(--radius-card);padding:24px;margin:30px 0;box-shadow:var(--shadow-soft);}
+.savedHeading {display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:20px;}
+.savedHeading h2 {font-family:var(--serif);font-weight:400;font-size:25px;color:var(--ink);}
+.savedHeading p {color:var(--muted);font-size:13px;}
+.savedGrid {display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
+.savedCard {display:flex;flex-direction:column;border:1px solid var(--line);border-radius:var(--radius-card);background:var(--white-2);overflow:hidden;}
+.savedMedia {position:relative;height:120px;display:flex;align-items:center;justify-content:center;background:linear-gradient(125deg,var(--surface-highlight),transparent 65%),var(--ivory-3);}
+.savedMedia img {max-width:100%;max-height:100%;padding:10px;box-sizing:border-box;object-fit:contain;}
+.savedInitial {font-family:var(--serif);font-size:34px;color:var(--champagne);}
+.savedBody {display:flex;flex-direction:column;gap:6px;flex:1;padding:14px;}
+.savedBody span {color:var(--muted);font-size:10px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;}
+.savedBody h3 {font-family:var(--serif);font-weight:400;font-size:17px;color:var(--ink);}
+.savedBody strong {color:var(--champagne-2);font-family:var(--serif);font-weight:400;font-size:20px;}
+.savedActions {display:flex;gap:8px;margin-top:auto;padding-top:12px;}
+.savedActions a,.savedActions button {flex:1;padding:9px 8px;border:1px solid var(--panel-border);background:var(--white);color:var(--gold-text);border-radius:var(--radius-button);font-size:12px;text-align:center;text-decoration:none;cursor:pointer;}
+.savedActions a {background:var(--champagne);border-color:var(--champagne);color:var(--noir);font-weight:700;text-transform:uppercase;letter-spacing:.8px;}
+.savedActions a:hover {background:var(--noir);border-color:var(--noir);color:var(--champagne);}
+.savedActions button:hover {border-color:var(--champagne);}
+.savedActions a:focus-visible,.savedActions button:focus-visible {outline:2px solid var(--focus-ring);outline-offset:2px;}
+
+/* ==============================================================
+   COUTURE 2026 — CATALOGUE
+   Filet d'or, panneaux de galerie et filtres de maison.
+   ============================================================== */
+
+.hero > .container > .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  letter-spacing: .26em;
+}
+
+.hero > .container > .eyebrow::before {
+  content: '';
+  width: 30px;
+  height: 1px;
+  flex-shrink: 0;
+  background: var(--gold-rule);
+}
+
+.hero h1 {
+  font-size: clamp(48px, 6.2vw, 90px);
+  letter-spacing: -.046em;
+}
+
+.hero h1 span {
+  color: var(--gold-text);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .hero h1 span {
+    background-image: var(--gold-ink);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+.heroDivider {
+  height: 1px;
+  background: var(--gold-rule);
+}
+
+.heroStats strong {
+  color: var(--ink);
+  letter-spacing: -.02em;
+}
+
+.heroStats span {
+  letter-spacing: .16em;
+}
+
+.filters,
+.messageBox {
+  border-radius: var(--radius-xl);
+  border-color: var(--panel-border);
+  box-shadow: var(--shadow-soft);
+}
+
+.filterLabel {
+  letter-spacing: .22em;
+}
+
+.pill,
+.pillActive,
+.editionToggle,
+.editionToggleActive {
+  border-radius: 999px;
+  letter-spacing: .05em;
+}
+
+.retryButton {
+  border-radius: var(--radius-button);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.savedSection,
+.comparePanel {
+  border-radius: var(--radius-xl);
+}
+
+.savedCard {
+  border-radius: var(--radius-card);
+  transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
+}
+
+.savedCard:hover {
+  transform: translateY(-3px);
+  border-color: var(--champagne-line);
+  box-shadow: var(--shadow-soft);
+}
+
+.compareScroll th {
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+/* ==============================================================
+   HAUTE COUTURE 2026 — CATALOGUE
+   Frontispice grand format, or métallique et panneaux profonds.
+   ============================================================== */
+
+.hero h1 {
+  font-size: clamp(52px, 6.8vw, 100px);
+  letter-spacing: -.05em;
+}
+
+.heroDivider {
+  height: 1px;
+  background: var(--gold-rule-strong);
+  opacity: .7;
+}
+
+.filters { box-shadow: var(--shadow-haute); }
+
+.savedSection,
+.comparePanel { box-shadow: var(--shadow-soft); }
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .hero h1 span {
+    background-image: var(--gold-ink-strong);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}

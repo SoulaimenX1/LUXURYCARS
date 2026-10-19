@@ -1,0 +1,369 @@
+- banner:
+  - link "L LUXURY CARS PREMIUM CAR RENTAL":
+    - /url: /
+    - generic: L
+    - strong:
+      - text: LUXURY
+      - emphasis: CARS
+    - generic: PREMIUM CAR RENTAL
+  - navigation:
+    - link "Home":
+      - /url: /
+    - link "Fleet":
+      - /url: /vehicles
+    - link "Contact":
+      - /url: /contact
+  - button "Notifications (1 unread)":
+    - generic: "1"
+  - 'button "Display currency: EUR. Prices billed in EUR"':
+    - generic: €
+    - generic: EUR
+    - generic: ▾
+  - button "Activer le thème clair":
+  - link "My account":
+    - /url: /account
+  - link "My reservations":
+    - /url: /account/reservations
+  - button "Sign out"
+- main:
+  - heading "Reserve this vehicle" [level=1]
+  - paragraph: You are reserving the exact vehicle shown below. Availability, prices and the security deposit are calculated by our system from live data.
+  - generic: "1"
+  - heading "Your vehicle" [level=2]
+  - img "Audit Bentley Continental Audit"
+  - text: Audit Bentley
+  - heading "Continental Audit" [level=3]
+  - generic: Automatic
+  - generic: Petrol
+  - generic: 4 seats
+  - generic: 550 hp
+  - generic: "2025"
+  - term: Daily rate
+  - definition: €300.00
+  - term: Security deposit
+  - definition: €2,000.00
+  - generic: "2"
+  - heading "Pickup location" [level=2]
+  - radiogroup "Pickup location":
+    - radio "airport Aéroport de Budapest Liszt Ferenc Aéroport international de Budapest, 1185 Budapest Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)":
+      - text: airport
+      - generic: Aéroport de Budapest Liszt Ferenc
+      - generic: Aéroport international de Budapest, 1185 Budapest
+      - generic: Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)
+    - radio "showroom Audit Budapest Hub Test address 1 Budapest, Hongrie · 00:00–23:59 (Europe/Budapest)" [checked]:
+      - text: showroom
+      - generic: Audit Budapest Hub
+      - generic: Test address 1
+      - generic: Budapest, Hongrie · 00:00–23:59 (Europe/Budapest)
+    - radio "city center Centre-ville de Budapest Deák Ferenc tér, 1052 Budapest Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)":
+      - text: city center
+      - generic: Centre-ville de Budapest
+      - generic: Deák Ferenc tér, 1052 Budapest
+      - generic: Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)
+    - radio "hotel Four Seasons Gresham Palace Budapest Széchenyi István tér 5-6, 1051 Budapest Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)":
+      - text: hotel
+      - generic: Four Seasons Gresham Palace Budapest
+      - generic: Széchenyi István tér 5-6, 1051 Budapest
+      - generic: Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)
+    - radio "custom Gare de Budapest-Keleti Baross tér, 1087 Budapest Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)":
+      - text: custom
+      - generic: Gare de Budapest-Keleti
+      - generic: Baross tér, 1087 Budapest
+      - generic: Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)
+    - radio "showroom LuxuryCars Showroom Budapest Andrássy út 12, 1061 Budapest Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)":
+      - text: showroom
+      - generic: LuxuryCars Showroom Budapest
+      - generic: Andrássy út 12, 1061 Budapest
+      - generic: Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)
+  - generic: "3"
+  - heading "Drop-off location" [level=2]
+  - radiogroup "Pickup location":
+    - radio "airport Aéroport de Budapest Liszt Ferenc Aéroport international de Budapest, 1185 Budapest Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)":
+      - text: airport
+      - generic: Aéroport de Budapest Liszt Ferenc
+      - generic: Aéroport international de Budapest, 1185 Budapest
+      - generic: Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)
+    - radio "showroom Audit Budapest Hub Test address 1 Budapest, Hongrie · 00:00–23:59 (Europe/Budapest)":
+      - text: showroom
+      - generic: Audit Budapest Hub
+      - generic: Test address 1
+      - generic: Budapest, Hongrie · 00:00–23:59 (Europe/Budapest)
+    - radio "city center Centre-ville de Budapest Deák Ferenc tér, 1052 Budapest Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)" [checked]:
+      - text: city center
+      - generic: Centre-ville de Budapest
+      - generic: Deák Ferenc tér, 1052 Budapest
+      - generic: Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)
+    - radio "hotel Four Seasons Gresham Palace Budapest Széchenyi István tér 5-6, 1051 Budapest Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)":
+      - text: hotel
+      - generic: Four Seasons Gresham Palace Budapest
+      - generic: Széchenyi István tér 5-6, 1051 Budapest
+      - generic: Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)
+    - radio "custom Gare de Budapest-Keleti Baross tér, 1087 Budapest Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)":
+      - text: custom
+      - generic: Gare de Budapest-Keleti
+      - generic: Baross tér, 1087 Budapest
+      - generic: Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)
+    - radio "showroom LuxuryCars Showroom Budapest Andrássy út 12, 1061 Budapest Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)":
+      - text: showroom
+      - generic: LuxuryCars Showroom Budapest
+      - generic: Andrássy út 12, 1061 Budapest
+      - generic: Budapest, Hongrie · 09:00–18:00 (Europe/Budapest)
+  - generic: "4"
+  - heading "Delivery & collection" [level=2]
+  - paragraph: "Optional: the vehicle can be delivered to your address, or collected and returned at a service point. Door delivery is available only inside our active service zones, and its fee is added to your quote by our system."
+  - paragraph: Pickup
+  - radio "Collect from a service point Audit Budapest Hub" [checked]
+  - generic: Collect from a service point
+  - generic: Audit Budapest Hub
+  - radio "Delivered to my address Available inside the service zone; the delivery fee is added to your quote."
+  - generic: Delivered to my address
+  - generic: Available inside the service zone; the delivery fee is added to your quote.
+  - paragraph: Return
+  - radio "Return to a service point Centre-ville de Budapest" [checked]
+  - generic: Return to a service point
+  - generic: Centre-ville de Budapest
+  - radio "Return to my address Available inside the service zone; the collection fee is added to your quote."
+  - generic: Return to my address
+  - generic: Available inside the service zone; the collection fee is added to your quote.
+  - generic: "5"
+  - heading "Choose your dates" [level=2]
+  - generic: October 2026
+  - button "Previous month" [disabled]: ‹
+  - button "Next month": ›
+  - grid "Availability calendar":
+    - generic: Mon
+    - generic: Tue
+    - generic: Wed
+    - generic: Thu
+    - generic: Fri
+    - generic: Sat
+    - generic: Sun
+    - button "2026-10-01, past" [disabled]: "1"
+    - button "2026-10-02, past" [disabled]: "2"
+    - button "2026-10-03, past" [disabled]: "3"
+    - button "2026-10-04, past" [disabled]: "4"
+    - button "2026-10-05, past" [disabled]: "5"
+    - button "2026-10-06, past" [disabled]: "6"
+    - button "2026-10-07, past" [disabled]: "7"
+    - button "2026-10-08, past" [disabled]: "8"
+    - button "2026-10-09, past" [disabled]: "9"
+    - button "2026-10-10, past" [disabled]: "10"
+    - button "2026-10-11, past" [disabled]: "11"
+    - button "2026-10-12, past" [disabled]: "12"
+    - button "2026-10-13, past" [disabled]: "13"
+    - button "2026-10-14, past" [disabled]: "14"
+    - button "2026-10-15, past" [disabled]: "15"
+    - button "2026-10-16, past" [disabled]: "16"
+    - button "2026-10-17, past" [disabled]: "17"
+    - button "2026-10-18, past" [disabled]: "18"
+    - button "2026-10-19, available, 13 pickup slots": "19"
+    - button "2026-10-20, available, 48 pickup slots" [pressed]: "20"
+    - button "2026-10-21, available, 48 pickup slots": "21"
+    - button "2026-10-22, available, 48 pickup slots" [active] [pressed]: "22"
+    - button "2026-10-23, available, 48 pickup slots": "23"
+    - button "2026-10-24, available, 48 pickup slots": "24"
+    - button "2026-10-25, available, 48 pickup slots": "25"
+    - button "2026-10-26, available, 48 pickup slots": "26"
+    - button "2026-10-27, available, 48 pickup slots": "27"
+    - button "2026-10-28, available, 48 pickup slots": "28"
+    - button "2026-10-29, available, 48 pickup slots": "29"
+    - button "2026-10-30, available, 48 pickup slots": "30"
+    - button "2026-10-31, available, 48 pickup slots": "31"
+  - generic: Available
+  - generic: Partially available
+  - generic: Unavailable
+  - generic: Past / outside policy
+  - alert: Invalid request origin.
+  - generic: "6"
+  - heading "Pickup & return times" [level=2]
+  - paragraph: Pickup — Tue, 20 Oct 2026
+  - button "00:00"
+  - button "00:30"
+  - button "01:00"
+  - button "01:30"
+  - button "02:00"
+  - button "02:30"
+  - button "03:00"
+  - button "03:30"
+  - button "04:00"
+  - button "04:30"
+  - button "05:00"
+  - button "05:30"
+  - button "06:00"
+  - button "06:30"
+  - button "07:00"
+  - button "07:30"
+  - button "08:00"
+  - button "08:30"
+  - button "09:00"
+  - button "09:30"
+  - button "10:00" [pressed]
+  - button "10:30"
+  - button "11:00"
+  - button "11:30"
+  - button "12:00"
+  - button "12:30"
+  - button "13:00"
+  - button "13:30"
+  - button "14:00"
+  - button "14:30"
+  - button "15:00"
+  - button "15:30"
+  - button "16:00"
+  - button "16:30"
+  - button "17:00"
+  - button "17:30"
+  - button "18:00"
+  - button "18:30"
+  - button "19:00"
+  - button "19:30"
+  - button "20:00"
+  - button "20:30"
+  - button "21:00"
+  - button "21:30"
+  - button "22:00"
+  - button "22:30"
+  - button "23:00"
+  - button "23:30"
+  - paragraph: Return — Thu, 22 Oct 2026
+  - button "00:00" [pressed]
+  - button "00:30"
+  - button "01:00"
+  - button "01:30"
+  - button "02:00"
+  - button "02:30"
+  - button "03:00"
+  - button "03:30"
+  - button "04:00"
+  - button "04:30"
+  - button "05:00"
+  - button "05:30"
+  - button "06:00"
+  - button "06:30"
+  - button "07:00"
+  - button "07:30"
+  - button "08:00"
+  - button "08:30"
+  - button "09:00"
+  - button "09:30"
+  - button "10:00"
+  - button "10:30"
+  - button "11:00"
+  - button "11:30"
+  - button "12:00"
+  - button "12:30"
+  - button "13:00"
+  - button "13:30"
+  - button "14:00"
+  - button "14:30"
+  - button "15:00"
+  - button "15:30"
+  - button "16:00"
+  - button "16:30"
+  - button "17:00"
+  - button "17:30"
+  - button "18:00"
+  - button "18:30"
+  - button "19:00"
+  - button "19:30"
+  - button "20:00"
+  - button "20:30"
+  - button "21:00"
+  - button "21:30"
+  - button "22:00"
+  - button "22:30"
+  - button "23:00"
+  - button "23:30"
+  - text: Pickup and return at
+  - strong: Audit Budapest Hub
+  - text: "(Europe/Budapest). One-way drop-off is not offered: the vehicle is returned to the same location."
+  - paragraph:
+    - button "Reset selected dates and times"
+  - generic: "7"
+  - heading "Optional services" [level=2]
+  - checkbox "Additional driver Second authorised driver, subject to licence checks 15.00 EUR / day"
+  - generic: Additional driver
+  - generic: Second authorised driver, subject to licence checks
+  - generic: 15.00 EUR / day
+  - checkbox "Child safety seat Child seat available on request 25.00 EUR once"
+  - generic: Child safety seat
+  - generic: Child seat available on request
+  - generic: 25.00 EUR once
+  - checkbox "GPS navigation Navigation accessory on request 15.00 EUR once"
+  - generic: GPS navigation
+  - generic: Navigation accessory on request
+  - generic: 15.00 EUR once
+  - checkbox "Additional protection Optional additional protection; coverage subject to rental terms 30.00 EUR / day"
+  - generic: Additional protection
+  - generic: Optional additional protection; coverage subject to rental terms
+  - generic: 30.00 EUR / day
+  - generic: Promotion code (optional)
+  - textbox "Promotion code (optional)":
+    - /placeholder: e.g. VIP10
+  - generic: "8"
+  - heading "Driver information" [level=2]
+  - generic: Licence required
+  - paragraph: Add your driving licence details to your profile before confirming. The licence must remain valid until the scheduled return date.
+  - link "Complete your profile →":
+    - /url: /account/profile
+  - complementary:
+    - generic: "9"
+    - heading "Your price" [level=2]
+    - alert: Origin rejected
+    - generic: "10"
+    - heading "Review & confirm" [level=2]
+    - alert: Invalid request origin.
+    - list:
+      - generic: Vehicle
+      - generic: Audit Bentley Continental Audit
+      - generic: Pickup
+      - generic: Audit Budapest Hub — Test address 1
+      - generic: Drop-off
+      - generic: Centre-ville de Budapest — Deák Ferenc tér, 1052 Budapest
+      - generic: Pickup date & time
+      - generic: Tue, 20 Oct 2026 · 10:00 (Europe/Budapest)
+      - generic: Return date & time
+      - generic: Thu, 22 Oct 2026 · 00:00 (Europe/Budapest)
+      - generic: Duration
+      - generic: —
+      - generic: Rental total
+      - generic: —
+      - generic: Security deposit
+      - generic: —
+    - button "Confirm reservation" [disabled]
+    - paragraph: "Your reservation is submitted to our team and stored in PostgreSQL. No online payment is taken: the rental is paid according to our standard pay-on-arrival policy."
+- contentinfo:
+  - link "LUXURY CARS":
+    - /url: /
+    - text: LUXURY
+    - emphasis: CARS
+  - paragraph:
+    - text: Premium vehicles.
+    - text: Exceptional journeys.
+  - strong: EXPLORE
+  - link "Home":
+    - /url: /
+  - link "Our fleet":
+    - /url: /vehicles
+  - link "Contact":
+    - /url: /contact
+  - strong: ACCOUNT
+  - link "Sign in":
+    - /url: /login
+  - link "Create account":
+    - /url: /register
+  - link "My account":
+    - /url: /account
+  - link "My reservations":
+    - /url: /account/reservations
+  - link "My rentals":
+    - /url: /account/rentals
+  - link "My premium collection":
+    - /url: /account/premium
+  - generic: © 2026 LUXURY CARS
+  - generic: Web-Based Luxury Car Rental Management System
+  - generic: Prices recorded in EUR · Other currencies are indicative
+- region "Notifications":
+  - list
+- button "Open Next.js Dev Tools":
+- alert

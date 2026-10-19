@@ -225,6 +225,8 @@
   background: var(--surface-glass);
 }
 
+/* Barre de filtres du studio média : recherche + portée photo. */
+
 .field {
   display: flex;
   flex-direction: column;
@@ -332,121 +334,278 @@
 .vehicleGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 22px;
+  gap: 26px;
   align-items: stretch;
-  grid-auto-rows: 1fr;
 }
 
 .vehicleCard {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 24px;
+  overflow: hidden;
   border: 1px solid var(--line);
   background: var(--white);
   transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
 }
 
 .vehicleCard:hover {
   border-color: var(--champagne-line);
-  box-shadow: 0 12px 30px -18px rgba(25, 21, 18, 0.35);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
 
-.vehicleTop {
+/* ---------- Visuel : photo ou monogramme ---------- */
+
+.vehicleFigure {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(135deg, var(--ivory-2), var(--ivory-3));
+}
+
+.vehiclePhoto {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.vehicleCard:hover .vehiclePhoto {
+  transform: scale(1.04);
+}
+
+.vehiclePhotoEmpty {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  color: var(--champagne-2);
+  font-family: var(--serif);
+  font-size: 26px;
+  font-style: italic;
+  letter-spacing: 0.5px;
+  text-align: center;
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 22px,
+    rgba(159, 116, 54, 0.05) 22px 44px
+  );
 }
 
-.vehicleTop span {
-  padding: 5px 10px;
-  border: 1px solid var(--champagne-line);
-  color: var(--gold-text);
+/* Badge « année » posé sur le visuel. */
+.vehicleYear {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Statut cliquable : un clic bascule actif <-> inactif.
+   Fond opaque (couleur translucide composée sur blanc) pour
+   rester lisible par-dessus la photo du véhicule. */
+.statusButton {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  padding: 5px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background-color: var(--white);
+  color: var(--muted-text);
+  font-family: inherit;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.2px;
   text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
 
-.vehicleTop small {
-  color: var(--muted);
-  font-family: var(--serif);
-  font-size: 15px;
+.statusButton:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
-.vehicleCard h3 {
-  margin-top: 16px;
-  color: var(--ink);
-  font-size: 20px;
-  letter-spacing: -0.4px;
-  line-height: 1.25;
-  min-height: 56px;
+.statusButtonActive {
+  border-color: var(--success-line);
+  background-image: linear-gradient(var(--success-bg), var(--success-bg));
+  color: var(--success-text);
+}
+
+/* Survol d'un véhicule actif : aperçu de l'état inactif. */
+.statusButtonActive:hover:not(:disabled) {
+  border-color: var(--danger-line);
+  background-image: linear-gradient(var(--danger-bg), var(--danger-bg));
+  color: var(--danger-text);
+}
+
+.statusButtonInactive {
+  border-color: var(--danger-line);
+  background-image: linear-gradient(var(--danger-bg), var(--danger-bg));
+  color: var(--danger-text);
+}
+
+/* Survol d'un véhicule inactif : aperçu du retour à l'état actif. */
+.statusButtonInactive:hover:not(:disabled) {
+  border-color: var(--success-line);
+  background-image: linear-gradient(var(--success-bg), var(--success-bg));
+  color: var(--success-text);
+}
+
+/* ---------- Corps de la carte ---------- */
+
+.vehicleBody {
   display: flex;
-  align-items: center;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  flex: 1;
+  flex-direction: column;
+  padding: 20px 22px 22px;
 }
 
 .category {
-  margin-top: 6px;
-  margin-bottom: 4px;
   color: var(--gold-text);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.6px;
   text-transform: uppercase;
-  min-height: 16px;
 }
 
-.vehicleDetails {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0;
-  margin-top: 20px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  grid-auto-rows: minmax(64px, 1fr);
-}
-
-.vehicleDetails > div {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  gap: 6px;
-  padding: 12px 14px;
-  background: var(--white);
-  min-height: 64px;
-  height: 100%;
-  box-sizing: border-box;
-}
-
-.vehicleDetails span {
-  color: var(--muted-text);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  line-height: 1.3;
-  min-height: 14px;
-  display: flex;
-  align-items: flex-start;
-}
-
-.vehicleDetails strong {
+.vehicleCard h3 {
+  margin-top: 8px;
+  min-height: 50px;
   color: var(--ink);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.4;
+  font-size: 19px;
+  letter-spacing: -0.3px;
+  line-height: 1.3;
   overflow-wrap: anywhere;
   word-break: break-word;
-  flex: 1;
+}
+
+.vehicleIdentity {
   display: flex;
-  align-items: flex-start;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin-top: 6px;
+}
+
+.plate {
+  padding: 3px 9px;
+  border: 1px solid var(--line);
+  background: var(--ivory-2);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.vin {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--muted-3);
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Caractéristiques ---------- */
+
+.vehicleSpecs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 18px 0 16px;
+  border: 1px solid var(--line-soft);
+  background: var(--line-soft);
+}
+
+.vehicleSpecs > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px 12px;
+  background: var(--white);
+}
+
+.vehicleSpecs dt {
+  color: var(--muted-text);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+}
+
+.vehicleSpecs dd {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Tarifs ---------- */
+
+.vehiclePricing {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1fr;
+  gap: 14px;
+  margin: auto 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.vehiclePricing > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.vehiclePricing dt {
+  color: var(--muted-text);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+}
+
+.vehiclePricing dd {
+  margin: 0;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+/* Tarif journalier mis en avant. */
+.vehiclePricing > div:first-child dd {
+  color: var(--gold-text);
+  font-size: 19px;
+  font-weight: 700;
 }
 
 /* ==============================================================
@@ -652,121 +811,7 @@
   line-height: 1.7;
 }
 
-.photoTableWrap {
-  width: 100%;
-  overflow-x: auto;
-  border: 1px solid var(--line);
-  background: var(--white);
-}
-
-.photoTable {
-  width: 100%;
-  min-width: 1000px;
-  border-collapse: collapse;
-}
-
-.photoTable thead th {
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--line);
-  background: var(--surface-glass);
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.4px;
-  text-transform: uppercase;
-  text-align: left;
-  white-space: nowrap;
-}
-
-.photoTable tbody tr + tr td {
-  border-top: 1px solid var(--line);
-}
-
-.photoTable tbody td {
-  padding: 14px 16px;
-  vertical-align: middle;
-}
-
-.photoIdentity {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.photoIdentity strong {
-  color: var(--ink);
-  font-size: 13.5px;
-  font-weight: 600;
-}
-
-.photoIdentity span {
-  color: var(--muted-2);
-  font-size: 11px;
-}
-
-.photoPlate {
-  color: var(--ink-2);
-  font-size: 12.5px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  white-space: nowrap;
-}
-
-.photoThumb {
-  display: block;
-  width: 100px;
-  height: 66px;
-  object-fit: cover;
-  border: 1px solid var(--line);
-  background: var(--ivory-2);
-}
-
-.photoEmpty {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 0 12px;
-  border: 1px dashed var(--line);
-  color: var(--muted-2);
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
 /* Aperçu d'un média existant + bouton de suppression. */
-.mediaPreview {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.photoRemove {
-  display: inline-flex;
-  align-items: center;
-  min-height: 30px;
-  padding: 0 2px;
-  border: 0;
-  background: none;
-  color: var(--danger-text);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  transition: color 0.2s ease;
-}
-
-.photoRemove:hover:not(:disabled) {
-  color: var(--danger);
-}
-
-.photoRemove:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 .photoInput {
   width: 100%;
@@ -801,31 +846,8 @@
 }
 
 /* ==============================================================
-   MÉDIAS (PHOTO + VIDÉO) — COLONNE D'ENVOI
+   MÉDIAS (PHOTO) — COLONNE D'ENVOI
    ============================================================== */
-
-.mediaStack {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 280px;
-}
-
-.mediaField {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding-left: 12px;
-  border-left: 2px solid var(--champagne-line);
-}
-
-.mediaLabel {
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1.4px;
-  text-transform: uppercase;
-}
 
 .photoButton,
 .photoButtonSecondary {
@@ -870,6 +892,63 @@
 .photoButtonSecondary:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+/* ==============================================================
+   EN-TÊTE DU STUDIO MÉDIA — TITRE + ACCÈS MEDIA STUDIO / 3D
+   ============================================================== */
+
+.mediaHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.mediaHeader .sectionHeader {
+  margin-bottom: 0;
+}
+
+.studioButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 0 22px;
+  border: 1px solid var(--champagne);
+  background: var(--noir);
+  color: var(--champagne-3);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.studioButton span {
+  transition: transform 0.2s ease;
+}
+
+.studioButton:hover {
+  background: var(--champagne);
+  border-color: var(--champagne);
+  color: var(--noir);
+}
+
+.studioButton:hover span {
+  transform: translateX(4px);
+}
+
+.studioButton:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 /* ==============================================================
@@ -932,3 +1011,1244 @@
     padding: 20px;
   }
 }
+
+
+/* MAISON — Atelier / Fleet Management. */
+.hero h1, .heroMetric strong, .sectionHeader h2 { font-family: var(--serif); font-weight: 400; }
+.heroMetric, .formCard, .vehicleCard { border-radius: var(--radius-card); }
+.vehicleCard, .formCard { box-shadow: var(--shadow-soft); }
+.vehicleCard:hover { box-shadow: var(--shadow); }
+.field input, .field select, .field textarea, .photoInput, .photoButton, .photoButtonSecondary, .tabActive { border-radius: var(--radius-field); }
+
+/* Statut de véhicule — activation / désactivation rapide. */
+.editStatus { grid-column: 1 / -1; display: grid; gap: 8px; }
+.editStatus > span { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-text); }
+
+/* Gestion du catalogue : suppression des marques, catégories et modèles. */
+.catalogIntro { display: flex; flex-direction: column; gap: 6px; margin-top: 26px; }
+.catalogIntro h3 { color: var(--ink); font-size: 20px; letter-spacing: -.4px; }
+.catalogHint { max-width: 760px; color: var(--muted-text); font-size: 13px; line-height: 1.6; }
+
+.catalogPanel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.catalogCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+
+.catalogCard h3 {
+  color: var(--ink);
+  font-size: 17px;
+  letter-spacing: -0.3px;
+}
+
+.catalogHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.catalogCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 24px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--gold-text);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .4px;
+}
+
+.catalogSearch {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--white-2);
+  color: var(--ink);
+  font-size: 13px;
+  transition: border-color .2s ease, background .2s ease;
+}
+
+.catalogSearch::placeholder { color: var(--muted-text); }
+.catalogSearch:focus { outline: none; border-color: var(--gold-text); background: var(--white); }
+
+.catalogList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 340px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.catalogItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.catalogInfo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+.catalogName {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.catalogUsage {
+  color: var(--muted-text);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+}
+
+.catalogUsageLocked {
+  color: var(--danger-text);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+}
+
+.catalogEmpty { color: var(--muted-text); font-size: 13px; }
+
+.catalogDelete {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--danger-line);
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--danger-text);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.catalogDelete:hover:not(:disabled) {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--white);
+}
+
+.catalogDelete:disabled {
+  opacity: .5;
+  border-color: var(--line);
+  color: var(--muted-text);
+  cursor: not-allowed;
+}
+
+/* Variante « cascade » : l'entrée est encore utilisée, la
+   suppression retire aussi les modèles et véhicules liés. */
+.catalogDeleteCascade {
+  border-style: dashed;
+  background: var(--danger-bg);
+}
+
+@media (max-width: 960px) {
+  .catalogPanel {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ==============================================================
+   ATELIER — ÉLÉGANCE (habillage visuel, 2026)
+   Raffine l'ensemble de la page Flotte : en-tête, onglets,
+   filtres, cartes véhicules, formulaires et catalogue.
+   Aucune logique métier n'est modifiée — styles uniquement.
+   ============================================================== */
+
+.page {
+  /* Or métallique réutilisable (s'adapte aux thèmes clair/sombre). */
+  --page-gold: linear-gradient(
+    102deg,
+    var(--champagne-2) 0%,
+    var(--champagne) 48%,
+    var(--gold-text) 100%
+  );
+}
+
+/* ---------- Filets d'or & sur-titres ---------- */
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.eyebrow::before {
+  content: '';
+  flex-shrink: 0;
+  width: 26px;
+  height: 1px;
+  background: var(--gold-rule-strong);
+}
+
+/* ---------- En-tête de page ---------- */
+
+.hero {
+  position: relative;
+  padding: 2px 0 32px;
+  border-bottom: 0;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 1px;
+  background: var(--gold-rule);
+}
+
+.hero h1 {
+  font-size: clamp(30px, 3.6vw, 44px);
+  letter-spacing: -1.2px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  background-image: var(--page-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.back {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  font-size: 14.5px;
+  letter-spacing: 0.2px;
+}
+
+/* Plaque « compteur » de la flotte — la signature de la page. */
+.heroMetric {
+  position: relative;
+  min-width: 150px;
+  padding: 20px 26px;
+  border: 1px solid var(--champagne-line);
+  border-radius: var(--radius-card);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 42%),
+    var(--noir);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.heroMetric::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--gold-rule-strong);
+}
+
+.heroMetric strong {
+  font-size: 46px;
+  letter-spacing: -1px;
+  background-image: var(--gold-ink-strong);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.heroMetric span {
+  color: var(--champagne-3);
+  letter-spacing: 2.6px;
+}
+
+/* ---------- Onglets (sélecteur raffiné) ---------- */
+
+.tabs {
+  gap: 6px;
+  padding: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-glass);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(12px);
+}
+
+.tabs button {
+  min-height: 42px;
+  padding: 0 24px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+.tabs .tabActive,
+.tabs .tabActive:hover {
+  border-color: var(--champagne-2);
+  background: linear-gradient(180deg, var(--champagne), var(--champagne-2));
+  color: var(--noir);
+  box-shadow: 0 12px 24px -14px rgba(83, 59, 29, 0.6);
+}
+
+.tabs .tabActive span {
+  background: rgba(16, 16, 15, 0.16);
+  color: var(--noir);
+}
+
+/* ---------- En-têtes de section ---------- */
+
+.sectionHeader h2 {
+  letter-spacing: -0.6px;
+}
+
+/* ---------- Filtres ---------- */
+
+.fleetFilters {
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: linear-gradient(180deg, var(--white), var(--white-2));
+  box-shadow: var(--shadow-soft);
+}
+
+.field label {
+  color: var(--gold-text);
+  letter-spacing: 1.5px;
+}
+
+.fleetFilters input,
+.fleetFilters select,
+.formCard input,
+.formCard select,
+.formCard textarea,
+.vehicleForm input,
+.vehicleForm select,
+.vehicleForm textarea,
+.editForm input,
+.editForm select,
+.editForm textarea {
+  border-radius: var(--radius-field);
+  border-color: var(--line-strong);
+}
+
+.fleetFilters input:hover,
+.fleetFilters select:hover {
+  border-color: var(--champagne-line);
+}
+
+.fleetMeta {
+  font-size: 12.5px;
+  letter-spacing: 0.3px;
+}
+
+/* ---------- Chargement & états vides ---------- */
+
+.loading,
+.fleetEmpty {
+  border-radius: var(--radius-card);
+}
+
+.fleetEmpty {
+  border-style: dashed;
+  border-color: var(--champagne-line);
+  background: linear-gradient(180deg, var(--white), var(--white-2));
+}
+
+/* ---------- Cartes véhicules (pièce maîtresse) ---------- */
+
+.vehicleGrid {
+  gap: 28px;
+}
+
+.vehicleCard {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+
+.vehicleCard::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 4;
+  height: 2px;
+  background: var(--gold-rule-strong);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.vehicleCard:hover {
+  border-color: var(--champagne-line);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-luxe);
+}
+
+.vehicleCard:hover::before {
+  opacity: 1;
+}
+
+.vehicleFigure {
+  aspect-ratio: 16 / 10;
+  border-bottom: 1px solid var(--line);
+}
+
+.vehicleFigure::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(16, 16, 15, 0.2) 0%,
+    transparent 34%,
+    transparent 60%,
+    rgba(16, 16, 15, 0.4) 100%
+  );
+}
+
+.vehicleYear {
+  padding: 5px 12px;
+  border: 1px solid var(--champagne-line);
+  border-radius: var(--radius-pill);
+  background: var(--surface-glass);
+  backdrop-filter: blur(8px);
+  font-family: var(--serif);
+  font-weight: 500;
+  letter-spacing: 0.6px;
+}
+
+.statusButton {
+  border-radius: var(--radius-pill);
+  box-shadow: 0 8px 18px -12px rgba(16, 16, 15, 0.55);
+}
+
+.vehicleBody {
+  padding: 22px 24px 24px;
+}
+
+.category {
+  letter-spacing: 1.8px;
+}
+
+.vehicleCard h3 {
+  min-height: 56px;
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.4px;
+}
+
+.plate {
+  border-color: var(--line-strong);
+  border-radius: var(--radius-field);
+  background: var(--ivory-2);
+  letter-spacing: 1.2px;
+}
+
+.vehicleSpecs {
+  border-color: var(--line-soft);
+  border-radius: var(--radius-field);
+  overflow: hidden;
+}
+
+.vehicleSpecs dt {
+  color: var(--muted-3);
+}
+
+.vehiclePricing {
+  position: relative;
+  border-top: 0;
+}
+
+.vehiclePricing::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: var(--gold-rule);
+}
+
+.vehiclePricing dt {
+  color: var(--gold-text);
+}
+
+.vehiclePricing > div:first-child dd {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -0.4px;
+}
+
+/* ---------- Formulaires ---------- */
+
+.threeColumns {
+  gap: 20px;
+}
+
+.formCard {
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: linear-gradient(180deg, var(--white), var(--white-2));
+  box-shadow: var(--shadow-soft);
+}
+
+.formCard h3 {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--champagne-soft);
+  font-size: 13px;
+}
+
+.vehicleForm,
+.editForm {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: linear-gradient(180deg, var(--white), var(--white-2));
+  box-shadow: var(--shadow-soft);
+}
+
+.formCard button,
+.vehicleForm button,
+.editForm button {
+  border-radius: var(--radius-button);
+}
+
+.checkboxRow {
+  border-radius: var(--radius-field);
+}
+
+.checkboxRow:hover {
+  border-color: var(--champagne-line);
+  background: var(--champagne-soft);
+}
+
+/* ---------- Catalogue (marques / catégories / modèles) ---------- */
+
+.catalogIntro h3 {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.catalogCard {
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: linear-gradient(180deg, var(--white), var(--white-2));
+  box-shadow: var(--shadow-soft);
+}
+
+.catalogSearch {
+  border-color: var(--line-strong);
+  border-radius: var(--radius-field);
+}
+
+.catalogItem {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--line-soft);
+  border-radius: var(--radius-field);
+  transition: background 0.2s ease;
+}
+
+.catalogItem:hover {
+  background: var(--champagne-soft);
+}
+
+.catalogName {
+  font-weight: 600;
+}
+
+.catalogDelete {
+  border-radius: var(--radius-pill);
+}
+
+/* ---------- Studio média ---------- */
+
+.studioButton {
+  border-radius: var(--radius-button);
+}
+
+.photoButton,
+.photoButtonSecondary {
+  border-radius: var(--radius-button);
+}
+
+/* ---------- Reprise mobile (après les surcharges) ---------- */
+
+@media (max-width: 760px) {
+  .hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 22px;
+  }
+
+  .heroMetric {
+    align-items: flex-start;
+  }
+
+  .tabs button {
+    padding: 0 14px;
+    letter-spacing: 1px;
+  }
+}
+
+/* ==============================================================
+   ATELIER MÉDIA — MASTER / DÉTAIL
+   ==============================================================
+   Refonte premium de l'onglet Media : collection de véhicules
+   à gauche (36–40 %), atelier média à droite (60–64 %).
+   Toutes les classes ci-dessous sont propres à cet onglet afin
+   de ne produire aucune régression ailleurs.
+   ============================================================== */
+
+.mediaStudio {
+  display: grid;
+  grid-template-columns: minmax(288px, 0.62fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 22px;
+  min-height: 560px;
+}
+
+/* ---------- Volet gauche : collection de véhicules --------- */
+
+.mediaCollection {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  /* La hauteur de la carte gauche suit celle de la carte droite (rangée de la
+     grille) sans que la longue liste n'allonge la rangée : la collection est
+     dimensionnée indépendamment de son contenu, et seule la liste défile. */
+  contain: size;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: linear-gradient(180deg, var(--white), var(--white-2));
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.mediaCollectionHead {
+  display: grid;
+  gap: 14px;
+  padding: 18px 18px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.mediaSearchRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(140px, auto);
+  gap: 12px;
+  align-items: end;
+}
+
+.mediaCollectionHead input,
+.mediaCollectionHead select {
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-field);
+  background: var(--white);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13.5px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.mediaCollectionHead input:hover,
+.mediaCollectionHead select:hover {
+  border-color: var(--champagne-line);
+}
+
+.mediaCollectionHead input:focus,
+.mediaCollectionHead select:focus {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-color: var(--champagne);
+  box-shadow: 0 0 0 3px var(--champagne-soft);
+}
+
+.mediaCollectionMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.mediaCollectionMeta button,
+.mediaListEmpty button {
+  border: 0;
+  background: none;
+  color: var(--gold-text);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+.mediaCollectionMeta button:hover,
+.mediaListEmpty button:hover {
+  color: var(--ink);
+}
+
+.mediaListWrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.mediaList {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mediaItem,
+.mediaItemActive {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 62px;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-field);
+  background: transparent;
+  text-align: left;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.mediaItem:hover {
+  border-color: var(--line);
+  background: var(--white);
+}
+
+.mediaItemActive,
+.mediaItemActive:hover {
+  border-color: var(--champagne-line);
+  background: linear-gradient(180deg, var(--white), var(--champagne-soft));
+  box-shadow: 0 12px 26px -20px rgba(83, 59, 29, 0.55);
+}
+
+.mediaItem:focus-visible,
+.mediaItemActive:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.mediaItemThumb {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--ivory-2);
+  overflow: hidden;
+}
+
+.mediaItemThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mediaItemThumbEmpty {
+  color: var(--muted-3);
+  font-size: 14px;
+}
+
+.mediaItemBody {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.mediaItemBody strong {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mediaItemBody small {
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mediaItemIndicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.mediaDot,
+.mediaDotOn {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.mediaDotOn {
+  background: var(--champagne);
+  box-shadow: 0 0 0 3px var(--champagne-soft);
+}
+
+.mediaItemCount {
+  min-width: 22px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.mediaListEmpty {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 26px 20px;
+  color: var(--muted);
+  font-size: 13px;
+  overflow-y: auto;
+}
+
+/* ---------- Volet droit : atelier média --------- */
+
+.mediaWorkspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 20px;
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: linear-gradient(180deg, var(--white), var(--white-2));
+  box-shadow: var(--shadow-soft);
+  /* Aucun défilement interne : la carte droite affiche tout son contenu. */
+  overflow: hidden;
+}
+
+.workspaceHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.workspaceIdentity {
+  min-width: 0;
+}
+
+.workspaceEyebrow {
+  color: var(--gold-text);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+}
+
+.workspaceTitle {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(22px, 2.4vw, 28px);
+  font-weight: 400;
+  letter-spacing: -0.6px;
+}
+
+.workspaceYear {
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.workspaceMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.workspacePlate {
+  padding: 4px 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-field);
+  background: var(--ivory-2);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+.workspaceStatusOn,
+.workspaceStatusOff {
+  flex-shrink: 0;
+  padding: 6px 13px;
+  border: 1px solid var(--champagne-line);
+  border-radius: var(--radius-pill);
+  background: var(--champagne-soft);
+  color: var(--gold-text);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.workspaceStatusOff {
+  border-color: var(--line);
+  background: transparent;
+  color: var(--muted);
+}
+
+/* Scène d'aperçu : le véhicule n'est jamais rogné. */
+
+.previewStage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: clamp(220px, 32vh, 420px);
+  margin: 0;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background:
+    radial-gradient(
+      120% 130% at 50% 0%,
+      var(--champagne-soft),
+      transparent 62%
+    ),
+    var(--ivory-2);
+  overflow: hidden;
+}
+
+.previewImage {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.previewEmpty {
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.4px;
+}
+
+.workspaceChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mediaChip {
+  padding: 6px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ---------- Galerie (lecture seule) --------- */
+
+.gallerySection {
+  display: grid;
+  gap: 10px;
+}
+
+.galleryHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.galleryLabel {
+  color: var(--gold-text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+}
+
+.galleryLink {
+  color: var(--gold-text);
+  font-size: 12px;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.galleryLink:hover {
+  color: var(--ink);
+}
+
+.galleryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 10px;
+}
+
+.galleryItem {
+  margin: 0;
+  aspect-ratio: 4 / 3;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--ivory-2);
+  overflow: hidden;
+}
+
+.galleryItem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.galleryNote {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* ---------- Zone d'envoi --------- */
+
+.uploadPanel {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px dashed var(--champagne-line);
+  border-radius: var(--radius-card);
+  background: linear-gradient(180deg, var(--white), var(--champagne-soft));
+}
+
+.uploadHead {
+  display: grid;
+  gap: 4px;
+}
+
+.uploadLabel {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.uploadNote {
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.uploadActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Lisibilité renforcée dans l'atelier (périmètre limité). */
+
+.uploadPanel .photoInput {
+  font-size: 13.5px;
+}
+
+.uploadPanel .photoFileName {
+  font-size: 12.5px;
+}
+
+.uploadPanel .photoButtonSecondary {
+  border-color: var(--danger-line);
+  color: var(--danger-text);
+}
+
+.uploadPanel .photoButtonSecondary:hover:not(:disabled) {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: #fff;
+}
+
+/* ---------- État d'avancement (indéterminé, réel) --------- */
+
+.progress {
+  display: grid;
+  gap: 8px;
+}
+
+.progressBar {
+  position: relative;
+  display: block;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--line-soft);
+  overflow: hidden;
+}
+
+.progressBar::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 38%;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, var(--champagne-2), var(--champagne));
+  animation: mediaProgress 1.15s ease-in-out infinite;
+}
+
+.progressText {
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.3px;
+}
+
+@keyframes mediaProgress {
+  0% {
+    transform: translateX(-110%);
+  }
+
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progressBar::after {
+    width: 100%;
+    animation: none;
+  }
+}
+
+/* ---------- Adaptation responsive (requête de conteneur) ---------- */
+
+/* L'onglet Média est un conteneur : la bascule maître/détail suit la largeur
+   réellement disponible (la barre latérale de l'admin variant selon le
+   viewport), et non la largeur du viewport. */
+
+.mediaTab {
+  container-type: inline-size;
+}
+
+@container (max-width: 760px) {
+  .mediaStudio {
+    grid-template-columns: 1fr;
+    align-items: start;
+    min-height: 0;
+  }
+
+  .mediaCollection {
+    contain: none;
+    max-height: 460px;
+  }
+
+  .mediaListWrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .mediaWorkspace {
+    overflow: visible;
+  }
+}
+
+@media (max-width: 560px) {
+  .mediaWorkspace {
+    padding: 18px;
+  }
+
+  .mediaSearchRow {
+    grid-template-columns: 1fr;
+  }
+
+  .previewStage {
+    height: 190px;
+  }
+}
+

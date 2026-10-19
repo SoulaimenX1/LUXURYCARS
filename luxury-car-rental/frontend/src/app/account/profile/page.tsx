@@ -3,6 +3,8 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+
+import { useToast } from '@/components/toast';
 import type { FormEvent } from 'react';
 import { useEffect, useState } from 'react';
 
@@ -94,6 +96,7 @@ async function readApiError(response: Response): Promise<string> {
 
 export default function CustomerProfilePage() {
     const router = useRouter();
+    const toast = useToast();
 
     // Profil déjà enregistré en base.
     const [profile, setProfile] =
@@ -260,9 +263,10 @@ export default function CustomerProfilePage() {
 
             // Vérification simple côté navigateur.
             if (payload.licenseExpiresOn <= payload.licenseIssuedOn) {
-                setError(
-                    'Licence expiry date must be after its issue date.',
-                );
+                const message =
+                    'Licence expiry date must be after its issue date.';
+                setError(message);
+                toast.error(message, 'Driving licence');
                 return;
             }
 
@@ -285,7 +289,9 @@ export default function CustomerProfilePage() {
 
             // Le backend reste responsable de valider les données.
             if (!response.ok) {
-                setError(await readApiError(response));
+                const message = await readApiError(response);
+                setError(message);
+                toast.error(message, 'Customer profile');
                 return;
             }
 
@@ -299,11 +305,11 @@ export default function CustomerProfilePage() {
             );
 
             if (!profileResponse.ok) {
-                setSuccess(
-                    isUpdate
-                        ? 'Profile updated. Refresh the page to display its details.'
-                        : 'Profile created. Refresh the page to display its details.',
-                );
+                const message = isUpdate
+                    ? 'Profile updated. Refresh the page to display its details.'
+                    : 'Profile created. Refresh the page to display its details.';
+                setSuccess(message);
+                toast.success(message, 'Customer profile');
                 return;
             }
 
@@ -314,15 +320,16 @@ export default function CustomerProfilePage() {
             setMode('view');
             setEditing(false);
 
-            setSuccess(
-                isUpdate
-                    ? 'Customer profile updated successfully.'
-                    : 'Customer profile created successfully.',
-            );
+            const message = isUpdate
+                ? 'Customer profile updated successfully.'
+                : 'Customer profile created successfully.';
+            setSuccess(message);
+            toast.success(message, 'Customer profile');
         } catch {
-            setError(
-                'Unable to save your profile. Please try again.',
-            );
+            const message =
+                'Unable to save your profile. Please try again.';
+            setError(message);
+            toast.error(message, 'Customer profile');
         } finally {
             setSubmitting(false);
         }

@@ -34,6 +34,12 @@ export class UpdateVehicleDto {
     @Min(0)
     securityDeposit?: number;
 
+    // Nouvelle valeur du véhicule (nombre réel strictement positif).
+    @IsOptional()
+    @IsNumber({ maxDecimalPlaces: 2 })
+    @Min(0.01)
+    vehicleValue?: number;
+
     // Nouveau kilométrage.
     @IsOptional()
     @IsInt()

@@ -1,0 +1,1033 @@
+/* ==========================================================
+   CUSTOMER DASHBOARD
+   Disposition simple, élégante et différente du portail admin.
+   ========================================================== */
+
+.page {
+  min-height: 100vh;
+  background: var(--ivory);
+  color: var(--ink);
+}
+
+/* ==========================================================
+   HEADER
+   ========================================================== */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--line-soft);
+  background: var(--header-bg-soft);
+  backdrop-filter: blur(18px);
+}
+
+.headerInner {
+  width: min(calc(100% - 48px), 1240px);
+  min-height: 78px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 35px;
+}
+
+/* ==========================================================
+   BRAND
+   ========================================================== */
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.brandMark {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--champagne);
+  color: var(--champagne);
+  font-family: var(--serif);
+  font-size: 22px;
+}
+
+.brand div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.brand strong {
+  font-size: 12px;
+  letter-spacing: 3px;
+}
+
+.brand div span {
+  color: var(--muted-2);
+  font-size: 8px;
+  letter-spacing: 2.5px;
+}
+
+/* ==========================================================
+   NAVIGATION
+   ========================================================== */
+
+.navigation {
+  justify-self: center;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.navigation a {
+  position: relative;
+  padding: 29px 0 27px;
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.navigation a:hover,
+.navigation .activeLink {
+  color: var(--ink);
+}
+
+.navigation .activeLink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--champagne);
+}
+
+/* ==========================================================
+   LOGOUT
+   ========================================================== */
+
+.logoutButton {
+  padding: 11px 17px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.logoutButton:hover:not(:disabled) {
+  border-color: var(--champagne);
+  background: var(--white);
+}
+
+.logoutButton:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+/* ==========================================================
+   DASHBOARD
+   ========================================================== */
+
+.dashboard {
+  width: min(calc(100% - 48px), 1240px);
+  margin: 0 auto;
+  padding: 68px 0 100px;
+}
+
+/* ==========================================================
+   INTRO
+   ========================================================== */
+
+.intro {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 50px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--line);
+}
+
+.eyebrow,
+.sectionTitle>span {
+  color: var(--gold-text);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2.6px;
+}
+
+.intro h1 {
+  margin-top: 15px;
+  font-family: var(--serif);
+  font-size: clamp(42px, 6vw, 72px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -2px;
+}
+
+.intro p {
+  max-width: 570px;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+/* ==========================================================
+   CUSTOMER BADGE
+   ========================================================== */
+
+.customerBadge {
+  min-width: 280px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 17px 19px;
+  border: 1px solid var(--line);
+  background: var(--white);
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 42px;
+  border-radius: 50%;
+  background: var(--noir);
+  color: var(--champagne-3);
+  font-family: var(--serif);
+  font-size: 13px;
+}
+
+.customerBadge div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.customerBadge strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.customerBadge div span {
+  overflow: hidden;
+  color: var(--muted-2);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ==========================================================
+   ERROR
+   ========================================================== */
+
+.errorBanner {
+  margin-top: 28px;
+  padding: 14px 16px;
+  border: 1px solid var(--danger-line);
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-size: 12px;
+}
+
+/* ==========================================================
+   SECTIONS
+   ========================================================== */
+
+.quickSection,
+.accountSection {
+  padding-top: 62px;
+}
+
+.sectionTitle {
+  margin-bottom: 27px;
+}
+
+.sectionTitle h2 {
+  margin-top: 10px;
+  font-family: var(--serif);
+  font-size: 31px;
+  font-weight: 400;
+}
+
+/* ==========================================================
+   QUICK ACTIONS
+   ========================================================== */
+
+.actionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.actionCard {
+  min-height: 176px;
+  position: relative;
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  align-items: start;
+  gap: 22px;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: linear-gradient(180deg, var(--white), var(--white-2));
+  color: var(--ink);
+  text-decoration: none;
+  overflow: hidden;
+  transition:
+    border-color 200ms ease,
+    transform 200ms ease,
+    box-shadow 200ms ease;
+}
+
+/* Liseré doré qui se déploie au survol. */
+.actionCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background: var(--gold-text);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 220ms ease;
+}
+
+.actionCard:hover {
+  border-color: var(--gold-text);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+}
+
+.actionCard:hover::before {
+  transform: scaleY(1);
+}
+
+.actionNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--gold-text);
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--gold-text);
+  font-family: var(--serif);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition:
+    background 200ms ease,
+    color 200ms ease;
+}
+
+.actionCard:hover .actionNumber {
+  background: var(--gold-text);
+  color: var(--white);
+}
+
+.actionCard h3 {
+  font-family: var(--serif);
+  font-size: 23px;
+  font-weight: 400;
+}
+
+.actionCard p {
+  max-width: 330px;
+  margin-top: 12px;
+  color: var(--muted-2);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.arrow {
+  align-self: end;
+  color: var(--champagne);
+  font-size: 24px;
+  transition:
+    transform 200ms ease,
+    color 200ms ease;
+}
+
+.actionCard:hover .arrow {
+  transform: translateX(5px);
+  color: var(--gold-text);
+}
+
+/* ==========================================================
+   ACCOUNT CARD
+   ========================================================== */
+
+.accountCard {
+  display: grid;
+  grid-template-columns: 0.8fr 1.8fr auto;
+  align-items: center;
+  gap: 36px;
+  padding: 32px;
+  border: 1px solid var(--line);
+  background: var(--white);
+}
+
+.accountIdentity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.largeAvatar {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 58px;
+  border: 1px solid var(--champagne);
+  color: var(--champagne);
+  font-family: var(--serif);
+  font-size: 18px;
+}
+
+.accountIdentity h3 {
+  font-family: var(--serif);
+  font-size: 21px;
+  font-weight: 400;
+}
+
+.accountIdentity p {
+  max-width: 220px;
+  margin-top: 7px;
+  overflow: hidden;
+  color: var(--muted-2);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 25px;
+}
+
+.detail {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail span {
+  color: var(--muted-3);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.detail strong {
+  overflow-wrap: anywhere;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.status {
+  color: var(--success);
+  text-transform: uppercase;
+}
+
+.profileButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 13px 17px;
+  border: 1px solid var(--champagne);
+  color: var(--champagne-2);
+  font-size: 11px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.profileButton:hover {
+  background: var(--champagne);
+  color: var(--noir);
+}
+
+/* ==========================================================
+   LOADING / ERROR PAGE
+   ========================================================== */
+
+.centerPage {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 30px;
+  background: var(--ivory);
+  color: var(--ink);
+}
+
+.loadingCard,
+.errorCard {
+  width: min(100%, 440px);
+  padding: 38px;
+  border: 1px solid var(--line);
+  background: var(--white);
+}
+
+.loadingCard {
+  text-align: center;
+}
+
+.loadingMark {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 20px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--champagne);
+  color: var(--champagne);
+  font-family: var(--serif);
+  font-size: 24px;
+}
+
+.loadingCard p,
+.errorCard p {
+  color: var(--muted-text);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.errorCard h1 {
+  margin-top: 15px;
+  font-family: var(--serif);
+  font-size: 34px;
+  font-weight: 400;
+}
+
+.errorCard p {
+  margin-top: 15px;
+}
+
+.primaryButton {
+  display: inline-flex;
+  margin-top: 25px;
+  padding: 13px 18px;
+  background: var(--champagne);
+  color: var(--noir);
+  font-size: 11px;
+  text-decoration: none;
+}
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+@media (max-width: 1050px) {
+  .headerInner {
+    grid-template-columns: auto auto;
+  }
+
+  .navigation {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    justify-content: center;
+    border-top: 1px solid var(--line-soft);
+  }
+
+  .accountCard {
+    grid-template-columns: 1fr;
+  }
+
+  .detailsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profileButton {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 760px) {
+  .headerInner {
+    width: min(calc(100% - 30px), 1240px);
+    min-height: 70px;
+    gap: 15px;
+  }
+
+  .brand div {
+    display: none;
+  }
+
+  .navigation {
+    overflow-x: auto;
+    justify-content: flex-start;
+    gap: 22px;
+  }
+
+  .navigation a {
+    flex: 0 0 auto;
+    padding: 18px 0;
+    font-size: 11px;
+  }
+
+  .logoutButton {
+    justify-self: end;
+  }
+
+  .dashboard {
+    width: min(calc(100% - 30px), 1240px);
+    padding-top: 45px;
+  }
+
+  .intro {
+    display: block;
+  }
+
+  .customerBadge {
+    width: 100%;
+    margin-top: 30px;
+  }
+
+  .actionGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .dashboard {
+    padding-bottom: 70px;
+  }
+
+  .intro h1 {
+    font-size: 42px;
+    letter-spacing: -1px;
+  }
+
+  .actionCard {
+    grid-template-columns: 42px 1fr;
+    min-height: 155px;
+    padding: 22px;
+  }
+
+  .arrow {
+    display: none;
+  }
+
+  .detailsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .accountCard {
+    padding: 24px;
+  }
+}
+
+/* ==========================================================
+   BANNIÈRE RÉSERVATIONS (accès mis en avant)
+   ========================================================== */
+
+.reservationsBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  margin-top: 34px;
+  padding: 30px 34px;
+  border: 1px solid var(--champagne-line);
+  background:
+    linear-gradient(
+      135deg,
+      var(--champagne-soft),
+      transparent 62%
+    ),
+    var(--white);
+}
+
+.reservationsText {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.reservationsEyebrow {
+  color: var(--gold-text);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2.6px;
+}
+
+.reservationsBanner h2 {
+  font-family: var(--serif);
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.reservationsBanner p {
+  max-width: 520px;
+  color: var(--muted-text);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.reservationsCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  min-height: 52px;
+  padding: 0 26px;
+  background: var(--champagne);
+  color: var(--noir);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+}
+
+.reservationsCta:hover {
+  background: var(--champagne-3);
+}
+
+@media (max-width: 760px) {
+  .reservationsBanner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .reservationsCta {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ==========================================================
+   BANNIÈRE PERMIS MANQUANT
+   ========================================================== */
+
+.licenceBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  margin-top: 34px;
+  padding: 30px 34px;
+  border: 1px solid var(--danger-line);
+  background:
+    linear-gradient(
+      135deg,
+      var(--danger-bg),
+      transparent 62%
+    ),
+    var(--white);
+}
+
+.licenceText {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.licenceEyebrow {
+  color: var(--danger);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2.6px;
+}
+
+.licenceBanner h2 {
+  font-family: var(--serif);
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.licenceBanner p {
+  max-width: 520px;
+  color: var(--muted-text);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.licenceCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  min-height: 52px;
+  padding: 0 26px;
+  background: var(--champagne);
+  color: var(--noir);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+}
+
+.licenceCta:hover {
+  background: var(--champagne-3);
+}
+
+@media (max-width: 760px) {
+  .licenceBanner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .licenceCta {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+
+/* MAISON — Espace client / finitions éditoriales. */
+.dashboard h1, .sectionTitle, .accountIdentity h2 { font-family: var(--serif); font-weight: 400; letter-spacing: -.035em; }
+.actionCard, .accountCard, .loadingCard, .errorCard, .reservationsBanner, .licenceBanner { border-radius: var(--radius-card); }
+.actionCard, .accountCard { box-shadow: var(--shadow-soft); }
+.actionCard:hover { box-shadow: var(--shadow); }
+.profileButton, .primaryButton, .logoutButton { border-radius: var(--radius-button); }
+
+/* ----------------------------------------------------------
+   INFORMATIONS PERSONNELLES — formulaire éditable
+   ---------------------------------------------------------- */
+
+.editCard {
+  padding: 30px;
+  border: 1px solid var(--line);
+  background: var(--white);
+}
+
+.editFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.editField {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.editField > span {
+  color: var(--gold-text);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+
+.editField > span em {
+  color: var(--danger);
+  font-style: normal;
+}
+
+.editField input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  background: var(--white);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.editField input:focus {
+  outline: none;
+  border-color: var(--champagne);
+  box-shadow: 0 0 0 3px var(--champagne-soft);
+}
+
+.editField input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: var(--white-2);
+}
+
+.editField input::placeholder {
+  color: var(--muted-3);
+}
+
+.saveError,
+.saveMessage {
+  margin-top: 20px;
+  padding: 12px 15px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.saveError {
+  border: 1px solid var(--danger-line);
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.saveMessage {
+  border: 1px solid var(--success-line);
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.saveButton {
+  margin-top: 22px;
+  min-height: 50px;
+  padding: 0 30px;
+  border: 0;
+  background: var(--champagne);
+  color: var(--noir);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition:
+    background 200ms ease,
+    transform 120ms ease;
+}
+
+.saveButton:hover:not(:disabled) {
+  background: var(--champagne-3);
+}
+
+.saveButton:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.saveButton:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* Arrondis et ombres. */
+.editCard { border-radius: var(--radius-card); box-shadow: var(--shadow-soft); }
+.editField input, .saveButton { border-radius: var(--radius-field); }
+
+@media (max-width: 760px) {
+  .editFields {
+    grid-template-columns: 1fr;
+  }
+
+  .editCard {
+    padding: 24px;
+  }
+
+  .saveButton {
+    width: 100%;
+  }
+}
+
+/* ==============================================================
+   COUTURE 2026 — ESPACE CLIENT
+   ============================================================== */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  letter-spacing: .26em;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 30px;
+  height: 1px;
+  background: var(--gold-rule);
+}
+
+.sectionTitle > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  letter-spacing: .26em;
+}
+
+.sectionTitle > span::before {
+  content: '';
+  width: 30px;
+  height: 1px;
+  background: var(--gold-rule);
+}
+
+.intro h1 {
+  font-size: clamp(46px, 6.4vw, 80px);
+  letter-spacing: -.046em;
+}
+
+.customerBadge {
+  border-radius: var(--radius-card);
+  border-color: var(--panel-border);
+  box-shadow: var(--shadow-soft);
+}
+
+.avatar,
+.largeAvatar {
+  box-shadow: inset 0 0 0 1px var(--champagne-line);
+}
+
+.actionCard,
+.accountCard,
+.editCard {
+  border-radius: var(--radius-xl);
+  border-color: var(--panel-border);
+}
+
+.actionCard:hover {
+  border-color: var(--champagne-line);
+  box-shadow: var(--shadow-luxe);
+}
+
+.actionNumber {
+  border-color: var(--champagne-line);
+}
+
+.accountCard {
+  box-shadow: var(--shadow-soft);
+}
+
+.reservationsBanner {
+  border-radius: var(--radius-xl);
+  border-color: var(--panel-border);
+  box-shadow: var(--shadow-soft);
+}
+
+.reservationsCta {
+  border-radius: var(--radius-button);
+  box-shadow: var(--button-shadow);
+}
+
+.profileButton,
+.primaryButton,
+.logoutButton,
+.saveButton {
+  border-radius: var(--radius-button);
+}
+
+.saveButton {
+  box-shadow: var(--button-shadow);
+}
+
+.detail span {
+  letter-spacing: .16em;
+}

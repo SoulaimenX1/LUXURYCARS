@@ -1,0 +1,152 @@
+- banner:
+  - link "L LUXURY CARS PREMIUM CAR RENTAL":
+    - /url: /
+    - generic: L
+    - strong:
+      - text: LUXURY
+      - emphasis: CARS
+    - generic: PREMIUM CAR RENTAL
+  - navigation:
+    - link "Home":
+      - /url: /
+    - link "Fleet":
+      - /url: /vehicles
+    - link "Contact":
+      - /url: /contact
+  - button "Notifications (1 unread)":
+    - generic: "1"
+  - 'button "Display currency: EUR. Prices billed in EUR"':
+    - generic: €
+    - generic: EUR
+    - generic: ▾
+  - button "Activer le thème clair":
+  - link "My account":
+    - /url: /account
+  - link "My reservations":
+    - /url: /account/reservations
+  - button "Sign out"
+- main:
+  - generic: YOUR PRIVATE GARAGE
+  - heading "Welcome, Browser" [level=1]
+  - paragraph: Everything you need to discover, reserve and manage your luxury rental experience.
+  - generic: BA
+  - strong: Browser Audit
+  - generic: audit.customer@example.test
+  - alert:
+    - generic: DRIVING LICENCE REQUIRED
+    - heading "You must register your driving licence" [level=2]
+    - paragraph: Add your driving licence details to your profile to be able to book a vehicle.
+    - link "Register my licence":
+      - /url: /account/profile
+      - text: Register my licence
+      - generic: →
+  - generic: RESERVATIONS
+  - heading "Your reservations & status" [level=2]
+  - paragraph: Track every booking — pending, confirmed, cancelled or completed — in one place.
+  - link "View my reservations":
+    - /url: /account/reservations
+    - text: View my reservations
+    - generic: →
+  - generic: QUICK ACCESS
+  - heading "What would you like to do?" [level=2]
+  - link "01 Browse cars Explore the luxury vehicle collection. →":
+    - /url: /vehicles
+    - generic: "01"
+    - heading "Browse cars" [level=3]
+    - paragraph: Explore the luxury vehicle collection.
+    - generic: →
+  - link "02 Contact us Reach our team in Budapest for any request. →":
+    - /url: /contact
+    - generic: "02"
+    - heading "Contact us" [level=3]
+    - paragraph: Reach our team in Budapest for any request.
+    - generic: →
+  - link "03 My reservations Review and manage your current bookings. →":
+    - /url: /account/reservations
+    - generic: "03"
+    - heading "My reservations" [level=3]
+    - paragraph: Review and manage your current bookings.
+    - generic: →
+  - link "04 Profile & licence Manage personal information and driving licence details. →":
+    - /url: /account/profile
+    - generic: "04"
+    - heading "Profile & licence" [level=3]
+    - paragraph: Manage personal information and driving licence details.
+    - generic: →
+  - link "05 My rentals Track active rentals, pickup details and rental history. →":
+    - /url: /account/rentals
+    - generic: "05"
+    - heading "My rentals" [level=3]
+    - paragraph: Track active rentals, pickup details and rental history.
+    - generic: →
+  - link "06 My premium collection Saved vehicles, membership tier and verified reviews. →":
+    - /url: /account/premium
+    - generic: "06"
+    - heading "My premium collection" [level=3]
+    - paragraph: Saved vehicles, membership tier and verified reviews.
+    - generic: →
+  - generic: ACCOUNT
+  - heading "Your details" [level=2]
+  - generic: BA
+  - heading "Browser Audit" [level=3]
+  - paragraph: audit.customer@example.test
+  - generic: First name
+  - strong: Browser
+  - generic: Last name
+  - strong: Audit
+  - generic: Phone
+  - strong: Not provided
+  - generic: Status
+  - strong: Not available
+  - link "Edit profile":
+    - /url: /account/profile
+    - text: Edit profile
+    - generic: →
+  - generic: PERSONAL INFORMATION
+  - heading "Update your details" [level=2]
+  - generic: First name
+  - textbox "First name": Browser
+  - generic: Last name
+  - textbox "Last name": Audit
+  - text: Phone number
+  - emphasis: "*"
+  - textbox "Phone number":
+    - /placeholder: +216 ...
+  - generic: Email
+  - textbox "Email" [disabled]: <redacted>
+  - button "Save changes"
+- contentinfo:
+  - link "LUXURY CARS":
+    - /url: /
+    - text: LUXURY
+    - emphasis: CARS
+  - paragraph:
+    - text: Premium vehicles.
+    - text: Exceptional journeys.
+  - strong: EXPLORE
+  - link "Home":
+    - /url: /
+  - link "Our fleet":
+    - /url: /vehicles
+  - link "Contact":
+    - /url: /contact
+  - strong: ACCOUNT
+  - link "Sign in":
+    - /url: /login
+  - link "Create account":
+    - /url: /register
+  - link "My account":
+    - /url: /account
+  - link "My reservations":
+    - /url: /account/reservations
+  - link "My rentals":
+    - /url: /account/rentals
+  - link "My premium collection":
+    - /url: /account/premium
+  - generic: © 2026 LUXURY CARS
+  - generic: Web-Based Luxury Car Rental Management System
+  - generic: Prices recorded in EUR · Other currencies are indicative
+- region "Notifications":
+  - list
+- button "Open Next.js Dev Tools":
+- alert

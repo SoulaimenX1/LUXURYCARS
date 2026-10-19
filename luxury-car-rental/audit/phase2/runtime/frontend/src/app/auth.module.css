@@ -1,0 +1,692 @@
+/* ==============================================================
+   AUTHENTIFICATION (LOGIN / REGISTER) — LUXURY CARS
+   ============================================================== */
+
+.page {
+  min-height: calc(100vh - 84px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--ivory);
+  color: var(--ink);
+}
+
+/* ==============================================================
+   PANNEAU VISUEL
+   ============================================================== */
+
+.visualSection {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 52px clamp(36px, 5vw, 72px);
+  overflow: hidden;
+  color: #f7f4ed;
+  background:
+    url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=80')
+    center / cover no-repeat;
+}
+
+.visualSection::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(14, 14, 14, 0.86) 0%, rgba(20, 18, 14, 0.62) 55%, rgba(14, 14, 14, 0.78) 100%);
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.logoMark {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--champagne-3);
+  color: var(--champagne-3);
+  font-family: var(--serif);
+  font-size: 23px;
+  line-height: 1;
+}
+
+.logoText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.logoText strong {
+  color: #f7f4ed;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.logoText span {
+  color: rgba(247, 244, 237, 0.62);
+  font-size: 8px;
+  letter-spacing: 2.6px;
+}
+
+.visualContent {
+  max-width: 460px;
+}
+
+.visualLabel {
+  color: var(--champagne-3);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.8px;
+}
+
+.visualContent h1 {
+  margin-top: 22px;
+  color: #f7f4ed;
+  font-size: clamp(44px, 4.6vw, 68px);
+  letter-spacing: -2px;
+  line-height: 1.03;
+}
+
+.visualContent h1 span {
+  display: block;
+  font-style: italic;
+  color: var(--champagne-3);
+}
+
+.visualContent p {
+  max-width: 400px;
+  margin-top: 24px;
+  color: rgba(247, 244, 237, 0.72);
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.visualFooter {
+  color: rgba(247, 244, 237, 0.5);
+  font-size: 10px;
+  letter-spacing: 2.4px;
+}
+
+/* ==============================================================
+   FORMULAIRE
+   ============================================================== */
+
+.formSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 64px clamp(28px, 5vw, 80px);
+}
+
+.formContainer {
+  width: min(100%, 470px);
+}
+
+.backLink {
+  display: inline-block;
+  margin-bottom: 40px;
+  color: var(--muted);
+  font-size: 12px;
+  transition: color 0.2s ease;
+}
+
+.backLink:hover {
+  color: var(--champagne);
+}
+
+.formLabel {
+  color: var(--gold-text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.8px;
+}
+
+.formContainer h2 {
+  margin-top: 16px;
+  color: var(--ink);
+  font-size: clamp(34px, 3.6vw, 46px);
+  letter-spacing: -1.4px;
+}
+
+.formSubtitle {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.8;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 34px;
+}
+
+.nameGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.field label {
+  color: var(--gold-text);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+
+.field input {
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--ink);
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.field input::placeholder {
+  color: var(--muted-3);
+}
+
+.field input:focus {
+  outline: none;
+  border-color: var(--champagne);
+}
+
+.passwordHint {
+  color: var(--muted-text);
+  font-size: 11px;
+}
+
+.error,
+.success {
+  padding: 14px 16px;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.error {
+  border: 1px solid var(--danger-line);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+.success {
+  border: 1px solid var(--success-line);
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.submitButton {
+  min-height: 54px;
+  margin-top: 6px;
+  border: 1px solid var(--champagne);
+  background: var(--champagne);
+  color: var(--noir);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: var(--noir);
+  border-color: var(--noir);
+  color: var(--champagne-3);
+}
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.switchText {
+  margin-top: 26px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.switchText a {
+  color: var(--gold-text);
+  font-weight: 600;
+  border-bottom: 1px solid var(--champagne-line);
+  transition: color 0.2s ease;
+}
+
+.switchText a:hover {
+  color: var(--ink);
+}
+
+/* ==============================================================
+   RESPONSIVE
+   ============================================================== */
+
+@media (max-width: 960px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+
+  .visualSection {
+    min-height: 300px;
+    padding: 40px 32px;
+  }
+
+  .visualContent p {
+    display: none;
+  }
+
+  .visualContent h1 {
+    font-size: clamp(36px, 8vw, 52px);
+  }
+
+  .visualFooter {
+    display: none;
+  }
+
+  .formSection {
+    padding: 48px 24px 72px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nameGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* MAISON — Authentification ; panneau photo volontairement sombre. */
+.formSection { background: var(--ivory); }
+.formContainer { color: var(--ink); }
+.formContainer h1, .formContainer h2 { font-family: var(--serif); font-weight: 400; }
+.form input, .field input, .submitButton { border-radius: var(--radius-field); }
+.submitButton { box-shadow: 0 9px 25px -18px var(--champagne); }
+
+/* ==============================================================
+   COUTURE 2026 — AUTHENTIFICATION
+   ============================================================== */
+.visualLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  letter-spacing: .26em;
+}
+
+.visualLabel::before {
+  content: '';
+  width: 30px;
+  height: 1px;
+  background: var(--gold-rule);
+}
+
+.visualContent h1 span {
+  color: var(--champagne-3);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .visualContent h1 span {
+    background-image: linear-gradient(102deg, var(--champagne-2) 0%, var(--champagne-3) 55%, var(--champagne) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+.formLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  letter-spacing: .26em;
+}
+
+.formLabel::before {
+  content: '';
+  width: 30px;
+  height: 1px;
+  background: var(--gold-rule);
+}
+
+.field input {
+  border-radius: var(--radius-field);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.field input:focus {
+  border-color: var(--champagne);
+  box-shadow: 0 0 0 3px var(--champagne-soft);
+}
+
+.submitButton {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-button);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.submitButton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--sheen);
+  transform: translateX(-140%);
+  transition: transform .75s ease;
+}
+
+.submitButton:hover:not(:disabled)::after {
+  transform: translateX(140%);
+}
+
+.switchText a {
+  border-bottom-color: var(--gold-text);
+}
+
+.logoMark {
+  border-radius: 8px;
+}
+
+/* ==============================================================
+   ÉDITION SIGNATURE 2026 — AUTHENTIFICATION (LUXE RENFORCÉ)
+   --------------------------------------------------------------
+   Surcouche purement cosmétique : aucune structure HTML modifiée,
+   aucune logique touchée. Réutilise uniquement les jetons de la
+   maison (or, champagne, ombres, grain) et respecte les thèmes
+   clair ET sombre. Concerne « sign in » (login) et « register ».
+   ============================================================== */
+
+/* --- 1. Fond de page : halo champagne, profondeur douce --- */
+.page {
+  position: relative;
+  background:
+    radial-gradient(115% 85% at 84% 6%, var(--card-glow) 0%, transparent 56%),
+    radial-gradient(90% 70% at -5% 104%, var(--champagne-soft) 0%, transparent 60%),
+    var(--ivory);
+}
+
+/* --- 2. Panneau visuel : scrims, glint doré, cadre fin --- */
+.visualSection {
+  padding: clamp(46px, 5vw, 78px) clamp(34px, 5vw, 82px);
+  background:
+    linear-gradient(180deg, rgba(9, 9, 9, .34) 0%, rgba(9, 9, 9, .06) 42%, rgba(9, 9, 9, .62) 100%),
+    url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1400&q=80')
+    center / cover no-repeat;
+}
+
+.visualSection::before {
+  background:
+    radial-gradient(120% 82% at 24% 16%, rgba(220, 193, 139, .17) 0%, transparent 54%),
+    radial-gradient(90% 70% at 100% 100%, rgba(220, 193, 139, .10) 0%, transparent 58%),
+    linear-gradient(158deg, rgba(11, 11, 11, .90) 0%, rgba(23, 19, 12, .58) 52%, rgba(8, 8, 8, .86) 100%);
+}
+
+/* Cadre doré intérieur, purement décoratif (n'intercepte aucun clic). */
+.visualSection::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  inset: clamp(16px, 2.2vw, 28px);
+  border: 1px solid rgba(220, 193, 139, .30);
+  box-shadow:
+    inset 0 0 0 1px rgba(11, 11, 11, .35),
+    0 0 60px -20px rgba(0, 0, 0, .6);
+  pointer-events: none;
+}
+
+/* --- 3. Marque : médaillon doré --- */
+.logoMark {
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(150deg, rgba(220, 193, 139, .20) 0%, rgba(220, 193, 139, .03) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(220, 193, 139, .55),
+    0 12px 30px -18px rgba(0, 0, 0, .8);
+}
+
+.logoText strong {
+  letter-spacing: 3.4px;
+}
+
+/* --- 4. Titre visuel : or, profondeur, respiration --- */
+.visualContent h1 {
+  letter-spacing: -2.4px;
+  text-shadow: 0 26px 60px rgba(0, 0, 0, .45);
+}
+
+.visualContent p {
+  letter-spacing: .01em;
+}
+
+.visualFooter {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  letter-spacing: .28em;
+}
+
+.visualFooter::before {
+  content: '';
+  width: 34px;
+  height: 1px;
+  background: var(--gold-rule);
+}
+
+/* --- 5. Carte du formulaire : panneau gilded sur fond givré --- */
+.formSection {
+  padding: 64px clamp(24px, 4vw, 64px);
+  background: transparent;
+}
+
+.formContainer {
+  position: relative;
+  width: min(100%, 520px);
+  padding: clamp(30px, 3.6vw, 52px);
+  overflow: hidden;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-xl);
+  background: var(--panel-elevated);
+  box-shadow: var(--shadow-luxe);
+  color: var(--ink);
+  animation: authRise .7s cubic-bezier(.2, .7, .2, 1) both;
+}
+
+/* Liseré doré supérieur de la carte. */
+.formContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: var(--gold-ink-strong);
+  opacity: .92;
+}
+
+/* Filet doré sous le titre. */
+.formContainer h2::after {
+  content: '';
+  display: block;
+  width: 66px;
+  height: 1px;
+  margin-top: 20px;
+  background: var(--gold-rule-strong);
+}
+
+.backLink {
+  margin-bottom: 30px;
+  color: var(--muted-2);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.backLink:hover {
+  color: var(--gold-text);
+}
+
+/* --- 6. Champs : aspect « gravé », focus net et doré --- */
+.field input {
+  min-height: 56px;
+  padding: 0 18px;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-field);
+  background: var(--ivory-2);
+  color: var(--ink);
+  font-size: 14.5px;
+  letter-spacing: .012em;
+  transition:
+    border-color .2s ease,
+    background .2s ease,
+    box-shadow .2s ease;
+}
+
+.field input:hover {
+  border-color: var(--champagne-line);
+}
+
+.field input:focus {
+  border-color: var(--champagne);
+  background: var(--white);
+  box-shadow: 0 0 0 3px var(--champagne-soft);
+}
+
+.field input::placeholder {
+  color: var(--muted-3);
+  letter-spacing: .02em;
+}
+
+/* --- 7. Messages : liseré latéral coloré --- */
+.error,
+.success {
+  border-radius: var(--radius-field);
+  border-left-width: 3px;
+}
+
+/* --- 8. Bouton : or massif, balayage lumineux --- */
+.submitButton {
+  min-height: 56px;
+  border: 1px solid var(--champagne-2);
+  border-radius: var(--radius-button);
+  background: linear-gradient(135deg, var(--champagne-3) 0%, var(--champagne) 52%, var(--champagne-2) 100%);
+  color: var(--on-accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  box-shadow:
+    var(--button-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, .38);
+  transition:
+    transform .2s ease,
+    box-shadow .25s ease,
+    background .35s ease,
+    border-color .2s ease;
+}
+
+.submitButton:hover:not(:disabled) {
+  border-color: var(--champagne);
+  background: linear-gradient(135deg, var(--champagne-2) 0%, var(--champagne) 50%, var(--champagne-3) 100%);
+  color: var(--on-accent);
+  transform: translateY(-1px);
+  box-shadow:
+    0 20px 40px -18px rgba(83, 59, 29, .5),
+    inset 0 1px 0 rgba(255, 255, 255, .45);
+}
+
+.submitButton:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow:
+    var(--button-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, .3);
+}
+
+/* --- 9. Liens de bascule : soulignement doré animé --- */
+.switchText a {
+  padding-bottom: 2px;
+  border-bottom: 0;
+  background-image: linear-gradient(var(--gold-text), var(--gold-text));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  transition:
+    background-size .3s ease,
+    color .2s ease;
+}
+
+.switchText a:hover {
+  color: var(--ink);
+  background-size: 100% 1px;
+}
+
+/* --- 10. Apparition sobre --- */
+@keyframes authRise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.visualContent {
+  animation: authRise .8s cubic-bezier(.2, .7, .2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .formContainer,
+  .visualContent {
+    animation: none;
+  }
+}
+
+/* --- 11. Adaptations responsives et petits écrans --- */
+@media (max-width: 960px) {
+  .formContainer {
+    width: min(100%, 560px);
+    padding: clamp(28px, 6vw, 42px);
+  }
+
+  .visualSection::after {
+    inset: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .formContainer {
+    padding: 26px 20px;
+  }
+
+  .backLink {
+    margin-bottom: 22px;
+  }
+}
+
+@media (max-height: 760px) {
+  .formSection {
+    padding-top: 40px;
+    padding-bottom: 40px;
+  }
+}

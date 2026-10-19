@@ -1,3 +1,6 @@
+import { NotificationsModule } from '../notifications/notifications.module.js';
+import { PremiumModule } from '../premium/premium.module.js';
+import { AvailabilityModule } from '../availability/availability.module.js';
 
 import {
     Module,
@@ -58,6 +61,9 @@ import {
         // Permettre aux Guards de retrouver
         // l'utilisateur connecté.
         UsersModule,
+        PremiumModule,
+        AvailabilityModule,
+        NotificationsModule,
     ],
 
     controllers: [

@@ -1,0 +1,147 @@
+/* ==========================================================
+   TOASTS — notifications volantes de la maison
+   Cuivre, ivoire, encre. Compatibles clair / sombre et
+   mouvement reduit.
+   ========================================================== */
+
+.viewport {
+  position: fixed;
+  top: 92px;
+  right: 20px;
+  z-index: 2600;
+  width: min(360px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toast {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  overflow: hidden;
+  padding: 16px 18px 16px 20px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-xl);
+  background: var(--panel-elevated, var(--white));
+  box-shadow: var(--shadow-luxe);
+  pointer-events: auto;
+  animation: toast-in 0.26s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.marker {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: var(--champagne);
+  box-shadow: 0 0 0 4px var(--champagne-soft);
+}
+
+.body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.title {
+  margin: 0 0 4px;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.message {
+  margin: 0;
+  color: var(--muted-text);
+  font-family: var(--sans);
+  font-size: 13.5px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.close {
+  flex: none;
+  margin: -4px -6px 0 0;
+  padding: 0 6px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.close:hover {
+  color: var(--ink);
+}
+
+/* Filet lateral : or par defaut, vert au succes, rouge a l'erreur. */
+.toast::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--gold-rule);
+}
+
+.toast[data-tone='success'] .marker {
+  background: var(--success);
+  box-shadow: 0 0 0 4px var(--success-bg);
+}
+
+.toast[data-tone='success']::before {
+  background: var(--success);
+}
+
+.toast[data-tone='error'] {
+  border-color: var(--danger-line);
+}
+
+.toast[data-tone='error'] .marker {
+  background: var(--danger);
+  box-shadow: 0 0 0 4px var(--danger-bg);
+}
+
+.toast[data-tone='error']::before {
+  background: var(--danger);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) translateX(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .viewport {
+    top: auto;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}

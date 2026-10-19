@@ -1,0 +1,944 @@
+/* ==========================================================
+   PARCOURS DE RÉSERVATION — styles partagés
+   Conserve l'identité or / crème / blanc / noir.
+   ========================================================== */
+
+.step {
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-card);
+  background: var(--panel-elevated);
+  box-shadow: var(--shadow-soft);
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.stepHeader {
+  display: flex;
+  align-items: baseline;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+
+.stepNumber {
+  font: 700 .78rem/1 var(--sans);
+  letter-spacing: .12em;
+  color: var(--on-accent);
+  background: var(--champagne);
+  border-radius: 999px;
+  padding: .45rem .6rem;
+}
+
+.stepTitle {
+  font-family: var(--serif);
+  font-size: 1.24rem;
+  color: var(--ink);
+  margin: 0;
+}
+
+.stepHint {
+  margin: .1rem 0 0;
+  color: var(--muted-text);
+  font-size: .86rem;
+}
+
+.muted { color: var(--muted); }
+.error {
+  color: var(--danger-text);
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-line);
+  border-radius: var(--radius-field);
+  padding: .7rem .9rem;
+  margin: .75rem 0 0;
+}
+.notice {
+  color: var(--gold-text);
+  background: var(--champagne-soft);
+  border: 1px solid var(--champagne-line);
+  border-radius: var(--radius-field);
+  padding: .75rem .9rem;
+  margin: .75rem 0 0;
+  font-size: .9rem;
+}
+.loading {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* -------------------- Véhicule -------------------- */
+
+.vehicleSummary {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.vehicleMedia {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--noir);
+  border: 1px solid var(--line);
+}
+
+.vehicleImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vehiclePlaceholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--champagne);
+  font-family: var(--serif);
+  font-size: 1.4rem;
+}
+
+.vehicleBrand {
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  font: 600 .72rem/1 var(--sans);
+  color: var(--gold-text);
+}
+
+.vehicleName {
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  margin: .35rem 0 .5rem;
+}
+
+.vehicleSpecs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: .75rem 0;
+}
+
+.chip {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: .3rem .7rem;
+  font: 500 .76rem/1 var(--sans);
+  color: var(--muted-text);
+}
+
+.rateRow {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.rateRow dt {
+  font: 600 .7rem/1.2 var(--sans);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.rateRow dd {
+  margin: .25rem 0 0;
+  font-family: var(--serif);
+  font-size: 1.15rem;
+}
+
+/* -------------------- Lieux -------------------- */
+
+.locationList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: .75rem;
+}
+
+.locationCard {
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--white);
+  padding: .85rem .95rem;
+  cursor: pointer;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.locationCard:hover {
+  border-color: var(--champagne-line);
+  transform: translateY(-1px);
+}
+
+.locationCardActive {
+  border-color: var(--champagne);
+  box-shadow: 0 0 0 2px var(--champagne-soft);
+}
+
+.locationName {
+  font-weight: 600;
+  display: block;
+}
+
+.locationCategory {
+  font: 600 .64rem/1 var(--sans);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--gold-text);
+}
+
+.locationMeta {
+  display: block;
+  margin-top: .35rem;
+  color: var(--muted);
+  font-size: .82rem;
+}
+
+/* -------------------- Calendrier -------------------- */
+
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: .85rem;
+}
+
+.calendarTitle {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  text-transform: capitalize;
+}
+
+.monthNav {
+  display: flex;
+  gap: .4rem;
+}
+
+.monthButton {
+  border: 1px solid var(--line);
+  background: var(--white);
+  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.monthButton:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: .3rem;
+}
+
+.weekday {
+  text-align: center;
+  font: 600 .68rem/1 var(--sans);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-bottom: .35rem;
+}
+
+.day {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--white);
+  cursor: pointer;
+  font: 600 .85rem/1 var(--sans);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.day:hover {
+  transform: translateY(-1px);
+}
+
+.dayOutside {
+  visibility: hidden;
+}
+
+.dayAvailable {
+  background: var(--success-bg);
+  border-color: var(--success-line);
+  color: var(--success-text);
+}
+
+.dayPartial {
+  background: rgba(183, 152, 98, .18);
+  border-color: var(--champagne-line);
+  color: var(--gold-text);
+}
+
+.dayUnavailable {
+  background: var(--danger-bg);
+  border-color: var(--danger-line);
+  color: var(--danger-text);
+  cursor: not-allowed;
+}
+
+.dayPast {
+  background: rgba(120, 116, 108, .09);
+  border-color: var(--line-soft);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.dayPickup {
+  outline: 2px solid var(--champagne);
+  outline-offset: 1px;
+  font-weight: 700;
+}
+
+.dayReturn {
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+
+.dayInRange {
+  box-shadow: inset 0 -3px 0 0 var(--champagne);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+  font-size: .8rem;
+  color: var(--muted);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+  border: 1px solid var(--line);
+}
+
+.dotAvailable { background: var(--success-bg); border-color: var(--success-line); }
+.dotPartial { background: rgba(183, 152, 98, .35); border-color: var(--champagne-line); }
+.dotUnavailable { background: var(--danger-bg); border-color: var(--danger-line); }
+.dotPast { background: rgba(120, 116, 108, .12); }
+
+/* -------------------- Créneaux -------------------- */
+
+.slotBlock {
+  margin-top: 1rem;
+}
+
+.slotTitle {
+  font: 600 .72rem/1 var(--sans);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: .5rem;
+}
+
+.slotGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+
+.slot {
+  border: 1px solid var(--line);
+  background: var(--white);
+  border-radius: 8px;
+  padding: .45rem .7rem;
+  cursor: pointer;
+  font: 600 .82rem/1 var(--sans);
+  color: var(--ink);
+}
+
+.slot:hover {
+  border-color: var(--champagne-line);
+}
+
+.slotActive {
+  background: var(--noir);
+  color: var(--champagne);
+  border-color: var(--noir);
+}
+
+.summaryLine {
+  margin-top: 1rem;
+  padding: .85rem 1rem;
+  border: 1px dashed var(--champagne-line);
+  border-radius: 10px;
+  background: var(--champagne-soft);
+  font-size: .92rem;
+}
+
+/* -------------------- Conducteur -------------------- */
+
+.driverCard {
+  display: grid;
+  gap: .5rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  border-radius: 999px;
+  padding: .35rem .75rem;
+  font: 600 .78rem/1 var(--sans);
+  width: fit-content;
+}
+
+.badgeOk {
+  background: var(--success-bg);
+  border: 1px solid var(--success-line);
+  color: var(--success-text);
+}
+
+.badgeWarn {
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-line);
+  color: var(--danger-text);
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: .5rem .9rem;
+  margin-top: .75rem;
+}
+
+.detailGrid div {
+  border-bottom: 1px solid var(--line-soft);
+  padding-bottom: .35rem;
+}
+
+.detailGrid dt {
+  font: 600 .66rem/1 var(--sans);
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.detailGrid dd {
+  margin: .25rem 0 0;
+}
+
+.inlineLink {
+  color: var(--gold-text);
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+/* -------------------- Prix -------------------- */
+
+.priceTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.priceTable th,
+.priceTable td {
+  text-align: left;
+  padding: .55rem 0;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: .92rem;
+}
+
+.priceTable td:last-child,
+.priceTable th:last-child {
+  text-align: right;
+}
+
+.priceTotal td {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  border-top: 2px solid var(--line-strong);
+  border-bottom: none;
+  padding-top: .85rem;
+}
+
+.depositBox {
+  margin-top: 1rem;
+  padding: .85rem 1rem;
+  border-radius: 10px;
+  background: var(--champagne-soft);
+  border: 1px solid var(--champagne-line);
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.depositBox span {
+  font-size: .82rem;
+  color: var(--muted-text);
+}
+
+.terms {
+  margin: .85rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--muted);
+  font-size: .8rem;
+}
+
+/* -------------------- Options -------------------- */
+
+.optionList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: .6rem;
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: .6rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: .7rem .8rem;
+  background: var(--white);
+  cursor: pointer;
+}
+
+.optionActive {
+  border-color: var(--champagne);
+  box-shadow: 0 0 0 2px var(--champagne-soft);
+}
+
+.optionBody { display: grid; gap: .15rem; }
+.optionName { font-weight: 600; font-size: .9rem; }
+.optionMeta { font-size: .78rem; color: var(--muted); }
+
+/* -------------------- Confirmation -------------------- */
+
+.reviewList {
+  display: grid;
+  gap: .35rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.reviewList li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--line-soft);
+  padding: .45rem 0;
+  font-size: .9rem;
+}
+
+.reviewList span:first-child {
+  color: var(--muted);
+}
+
+.confirmButton {
+  width: 100%;
+  border: none;
+  border-radius: var(--radius-button);
+  background: var(--noir);
+  color: var(--champagne);
+  font: 600 .95rem/1 var(--sans);
+  letter-spacing: .06em;
+  padding: 1rem;
+  cursor: pointer;
+}
+
+.confirmButton:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.errorBox {
+  border: 1px solid var(--danger-line);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border-radius: 10px;
+  padding: .85rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.noticeBox {
+  border: 1px solid var(--success-line);
+  background: var(--success-bg);
+  color: var(--success-text);
+  border-radius: 10px;
+  padding: .85rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.twoCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 720px) {
+  .vehicleSummary { grid-template-columns: 1fr; }
+  .twoCols { grid-template-columns: 1fr; }
+}
+
+/* ==============================================================
+   COUTURE 2026 — PARCOURS DE RÉSERVATION
+   Étapes en galerie, filet d'or et bouton de confirmation signé.
+   ============================================================== */
+.step {
+  position: relative;
+  border-radius: var(--radius-xl);
+  border-color: var(--panel-border);
+  overflow: hidden;
+}
+
+.step::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gold-rule);
+  opacity: .8;
+}
+
+.stepNumber {
+  border-radius: 999px;
+  letter-spacing: .16em;
+}
+
+.stepTitle {
+  letter-spacing: -.02em;
+}
+
+.vehicleMedia {
+  border-radius: var(--radius-card);
+}
+
+.chip {
+  border-color: var(--champagne-line);
+}
+
+.locationCard,
+.option {
+  border-radius: var(--radius-card);
+}
+
+.day {
+  border-radius: 10px;
+}
+
+.slot {
+  border-radius: 999px;
+}
+
+.summaryLine,
+.depositBox {
+  border-radius: var(--radius-card);
+}
+
+.confirmButton {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-button);
+  letter-spacing: .1em;
+}
+
+.confirmButton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--sheen);
+  transform: translateX(-140%);
+  transition: transform .75s ease;
+}
+
+.confirmButton:hover:not(:disabled)::after {
+  transform: translateX(140%);
+}
+
+.confirmButton:hover:not(:disabled) {
+  background: var(--champagne);
+  color: var(--noir);
+}
+
+.priceTotal td {
+  letter-spacing: -.01em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confirmButton::after { transition: none !important; }
+}
+
+/* ==============================================================
+   HAUTE COUTURE 2026 — PARCOURS DE RÉSERVATION
+   Panneaux nobles et profondeur de la maison.
+   ============================================================== */
+
+.step { box-shadow: var(--shadow-soft); }
+
+.vehicleSummary,
+.summaryLine,
+.depositBox { box-shadow: var(--shadow-soft); }
+
+.locationCard,
+.option { transition: border-color .3s ease, box-shadow .3s ease; }
+
+.locationCard:hover,
+.option:hover { box-shadow: var(--shadow-soft); }
+
+/* ==============================================================
+   FENÊTRE MODALE — PERMIS DE CONDUIRE OBLIGATOIRE
+   Confirmation bloquée tant que le permis n'est pas enregistré.
+   ============================================================== */
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(12, 11, 9, .62);
+  backdrop-filter: blur(3px);
+  animation: modalFade .2s ease;
+}
+
+.modalCard {
+  width: min(100%, 460px);
+  padding: 34px 34px 30px;
+  border: 1px solid var(--champagne-line);
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(135deg, var(--champagne-soft), transparent 62%),
+    var(--white);
+  box-shadow: var(--shadow);
+  animation: modalRise .24s ease;
+}
+
+.modalEyebrow {
+  color: var(--danger-text);
+  font: 600 10px/1 var(--sans);
+  letter-spacing: 2.6px;
+  text-transform: uppercase;
+}
+
+.modalTitle {
+  margin-top: 12px;
+  color: var(--noir);
+  font: 400 clamp(22px, 3vw, 30px)/1.15 var(--serif);
+  letter-spacing: -.02em;
+}
+
+.modalMessage {
+  margin-top: 12px;
+  color: var(--muted);
+  font: 400 .95rem/1.7 var(--sans);
+}
+
+.modalActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.modalPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  padding: 0 26px;
+  border-radius: var(--radius-button);
+  background: var(--noir);
+  color: var(--champagne);
+  font: 600 .86rem/1 var(--sans);
+  letter-spacing: .08em;
+  text-decoration: none;
+  transition: background .2s ease, color .2s ease;
+}
+
+.modalPrimary:hover {
+  background: var(--champagne);
+  color: var(--noir);
+}
+
+.modalSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  padding: 0 26px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-button);
+  background: transparent;
+  color: var(--noir);
+  font: 600 .86rem/1 var(--sans);
+  letter-spacing: .08em;
+  cursor: pointer;
+  transition: border-color .2s ease;
+}
+
+.modalSecondary:hover {
+  border-color: var(--champagne);
+}
+
+@keyframes modalFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalRise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 520px) {
+  .modalActions { flex-direction: column; }
+  .modalPrimary,
+  .modalSecondary { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modalOverlay,
+  .modalCard { animation: none !important; }
+}
+
+/* ==============================================================
+   ALTERNATIVES — VÉHICULE INDISPONIBLE
+   Prochaine période réellement libre + véhicules disponibles.
+   ============================================================== */
+
+.altPanel {
+  margin-top: 1rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--danger-line);
+  border-radius: var(--radius-card);
+  background: var(--danger-bg);
+}
+
+.altTitle {
+  margin: 0 0 .35rem;
+  font: 600 .95rem/1.3 var(--sans);
+  color: var(--danger-text);
+}
+
+.altMessage {
+  margin: 0 0 .85rem;
+  font-size: .88rem;
+  color: var(--muted-text);
+}
+
+.altSubhead {
+  margin: 1rem 0 .5rem;
+  font: 600 .72rem/1 var(--sans);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.altInterval {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .8rem .9rem;
+  border: 1px solid var(--success-line);
+  border-radius: var(--radius-card);
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.altIntervalDates {
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+  font-size: .9rem;
+}
+
+.altIntervalButton {
+  border: none;
+  border-radius: var(--radius-button);
+  background: var(--noir);
+  color: var(--champagne);
+  font: 600 .82rem/1 var(--sans);
+  letter-spacing: .06em;
+  padding: .7rem 1.1rem;
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease;
+}
+
+.altIntervalButton:hover {
+  background: var(--champagne);
+  color: var(--noir);
+}
+
+.altVehicleList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: .7rem;
+}
+
+.altVehicleCard {
+  display: grid;
+  gap: .5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  padding: .6rem;
+  text-decoration: none;
+  color: var(--ink);
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.altVehicleCard:hover {
+  border-color: var(--champagne-line);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-1px);
+}
+
+.altVehicleMedia {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--noir);
+  border: 1px solid var(--line);
+}
+
+.altVehicleImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.altVehiclePlaceholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--champagne);
+  font-family: var(--serif);
+  font-size: 1rem;
+}
+
+.altVehicleName {
+  font: 600 .9rem/1.2 var(--sans);
+}
+
+.altVehicleMeta {
+  font-size: .78rem;
+  color: var(--muted);
+}

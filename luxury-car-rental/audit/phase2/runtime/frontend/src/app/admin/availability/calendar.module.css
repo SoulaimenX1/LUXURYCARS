@@ -1,0 +1,554 @@
+/* ==============================================================
+   ADMIN — DISPONIBILITÉ  ·  CONTROL CENTRE
+   Calendrier des réservations et de la maintenance des véhicules.
+   Charte joaillerie (or / ivoire / noir).
+   ============================================================== */
+
+.page {
+  min-width: 0;
+  color: var(--ink);
+}
+
+/* ==============================================================
+   EN-TÊTE
+   ============================================================== */
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 26px;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.2px;
+  transition: color 0.2s ease;
+}
+
+.back:hover {
+  color: var(--gold-text);
+}
+
+.hero {
+  padding-bottom: 30px;
+  border-bottom: 1px solid var(--line);
+}
+
+.eyebrow {
+  color: var(--gold-text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.8px;
+  text-transform: uppercase;
+}
+
+.title {
+  margin-top: 14px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(34px, 4.4vw, 56px);
+  font-weight: 400;
+  letter-spacing: -1.6px;
+  line-height: 1.05;
+}
+
+.intro {
+  max-width: 620px;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 14.5px;
+  line-height: 1.8;
+}
+
+/* ==============================================================
+   MESSAGE
+   ============================================================== */
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 22px;
+  padding: 15px 18px;
+  border: 1px solid var(--danger-line);
+  border-left: 3px solid var(--danger);
+  border-radius: var(--radius-card);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  font-size: 12.5px;
+  line-height: 1.6;
+  box-shadow: var(--shadow-soft);
+}
+
+/* ==============================================================
+   FILTRES — véhicule et mois
+   ============================================================== */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px 18px;
+  margin-top: 28px;
+  padding: 22px 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface-glass);
+  box-shadow: var(--shadow-soft);
+}
+
+.controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--gold-text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.controls select,
+.controls input,
+.controls button {
+  min-height: 44px;
+  padding: 10px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--white);
+  color: var(--ink);
+  font-size: 13px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.controls select {
+  min-width: 220px;
+  max-width: 360px;
+}
+
+.controls select:focus,
+.controls input:focus {
+  outline: none;
+  border-color: var(--champagne);
+  box-shadow: 0 0 0 3px var(--champagne-soft);
+}
+
+.controls button {
+  color: var(--gold-text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.controls button:hover {
+  border-color: var(--champagne);
+  background: var(--champagne-soft);
+}
+
+/* ==============================================================
+   LÉGENDE
+   ============================================================== */
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 26px 0 14px;
+  font-size: 12px;
+}
+
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.legend span::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+}
+
+.legend .available::before {
+  background: var(--calendar-available-bg);
+  border-color: var(--calendar-available-ink);
+}
+
+.legend .reserved::before {
+  background: var(--calendar-reserved-bg);
+  border-color: var(--calendar-reserved-ink);
+}
+
+.legend .unavailable::before {
+  background: var(--calendar-unavailable-bg);
+  border-color: var(--calendar-unavailable-ink);
+}
+
+/* ==============================================================
+   CALENDRIER — grille 7 colonnes
+   ============================================================== */
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.weekday {
+  padding: 12px;
+  color: var(--gold-text);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.day,
+.placeholder {
+  min-height: 98px;
+  padding: 12px;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--white);
+}
+
+.day {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.day:hover {
+  border-color: var(--champagne-line);
+  box-shadow: var(--shadow-soft);
+}
+
+.day strong {
+  font-size: 16px;
+}
+
+.day small {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* États du jour — couleurs définies PAR THÈME via les tokens --calendar-*.
+   Ces règles suivent volontairement les règles de base ci-dessus. */
+.available {
+  background: var(--calendar-available-bg);
+  color: var(--calendar-available-ink);
+}
+
+.reserved {
+  background: var(--calendar-reserved-bg);
+  color: var(--calendar-reserved-ink);
+}
+
+.unavailable {
+  background: var(--calendar-unavailable-bg);
+  color: var(--calendar-unavailable-ink);
+}
+
+.note {
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* ==============================================================
+   MAINTENANCE — création, modification, libération
+   ============================================================== */
+
+.panel {
+  margin-top: 34px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface-glass);
+  box-shadow: var(--shadow-soft);
+}
+
+.panelHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 18px;
+}
+
+.panelTitle {
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.4px;
+}
+
+.panelHint {
+  max-width: 520px;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px 18px;
+  margin-top: 22px;
+}
+
+.form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--gold-text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.form .wide {
+  grid-column: 1 / -1;
+}
+
+.form input,
+.form select,
+.form textarea {
+  min-height: 44px;
+  padding: 10px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--white);
+  color: var(--ink);
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.form input:focus,
+.form select:focus,
+.form textarea:focus {
+  outline: none;
+  border-color: var(--champagne);
+  box-shadow: 0 0 0 3px var(--champagne-soft);
+}
+
+.formActions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.formActions button,
+.blockActions button {
+  min-height: 42px;
+  padding: 10px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--white);
+  color: var(--gold-text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.formActions button:hover:not(:disabled),
+.blockActions button:hover:not(:disabled) {
+  border-color: var(--champagne);
+  background: var(--champagne-soft);
+}
+
+.formActions button:disabled,
+.blockActions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.formActions .secondary {
+  color: var(--muted);
+}
+
+.blockActions .danger {
+  color: var(--danger-text);
+  border-color: var(--danger-line);
+}
+
+.blockActions .danger:hover:not(:disabled) {
+  background: var(--danger-bg);
+  border-color: var(--danger);
+}
+
+.message {
+  margin-top: 18px;
+  padding: 13px 16px;
+  border: 1px solid var(--champagne-line);
+  border-radius: var(--radius-field);
+  background: var(--champagne-soft);
+  color: var(--gold-text);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.listTitle {
+  margin-top: 28px;
+  color: var(--gold-text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+.empty {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.blockList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.blockItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 18px;
+  padding: 15px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--white);
+}
+
+.blockInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.blockInfo strong {
+  color: var(--ink);
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+.blockInfo span {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.blockInfo small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.blockActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Motif de libération facultatif (historique d'audit F-05). */
+.releaseReason {
+  min-width: 190px;
+  min-height: 42px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--white);
+  color: var(--ink);
+  font-size: 12.5px;
+}
+
+.releaseReason:focus {
+  outline: none;
+  border-color: var(--champagne);
+}
+
+.releaseReason:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Détail de libération (auteur, motif) dans l'historique. */
+.historyMeta {
+  color: var(--gold-text) !important;
+}
+
+/* ==============================================================
+   RESPONSIVE
+   ============================================================== */
+
+@media (max-width: 640px) {
+  .controls {
+    padding: 18px;
+  }
+
+  .controls label,
+  .controls select,
+  .controls input {
+    width: 100%;
+  }
+
+  .controls select {
+    min-width: 0;
+    max-width: none;
+  }
+
+  .controls button {
+    flex: 1 1 auto;
+  }
+
+  /* Grille conservée sur 7 colonnes, défilement horizontal si l'écran
+     devient trop étroit : les jours restent lisibles. */
+  .calendar {
+    grid-template-columns: repeat(7, minmax(54px, 1fr));
+    padding-bottom: 6px;
+    overflow-x: auto;
+  }
+
+  .weekday {
+    padding: 8px 4px;
+    font-size: 9px;
+    letter-spacing: 0.6px;
+  }
+
+  .day,
+  .placeholder {
+    min-height: 72px;
+    padding: 7px;
+  }
+
+  .day small {
+    font-size: 9px;
+  }
+}

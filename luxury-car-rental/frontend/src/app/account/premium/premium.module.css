@@ -1,0 +1,117 @@
+.page{min-height:90vh;background:var(--ivory);color:var(--ink);padding:clamp(32px,6vw,88px) 0;}
+.container{width:min(calc(100% - 40px),1100px);margin:auto;display:grid;gap:24px;}
+.container>a{color:var(--gold-text);font-size:13px;}
+.eyebrow{letter-spacing:.19em;text-transform:uppercase;font-size:11px;color:var(--gold-text);}
+.container h1{font:400 clamp(33px,5vw,60px)/1.1 var(--serif);}
+.panel{border:1px solid var(--panel-border);background:var(--white);padding:clamp(22px,3.8vw,42px);border-radius:var(--radius-card);box-shadow:var(--shadow-soft);display:grid;gap:14px;}
+.panel h2{font:400 28px var(--serif);}
+.panel p,.panel small{color:var(--muted-text);}
+.collection{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;}
+.item{border:1px solid var(--line);padding:16px;background:var(--white-2);border-radius:var(--radius-card);display:grid;gap:10px;}
+.item img{width:100%;height:155px;object-fit:cover;border-radius:8px;}
+.item h3{font:400 22px var(--serif);}
+.item div{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+.item a,.item button{font:600 12px var(--sans);color:var(--gold-text);background:none;border:0;text-decoration:underline;cursor:pointer;}
+.form{display:grid;gap:16px;max-width:630px;}
+.form label{display:grid;gap:7px;color:var(--gold-text);font-size:13px;font-weight:600;}
+.form :is(select,input,textarea){padding:13px;color:var(--ink);background:var(--white-2);border:1px solid var(--panel-border);border-radius:var(--radius-field);font:inherit;}
+.form button{padding:14px 19px;background:var(--champagne);border:1px solid var(--champagne);color:var(--on-accent);border-radius:var(--radius-button);cursor:pointer;font-weight:650;}
+.form button:disabled{opacity:.5;cursor:not-allowed;}
+.page :is(a,button,input,select,textarea):focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px;}
+
+/* ==============================================================
+   COUTURE 2026 — COLLECTION PREMIUM
+   ============================================================== */
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:14px;
+  letter-spacing:.26em;
+}
+.eyebrow::before{
+  content:'';
+  width:30px;height:1px;
+  background:var(--gold-rule);
+}
+.container h1{letter-spacing:-.045em;}
+.panel{
+  position:relative;
+  border-radius:var(--radius-xl);
+  overflow:hidden;
+}
+.panel::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--gold-rule);
+}
+.panel h2{letter-spacing:-.03em;}
+.item{
+  border-radius:var(--radius-card);
+  transition:transform .3s ease,border-color .3s ease,box-shadow .3s ease;
+}
+.item:hover{
+  transform:translateY(-3px);
+  border-color:var(--champagne-line);
+  box-shadow:var(--shadow-soft);
+}
+.item img{border-radius:10px;}
+.item a,.item button{
+  text-decoration:none;
+  border-bottom:1px solid transparent;
+  transition:border-color .2s ease;
+}
+.item a:hover,.item button:hover{border-bottom-color:var(--gold-text);}
+.form button{
+  position:relative;
+  overflow:hidden;
+  letter-spacing:.08em;
+}
+.form button::after{
+  content:'';
+  position:absolute;inset:0;pointer-events:none;
+  background:var(--sheen);
+  transform:translateX(-140%);
+  transition:transform .75s ease;
+}
+.form button:hover:not(:disabled)::after{transform:translateX(140%);}
+@media (prefers-reduced-motion:reduce){
+  .item,.form button::after{transition:none !important;}
+}
+
+/* ==============================================================
+   AVIS — VOLET SERVICE (services optionnels souscrits)
+   ============================================================== */
+.form .reviewService{
+  display:grid;
+  gap:14px;
+  margin:0;
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-card);
+  background:var(--white-2);
+}
+.form .reviewService legend{
+  padding:0 8px;
+  color:var(--gold-text);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+}
+.reviewServices{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+.reviewServices li{
+  padding:5px 12px;
+  border:1px solid var(--champagne-line);
+  border-radius:999px;
+  background:var(--champagne-soft);
+  color:var(--ink);
+  font-size:12px;
+  letter-spacing:.02em;
+}

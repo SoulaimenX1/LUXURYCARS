@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from './reservations.module.css';
 
-import { formatAmount } from '@/lib/format';
+import { Price } from '@/components/currency-provider';
+import { useConfirm } from '@/components/confirm-dialog';
+import { useToast } from '@/components/toast';
 
 // ==========================================================
 // TYPE DE RÉSERVATION RETOURNÉ PAR NESTJS
@@ -23,6 +25,9 @@ interface Reservation {
   totalAmount: string;
   status: string;
   createdAt: string;
+  pickupLocation?:string|null;dropoffLocation?:string|null;
+  // Horodatage du pré-enregistrement en ligne (check-in) s'il a eu lieu.
+  checkinAt?: string | null;
 }
 
 interface CatalogVehicle {
@@ -74,12 +79,15 @@ function isReservation(value: unknown): value is Reservation {
 
 export default function MyReservationsPage() {
   const router = useRouter();
+  const confirm = useConfirm();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [vehicleNames, setVehicleNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [busyNumber, setBusyNumber] = useState<string | null>(null);
+
+  const toast = useToast();
 
   // Heure courante conservée dans un state.
   // Cela évite d'appeler Date.now() directement pendant le rendu.
@@ -185,13 +193,16 @@ export default function MyReservationsPage() {
   }, [loadReservations]);
 
   // ========================================================
-  // ANNULER UNE RÉSERVATION PENDING
+  // ANNULER UNE RÉSERVATION (pending ou confirmed)
   // ========================================================
 
   async function handleCancel(reservation: Reservation) {
     if (busyNumber) return;
+    const cancellableStatus =
+      reservation.status === 'pending' ||
+      reservation.status === 'confirmed';
     if (
-      reservation.status !== 'pending' ||
+      !cancellableStatus ||
       currentTime === null ||
       Date.parse(reservation.pickupAt) <=
         currentTime
@@ -200,9 +211,13 @@ export default function MyReservationsPage() {
     }
 
     // Confirmation explicite avant modification en base.
-    const confirmed = window.confirm(
-      `Cancel reservation ${reservation.reservationNumber}?`,
-    );
+    const confirmed = await confirm({
+      title: 'Cancel reservation',
+      message: `Reservation ${reservation.reservationNumber} will be cancelled. This action cannot be undone from your account.`,
+      confirmLabel: 'Yes, cancel it',
+      cancelLabel: 'Keep reservation',
+      tone: 'danger',
+    });
     if (!confirmed) return;
 
     setError('');
@@ -223,14 +238,36 @@ export default function MyReservationsPage() {
 
       // Recharger la liste réelle depuis NestJS après l'annulation.
       await loadReservations();
-      setSuccess(`Reservation ${reservation.reservationNumber} cancelled.`);
+      const message = `Reservation ${reservation.reservationNumber} cancelled.`;
+      setSuccess(message);
+      toast.success(message, 'Reservation cancelled');
     } catch (caught) {
-      setError(
-        caught instanceof Error ? caught.message : 'Unable to cancel reservation.',
-      );
+      const message =
+        caught instanceof Error ? caught.message : 'Unable to cancel reservation.';
+      setError(message);
+      toast.error(message, 'Reservation');
     } finally {
       setBusyNumber(null);
     }
+  }
+
+  // Préenregistrement numérique pour les réservations confirmées.
+  async function checkIn(reservationNumber:string){
+    setBusyNumber(reservationNumber);setError('');setSuccess('');
+    try{
+      const response=await fetch(`/api/premium/me/checkin/${encodeURIComponent(reservationNumber)}`,{
+        method:'POST',headers:{'Content-Type':'application/json'},body:'{}'
+      });
+      if(!response.ok) throw new Error(await readError(response));
+      const message=`Online check-in saved for ${reservationNumber}. Present your reservation number and licence at pickup.`;
+      setSuccess(message);
+      toast.success(message, 'Online check-in');
+    }catch(e){
+      const message=e instanceof Error?e.message:'Unable to check in';
+      setError(message);
+      toast.error(message, 'Online check-in');
+    }
+    finally{setBusyNumber(null);}
   }
 
   // ========================================================
@@ -289,8 +326,8 @@ export default function MyReservationsPage() {
           <div className={styles.empty}>
             <h2>No reservations yet</h2>
             <p>Your bookings will appear here after you make a reservation.</p>
-            <Link href="/availability" className={styles.primaryLink}>
-              Check availability →
+            <Link href="/vehicles" className={styles.primaryLink}>
+              Browse the fleet →
             </Link>
           </div>
         ) : (
@@ -298,7 +335,8 @@ export default function MyReservationsPage() {
             {reservations.map((reservation) => {
               const canCancel =
                 currentTime !== null &&
-                reservation.status === 'pending' &&
+                (reservation.status === 'pending' ||
+                  reservation.status === 'confirmed') &&
                 Date.parse(reservation.pickupAt) >
                   currentTime;
               const statusClass = reservation.status === 'pending'
@@ -327,24 +365,41 @@ export default function MyReservationsPage() {
                     </div>
                     <div><span>Pickup</span><strong>{formatDate(reservation.pickupAt)}</strong></div>
                     <div><span>Return</span><strong>{formatDate(reservation.returnAt)}</strong></div>
+                    {reservation.pickupLocation&&<div><span>Pick-up location</span><strong>{reservation.pickupLocation}</strong></div>}
+                    {reservation.dropoffLocation&&<div><span>Drop-off location</span><strong>{reservation.dropoffLocation}</strong></div>}
                     <div><span>Rental days</span><strong>{reservation.rentalDays}</strong></div>
-                    <div><span>Daily rate</span><strong>{formatAmount(reservation.dailyPrice)}</strong></div>
-                    <div><span>Rental total</span><strong>{formatAmount(reservation.totalAmount)}</strong></div>
-                    <div><span>Security deposit</span><strong>{formatAmount(reservation.depositAmount)}</strong></div>
+                    <div><span>Daily rate</span><strong><Price value={reservation.dailyPrice} /></strong></div>
+                    <div><span>Rental total</span><strong><Price value={reservation.totalAmount} /></strong></div>
+                    <div><span>Security deposit</span><strong><Price value={reservation.depositAmount} /></strong></div>
                   </div>
 
-                  {canCancel && (
-                    <button
-                      type="button"
-                      className={styles.cancelButton}
-                      disabled={busyNumber !== null}
-                      onClick={() => void handleCancel(reservation)}
-                    >
-                      {busyNumber === reservation.reservationNumber
-                        ? 'Cancelling...'
-                        : 'Cancel reservation'}
-                    </button>
-                  )}
+                  {(() => {
+                    // Réservation confirmée à venir : check-in possible
+                    // uniquement tant qu'il n'a pas déjà été effectué.
+                    const upcomingConfirmed =
+                      currentTime !== null &&
+                      reservation.status === 'confirmed' &&
+                      Date.parse(reservation.pickupAt) > currentTime;
+                    if (!upcomingConfirmed && !canCancel) return null;
+                    return (
+                      <div className={styles.actionsRow}>
+                        {upcomingConfirmed && (reservation.checkinAt
+                          ? <span className={styles.checkinDone}>Online check-in completed</span>
+                          : <button type="button" className={styles.checkinButton}
+                              disabled={busyNumber !== null}
+                              onClick={() => void checkIn(reservation.reservationNumber)}>
+                              {busyNumber === reservation.reservationNumber ? 'Saving check-in…' : 'Complete online check-in'}
+                            </button>)}
+                        {canCancel && (
+                          <button type="button" className={styles.cancelButton}
+                            disabled={busyNumber !== null}
+                            onClick={() => void handleCancel(reservation)}>
+                            {busyNumber === reservation.reservationNumber ? 'Cancelling...' : 'Cancel reservation'}
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </article>
               );
             })}

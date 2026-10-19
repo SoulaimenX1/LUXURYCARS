@@ -227,3 +227,104 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* MAISON — Sélection de la maison, vitrine premium. */
+.head h2, .body h3 { font-family: var(--serif); font-weight: 400; }
+.card { border-radius: var(--radius-card); overflow: hidden; box-shadow: var(--shadow-soft); }
+.card:hover { box-shadow: var(--shadow); }
+
+/* ==============================================================
+   COUTURE 2026 — VITRINE DE L'ACCUEIL
+   ============================================================== */
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  letter-spacing: .26em;
+}
+
+.label::before {
+  content: '';
+  width: 30px;
+  height: 1px;
+  flex-shrink: 0;
+  background: var(--gold-rule);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .head h2 em {
+    background-image: var(--gold-ink);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+.card {
+  border-radius: var(--radius-xl);
+  border-color: var(--panel-border);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  pointer-events: none;
+  background: var(--gold-rule);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .55s cubic-bezier(.2, .7, .2, 1);
+}
+
+.card {
+  position: relative;
+}
+
+.card:hover::before {
+  transform: scaleX(1);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-luxe);
+}
+
+.badge {
+  border-radius: 999px;
+}
+
+.arrow {
+  border-radius: 999px;
+}
+
+.meta {
+  border-top-color: var(--champagne-line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card::before { transition: none !important; }
+}
+
+/* ==============================================================
+   HAUTE COUTURE 2026 — VITRINE DE L'ACCUEIL
+   ============================================================== */
+
+.label::before { width: 38px; }
+
+.card:hover { box-shadow: var(--shadow-haute); }
+
+.meta { border-top-color: var(--champagne-line); }
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .head h2 em {
+    background-image: var(--gold-ink-strong);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}

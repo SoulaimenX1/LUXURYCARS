@@ -586,3 +586,172 @@ export async function PATCH(
         );
     }
 }
+
+// ==========================================================
+// DELETE /api/admin/vehicles
+// ==========================================================
+//
+// Supprime une ressource du catalogue ou un véhicule.
+//
+// Le frontend envoie :
+//
+//   DELETE /api/admin/vehicles?resource=brand&id=<uuid>
+//   DELETE /api/admin/vehicles?resource=category&id=<uuid>
+//   DELETE /api/admin/vehicles?resource=model&id=<uuid>
+//   DELETE /api/admin/vehicles?resource=vehicle&licensePlate=<plate>
+// ==========================================================
+
+export async function DELETE(
+    request: Request,
+): Promise<NextResponse> {
+    // ========================================================
+    // PROTECTION CROSS-SITE
+    // ========================================================
+
+    if (hasInvalidOrigin(request)) {
+        return NextResponse.json(
+            {
+                message: 'Invalid request origin.',
+            },
+            {
+                status: 403,
+            },
+        );
+    }
+
+    // ========================================================
+    // AUTHENTIFICATION
+    // ========================================================
+
+    const token = await getToken();
+
+    if (!token) {
+        return NextResponse.json(
+            {
+                message: 'Authentication required.',
+            },
+            {
+                status: 401,
+            },
+        );
+    }
+
+    // ========================================================
+    // LIRE LES PARAMA"TRES DE REQUA�TE
+    // ========================================================
+
+    const url = new URL(request.url);
+    const resource = url.searchParams.get('resource');
+    const id = url.searchParams.get('id');
+    const licensePlate =
+        url.searchParams.get('licensePlate');
+
+    // « force » : suppression en cascade des éléments
+    // liés (modèles et véhicules) demandée par l'admin.
+    const force = url.searchParams.get('force') === 'true';
+
+    // ========================================================
+    // DA%TERMINER L'ENDPOINT NESTJS
+    // ========================================================
+
+    let endpoint: string;
+
+    switch (resource) {
+        case 'brand':
+        case 'category':
+        case 'model':
+            if (!id || !id.trim()) {
+                return NextResponse.json(
+                    {
+                        message: 'Resource identifier is required.',
+                    },
+                    {
+                        status: 400,
+                    },
+                );
+            }
+
+            endpoint = `/vehicles/${resource === 'brand'
+                ? 'brands'
+                : resource === 'category'
+                    ? 'categories'
+                    : 'models'}/${encodeURIComponent(
+                        id.trim(),
+                    )}`;
+            break;
+
+        case 'vehicle':
+            if (!licensePlate || !licensePlate.trim()) {
+                return NextResponse.json(
+                    {
+                        message: 'License plate is required.',
+                    },
+                    {
+                        status: 400,
+                    },
+                );
+            }
+
+            endpoint = `/vehicles/by-plate/${encodeURIComponent(
+                licensePlate.trim(),
+            )}`;
+            break;
+
+        default:
+            return NextResponse.json(
+                {
+                    message: 'Unknown resource type.',
+                },
+                {
+                    status: 400,
+                },
+            );
+    }
+
+    // ========================================================
+    // MODE « FORCE » (CATALOGUE)
+    // ========================================================
+    //
+    // Transmis uniquement pour les marques, catégories
+    // et modèles : autorise la suppression en cascade
+    // des modèles et véhicules liés.
+
+    if (
+        force &&
+        (resource === 'brand' ||
+            resource === 'category' ||
+            resource === 'model')
+    ) {
+        endpoint += '?force=true';
+    }
+
+    // ========================================================
+    // ENVOYER AU BACKEND
+    // ========================================================
+
+    try {
+        const backendResponse = await fetch(
+            buildApiUrl(endpoint),
+            {
+                method: 'DELETE',
+
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+
+                cache: 'no-store',
+            },
+        );
+
+        return forwardResponse(backendResponse);
+    } catch {
+        return NextResponse.json(
+            {
+                message: 'Unable to delete vehicle resource.',
+            },
+            {
+                status: 502,
+            },
+        );
+    }
+}

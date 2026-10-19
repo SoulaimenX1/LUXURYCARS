@@ -1,0 +1,74 @@
+.page {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  align-items: center;
+  color: var(--muted);
+  font-size: .82rem;
+  margin-bottom: 1.25rem;
+}
+
+.breadcrumb a {
+  color: var(--gold-text);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.title {
+  font-family: var(--serif);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  margin: 0 0 .35rem;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin: 0 0 2rem;
+  max-width: 70ch;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.aside {
+  position: sticky;
+  top: 90px;
+}
+
+@media (max-width: 980px) {
+  .page { padding: 1.5rem .85rem 3rem; }
+  .breadcrumb { display: none; }
+}
+
+/* ==============================================================
+   COUTURE 2026 — RÉSERVATION (enveloppe)
+   ============================================================== */
+.title {
+  letter-spacing: -.035em;
+}
+
+.breadcrumb a {
+  border-bottom: 1px solid transparent;
+  transition: border-color .2s ease, color .2s ease;
+}
+
+.breadcrumb a:hover {
+  border-bottom-color: var(--gold-text);
+  text-decoration: none;
+}
+
+.subtitle {
+  color: var(--muted-text);
+}

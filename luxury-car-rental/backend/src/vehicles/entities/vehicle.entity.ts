@@ -41,6 +41,9 @@ export enum FuelType {
 // gérée séparément, à partir des dates.
 export enum VehicleStatus {
     ACTIVE = 'active',
+    // Retirée volontairement du catalogue client par l'admin,
+    // sans être supprimée de la flotte.
+    INACTIVE = 'inactive',
     MAINTENANCE = 'maintenance',
     RETIRED = 'retired',
 }
@@ -160,6 +163,17 @@ export class Vehicle {
         scale: 2,
     })
     securityDeposit!: string;
+
+    // Valeur du véhicule (valeur d'achat / de marché).
+    // Visible dans l'administration et dans le catalogue client.
+    // PostgreSQL retourne NUMERIC sous forme de chaîne.
+    @Column({
+        name: 'vehicle_value',
+        type: 'numeric',
+        precision: 12,
+        scale: 2,
+    })
+    vehicleValue!: string;
 
     // Kilométrage actuel.
     @Column({

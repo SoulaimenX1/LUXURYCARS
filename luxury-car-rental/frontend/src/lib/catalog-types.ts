@@ -19,6 +19,10 @@ export interface VehicleItem {
   powerHp: number;
   dailyPrice: string;
   securityDeposit: string;
+
+  // Valeur du véhicule (valeur d'achat / de marché).
+  vehicleValue: string;
+
   description: string | null;
   modelName: string;
   brandName: string;

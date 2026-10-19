@@ -1,0 +1,411 @@
+{
+  "info": {
+    "name": "Luxury Car Rental — Fleet Management",
+    "_postman_id": "c4e9b7a1-6d2f-4b8e-9a51-8f3c2e6d1b42",
+    "description": "Fleet administration of the collection structure: brands, categories, models and vehicles. Covers the catalogue reads (public), the admin creation endpoints, and the DELETE endpoints (added for the fleet-management forms). Deletion is protected by PostgreSQL RESTRICT constraints: a brand/category still used by a model, or a model still used by a vehicle, is refused with 409 instead of deleting data.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3001", "type": "string" },
+    { "key": "webUrl", "value": "http://localhost:3000", "type": "string" },
+    { "key": "adminEmail", "value": "admin@luxury.test", "type": "string" },
+    { "key": "adminPassword", "value": "", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "brandId", "value": "", "type": "string" },
+    { "key": "categoryId", "value": "", "type": "string" },
+    { "key": "modelId", "value": "", "type": "string" },
+    { "key": "licensePlate", "value": "ZZ-PM-001", "type": "string" },
+    { "key": "mediaId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "1. Admin login (stores accessToken)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const data = pm.response.json();",
+              "if (data && data.accessToken) { pm.collectionVariables.set('accessToken', data.accessToken); }",
+              "pm.test('status is 200/201', () => pm.response.to.be.success);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+        },
+        "description": "Public. Sign in with an ADMIN account so the collection variable accessToken is filled. Set adminEmail / adminPassword first. The token is required by every write/delete request below."
+      }
+    },
+    {
+      "name": "2. List brands (public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/vehicles/brands", "host": ["{{baseUrl}}"], "path": ["vehicles", "brands"] },
+        "description": "Public. All brands, alphabetical."
+      }
+    },
+    {
+      "name": "3. List categories (public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/vehicles/categories", "host": ["{{baseUrl}}"], "path": ["vehicles", "categories"] },
+        "description": "Public. All categories, alphabetical."
+      }
+    },
+    {
+      "name": "4. List models (public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/vehicles/models", "host": ["{{baseUrl}}"], "path": ["vehicles", "models"] },
+        "description": "Public. All models, alphabetical. Each carries brandId and categoryId."
+      }
+    },
+    {
+      "name": "5. Admin — list vehicles",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": { "raw": "{{baseUrl}}/vehicles", "host": ["{{baseUrl}}"], "path": ["vehicles"] },
+        "description": "Bearer (admin). Internal fleet rows with their model relation. 401 without a token, 403 for a non-admin."
+      }
+    },
+    {
+      "name": "6. Admin — create brand (stores brandId)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const data = pm.response.json();",
+              "if (data && data.id) { pm.collectionVariables.set('brandId', data.id); }",
+              "pm.test('status is 201', () => pm.response.code === 201);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": { "raw": "{{baseUrl}}/vehicles/brands", "host": ["{{baseUrl}}"], "path": ["vehicles", "brands"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman Brand\"\n}"
+        },
+        "description": "Bearer (admin). Creates a brand. 409 if the name already exists. The returned id is stored in brandId so it can be deleted by request 10."
+      }
+    },
+    {
+      "name": "7. Admin — create category (stores categoryId)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const data = pm.response.json();",
+              "if (data && data.id) { pm.collectionVariables.set('categoryId', data.id); }",
+              "pm.test('status is 201', () => pm.response.code === 201);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": { "raw": "{{baseUrl}}/vehicles/categories", "host": ["{{baseUrl}}"], "path": ["vehicles", "categories"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman Category\",\n  \"description\": \"Created from Postman\"\n}"
+        },
+        "description": "Bearer (admin). Creates a category. 409 if the name already exists. The returned id is stored in categoryId so it can be deleted by request 11."
+      }
+    },
+    {
+      "name": "8. Admin — create model (stores modelId)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const data = pm.response.json();",
+              "if (data && data.id) { pm.collectionVariables.set('modelId', data.id); }",
+              "pm.test('status is 201', () => pm.response.code === 201);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": { "raw": "{{baseUrl}}/vehicles/models", "host": ["{{baseUrl}}"], "path": ["vehicles", "models"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"brandName\": \"Postman Brand\",\n  \"categoryName\": \"Postman Category\",\n  \"name\": \"Postman Model\"\n}"
+        },
+        "description": "Bearer (admin). Creates a model from an existing brand name + category name. Requires requests 6 and 7 to have been run first. The returned id is stored in modelId so it can be deleted by request 12."
+      }
+    },
+    {
+      "name": "9. Admin — create vehicle",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": { "raw": "{{baseUrl}}/vehicles", "host": ["{{baseUrl}}"], "path": ["vehicles"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"brandName\": \"Ferrari\",\n  \"modelName\": \"SF90 Stradale\",\n  \"manufactureYear\": 2025,\n  \"licensePlate\": \"{{licensePlate}}\",\n  \"vin\": \"ZZPOSTMAN12345678\",\n  \"transmission\": \"automatic\",\n  \"fuelType\": \"petrol\",\n  \"seats\": 2,\n  \"dailyPrice\": 100,\n  \"securityDeposit\": 500,\n  \"vehicleValue\": 1000,\n  \"mileageKm\": 1\n}"
+        },
+        "description": "Bearer (admin). Creates a vehicle attached to an existing brand/model. The VIN is 17 chars from [A-HJ-NPR-Z0-9]. Can be removed again with request 13."
+      }
+    },
+    {
+      "name": "10. Admin — DELETE brand",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200 deleted, or 409 if still used by a model', () => [200, 409].includes(pm.response.code));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": { "raw": "{{baseUrl}}/vehicles/brands/{{brandId}}", "host": ["{{baseUrl}}"], "path": ["vehicles", "brands", "{{brandId}}"] },
+        "description": "Bearer (admin). Removes a brand. 400 if the id is not a UUID, 404 if unknown, 409 if any model still uses it (RESTRICT). Add ?force=true (request 16) to delete the brand together with its models and vehicles; vehicles that hold reservations or reviews still block the delete."
+      }
+    },
+    {
+      "name": "11. Admin — DELETE category",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200 deleted, or 409 if still used by a model', () => [200, 409].includes(pm.response.code));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": { "raw": "{{baseUrl}}/vehicles/categories/{{categoryId}}", "host": ["{{baseUrl}}"], "path": ["vehicles", "categories", "{{categoryId}}"] },
+        "description": "Bearer (admin). Removes a category. 409 if any model still uses it (RESTRICT). Add ?force=true (request 17) to cascade."
+      }
+    },
+    {
+      "name": "12. Admin — DELETE model",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200 deleted, or 409 if still used by a vehicle', () => [200, 409].includes(pm.response.code));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": { "raw": "{{baseUrl}}/vehicles/models/{{modelId}}", "host": ["{{baseUrl}}"], "path": ["vehicles", "models", "{{modelId}}"] },
+        "description": "Bearer (admin). Removes a model. 409 if any vehicle still uses it (RESTRICT). Add ?force=true (request 18) to delete the model together with its vehicles; vehicles that hold reservations or reviews still block the delete."
+      }
+    },
+    {
+      "name": "13. Admin — DELETE vehicle",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200 deleted, 404 unknown, or 409 if it has reservations/reviews', () => [200, 404, 409].includes(pm.response.code));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": { "raw": "{{baseUrl}}/vehicles/by-plate/{{licensePlate}}", "host": ["{{baseUrl}}"], "path": ["vehicles", "by-plate", "{{licensePlate}}"] },
+        "description": "Bearer (admin). Removes a vehicle by plate. Media, favourites, notifications and unavailability rows are removed by CASCADE. 409 if the vehicle is referenced by a reservation or a customer review (history is preserved)."
+      }
+    },
+    {
+      "name": "14. Via the web proxy — DELETE brand (cookie session)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{webUrl}}/api/admin/vehicles?resource=brand&id={{brandId}}",
+          "host": ["{{webUrl}}"],
+          "path": ["api", "admin", "vehicles"],
+          "query": [
+            { "key": "resource", "value": "brand" },
+            { "key": "id", "value": "{{brandId}}" }
+          ]
+        },
+        "description": "The browser-facing route used by the admin forms. The JWT stays in the HttpOnly access_token cookie; Next.js forwards it to NestJS. resource=brand|category|model uses id; resource=vehicle uses licensePlate."
+      }
+    },
+    {
+      "name": "15. Via the web proxy — DELETE vehicle (cookie session)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{webUrl}}/api/admin/vehicles?resource=vehicle&licensePlate={{licensePlate}}",
+          "host": ["{{webUrl}}"],
+          "path": ["api", "admin", "vehicles"],
+          "query": [
+            { "key": "resource", "value": "vehicle" },
+            { "key": "licensePlate", "value": "{{licensePlate}}" }
+          ]
+        },
+        "description": "Cookie-session variant of the vehicle delete used by the fleet page. Requires an authenticated admin session cookie instead of the Authorization header."
+      }
+    },
+    {
+      "name": "16. Admin — DELETE brand (forced cascade)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200 deleted, or 409 if a linked vehicle has reservations/reviews', () => [200, 409].includes(pm.response.code));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/vehicles/brands/{{brandId}}?force=true",
+          "host": ["{{baseUrl}}"],
+          "path": ["vehicles", "brands", "{{brandId}}"],
+          "query": [{ "key": "force", "value": "true" }]
+        },
+        "description": "Bearer (admin). Forced cascade delete: removes the brand AND every model and vehicle linked to it, in a single transaction. The delete is refused with 409 (and nothing is removed) if any linked vehicle holds a reservation or a review, so rental history is never destroyed. Same pattern for categories (?force=true) and models (?force=true)."
+      }
+    },
+    {
+      "name": "17. Admin — DELETE category (forced cascade)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200 deleted, or 409 if a linked vehicle has reservations/reviews', () => [200, 409].includes(pm.response.code));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/vehicles/categories/{{categoryId}}?force=true",
+          "host": ["{{baseUrl}}"],
+          "path": ["vehicles", "categories", "{{categoryId}}"],
+          "query": [{ "key": "force", "value": "true" }]
+        },
+        "description": "Bearer (admin). Forced cascade delete of a category together with its models and vehicles. 409 if a linked vehicle holds a reservation or a review."
+      }
+    },
+    {
+      "name": "18. Admin — DELETE model (forced cascade)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200 deleted, or 409 if a linked vehicle has reservations/reviews', () => [200, 409].includes(pm.response.code));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/vehicles/models/{{modelId}}?force=true",
+          "host": ["{{baseUrl}}"],
+          "path": ["vehicles", "models", "{{modelId}}"],
+          "query": [{ "key": "force", "value": "true" }]
+        },
+        "description": "Bearer (admin). Forced cascade delete of a model together with its vehicles. 409 if a linked vehicle holds a reservation or a review."
+      }
+    },
+    {
+      "name": "19. Via the web proxy — DELETE brand (forced cascade)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{webUrl}}/api/admin/vehicles?resource=brand&id={{brandId}}&force=true",
+          "host": ["{{webUrl}}"],
+          "path": ["api", "admin", "vehicles"],
+          "query": [
+            { "key": "resource", "value": "brand" },
+            { "key": "id", "value": "{{brandId}}" },
+            { "key": "force", "value": "true" }
+          ]
+        },
+        "description": "Cookie-session variant used by the admin catalogue panel. force=true is forwarded to NestJS as ?force=true for resource=brand|category|model (ignored for resource=vehicle)."
+      }
+    },
+    {
+      "name": "20. Admin — delete ONE vehicle media (photo/video) by id",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/vehicles/media/{{mediaId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["vehicles", "media", "{{mediaId}}"]
+        },
+        "description": "Bearer (admin). Deletes ONE media row (photo or video) from vehicle_images by its id, removes the file from disk, and — if the deleted row was the primary photo — promotes the oldest remaining photo to primary so the catalogue keeps a visual. Returns { deleted, id, vehicleId, mediaType }. 404 if the id does not exist, 400 if the id is not a UUID. Set {{mediaId}} from a vehicle's images[] returned by GET /vehicles."
+      }
+    },
+    {
+      "name": "21. Via the web proxy — delete ONE vehicle media (photo/video) by id",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{webUrl}}/api/admin/media/{{mediaId}}",
+          "host": ["{{webUrl}}"],
+          "path": ["api", "admin", "media", "{{mediaId}}"]
+        },
+        "description": "Cookie-session variant used by the admin Media studio (/admin/media) bin icon. Forwards to NestJS DELETE /vehicles/media/:mediaId using the HttpOnly access_token cookie. 401 without a session, 403 on cross-origin, 400 on a non-UUID id. Returns { deleted, id, vehicleId, mediaType }."
+      }
+    }
+  ]
+}

@@ -1,7 +1,9 @@
 
 import {
+    IsNotEmpty,
     IsString,
     Length,
+    Matches,
     MaxLength,
     ValidateIf,
 } from 'class-validator';
@@ -29,16 +31,17 @@ export class UpdateProfileDto {
     )
     lastName?: string;
 
-    @ValidateIf(
-        (_, value) =>
-            value !== undefined && value !== null,
-    )
     @IsString()
+    @IsNotEmpty()
     @MaxLength(30)
+    @Matches(/^\+?[0-9 ().-]{6,30}$/, {
+        message:
+            'phone must be a valid phone number (digits, spaces, +, -, parentheses).',
+    })
     @Transform(({ value }) =>
         typeof value === 'string'
             ? value.trim()
             : value,
     )
-    phone?: string | null;
+    phone!: string;
 }

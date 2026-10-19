@@ -1,3 +1,8 @@
+import { FinanceModule } from './finance/finance.module.js';
+import { ReturnsModule } from './returns/returns.module.js';
+import { PremiumModule } from './premium/premium.module.js';
+import { AdminCustomersModule } from './admin-customers/admin-customers.module.js';
+import { RentalsModule } from './rentals/rentals.module.js';
 
 import {
   Module,
@@ -79,6 +84,36 @@ import {
   ReservationsModule,
 } from './reservations/reservations.module.js';
 
+// Lieux de prise en charge réels (points de service).
+import {
+  LocationsModule,
+} from './locations/locations.module.js';
+
+// Zones de service et tarification de livraison (porte-à-porte).
+import {
+  ZonesModule,
+} from './zones/zones.module.js';
+
+// Devis de livraison persistés (validité limitée, revalidés au booking).
+import {
+  DeliveryModule,
+} from './delivery/delivery.module.js';
+
+// Registre de localisation physique des véhicules (journal admin).
+import {
+  VehicleMovementsModule,
+} from './vehicle-movements/vehicle-movements.module.js';
+
+// Missions de transport (logistique de livraison/collecte et chauffeurs).
+import {
+  TransportMissionsModule,
+} from './transport-missions/transport-missions.module.js';
+
+// Disponibilité réelle par véhicule et par lieu.
+import {
+  AvailabilityModule,
+} from './availability/availability.module.js';
+
 // Nouveau module du tableau de bord.
 import {
   DashboardModule,
@@ -136,6 +171,24 @@ import {
     CustomerProfilesModule,
 
     ReservationsModule,
+
+    // Lieux de prise en charge réels et disponibilité dynamique.
+    LocationsModule,
+    AvailabilityModule,
+
+    // Zones de service, règles de tarification et devis persistés.
+    ZonesModule,
+    DeliveryModule,
+    VehicleMovementsModule,
+    TransportMissionsModule,
+
+    // Démarrage et suivi des locations (Thesis 2).
+    RentalsModule,
+    PremiumModule,
+    ReturnsModule,
+    FinanceModule,
+
+    AdminCustomersModule,
 
     // Activer les routes du tableau de bord.
     DashboardModule,

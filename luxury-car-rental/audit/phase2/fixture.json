@@ -1,0 +1,15 @@
+{
+  "database": "luxuar_browser_audit_20261019",
+  "frontendPort": 3200,
+  "backendPort": 3201,
+  "vehicles": [
+    "08d1bae5-9aa2-457a-a1d8-f87a7fb721fb",
+    "d97298d6-29f2-436d-910e-5769589bb126",
+    "d8bbfe1f-6823-4d3e-8c97-44eb21af25a9"
+  ],
+  "location": "c082cc87-c69b-4d03-aa53-46dc5b143cb5",
+  "admin": "audit.admin@example.test",
+  "staff": "audit.staff@example.test",
+  "password": "AuditOnly!2026Car",
+  "originalRecordsCopied": false
+}

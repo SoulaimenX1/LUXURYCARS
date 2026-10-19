@@ -11,6 +11,7 @@ import {
     useRouter,
 } from 'next/navigation';
 
+import { useToast } from '@/components/toast';
 import styles from '../auth.module.css';
 
 // ==========================================================
@@ -39,6 +40,8 @@ interface LoginResponse {
 export default function LoginPage() {
     const router =
         useRouter();
+
+    const toast = useToast();
 
     // --------------------------------------------------------
     // CHAMPS DU FORMULAIRE
@@ -139,10 +142,11 @@ export default function LoginPage() {
                         )
                         : data.message;
 
-                setError(
-                    message ??
-                    'Unable to sign in.',
-                );
+                const failure =
+                    message ?? 'Unable to sign in.';
+
+                setError(failure);
+                toast.error(failure, 'Sign in');
 
                 return;
             }
@@ -181,16 +185,20 @@ export default function LoginPage() {
             // et on laisse l'utilisateur sur la page.
             // ----------------------------------------------------
 
-            setError('This account role is not supported.');
+            const failure =
+                'This account role is not supported.';
+            setError(failure);
+            toast.error(failure, 'Sign in');
             return;
         } catch {
             // ----------------------------------------------------
             // ERREUR RÉSEAU OU SERVEUR
             // ----------------------------------------------------
 
-            setError(
-                'The authentication service is currently unavailable.',
-            );
+            const failure =
+                'The authentication service is currently unavailable.';
+            setError(failure);
+            toast.error(failure, 'Sign in');
         } finally {
             // Désactiver l'état de chargement.
             setLoading(
@@ -264,7 +272,7 @@ export default function LoginPage() {
                     <h1>
                         Welcome
                         <span>
-                            back.
+                            back
                         </span>
                     </h1>
 

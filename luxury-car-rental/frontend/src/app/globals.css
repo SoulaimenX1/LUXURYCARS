@@ -1,87 +1,91 @@
 @import "tailwindcss";
 
-/* ==============================================================
-   LUXURY CARS — DESIGN SYSTEM
-   Thème : IVOIRE / CHAMPAGNE
-   Base commune à tout le site (public, compte, admin).
-   ============================================================== */
-
+/* ==================================================================
+   LUXURY CARS  |  MAISON EDITION 2026
+   Deux palettes coordonnées : Porcelaine / Champagne et Onyx / Or.
+   Les anciens noms de variables restent compatibles avec les pages.
+   ================================================================== */
 :root {
-  /* ============================================================
-     LUXURY CARS — DESIGN SYSTEM « IVOIRE & OR »
-     Esthétique Patek Philippe / maison de haute joaillerie :
-     ivoire chaud, blanc nacré, or champagne, hairline fines.
-     ============================================================ */
+  color-scheme: light;
+  --sans: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --serif: "Iowan Old Style", "Baskerville", "Palatino Linotype", Georgia, serif;
+  --container: 1280px;
 
-  /* Fonds — Ivoire chaud & blanc nacré */
-  --noir: #191512;
-  --noir-2: #100d0a;
-  --ivory: #f7f3ea;
-  --ivory-2: #f1ecdf;
-  --ivory-3: #eae4d5;
-  --white: #ffffff;
+  --noir: #10100f;
+  --noir-2: #090a0a;
+  --ivory: #f7f5ef;
+  --ivory-2: #f1eee5;
+  --ivory-3: #eae5da;
+  --white: #fffefa;
   --white-2: #fbf8f1;
+  --ink: #24221f;
+  --ink-2: #414039;
+  --ink-3: #615d54;
+  --muted: #6d675c;
+  --muted-2: #756d60;
+  --muted-3: #8b8271;
+  --muted-text: #625e54;
+  --gold-text: #765722;
 
-  /* Encres — brun-noir chaud */
-  --ink: #1e1a14;
-  --ink-2: #43392c;
-  --ink-3: #6b6254;
-  --muted: #756c5b;
-  --muted-2: #8a8171;
-  --muted-3: #9c9486;
+  --champagne: #b79862;
+  --champagne-2: #9b783e;
+  --champagne-3: #dcc18b;
+  --champagne-soft: rgba(159, 116, 54, .1);
+  --champagne-line: rgba(156, 119, 63, .43);
+  --on-accent: #181611;
+  --line: rgba(99, 80, 49, .22);
+  --line-soft: rgba(99, 80, 49, .12);
+  --line-strong: rgba(99, 80, 49, .38);
 
-  /* Textes — variantes conformes AA (>= 4.5:1) sur fonds ivoire.
-     Réservées au contenu textuel : l'ornement et les hairlines
-     gardent l'or champagne clair (--champagne). */
-  --gold-text: #805f2b;
-  --muted-text: #6a6153;
-  --danger-text: #9e422e;
-  --success-text: #3d6649;
+  --danger: #a84e48;
+  --danger-text: #92382e;
+  --danger-bg: rgba(168, 78, 72, .085);
+  --danger-line: rgba(168, 78, 72, .3);
+  --success: #426d59;
+  --success-text: #37634d;
+  --success-bg: rgba(66, 109, 89, .09);
+  --success-line: rgba(66, 109, 89, .3);
 
-  /* Lignes — Hairlines or champagne */
-  --line: rgba(148, 118, 62, 0.24);
-  --line-soft: rgba(148, 118, 62, 0.12);
-  --line-strong: rgba(148, 118, 62, 0.4);
+  --surface-glass: rgba(255, 254, 250, .84);
+  --header-bg: rgba(250, 248, 243, .91);
+  --header-bg-soft: rgba(250, 248, 243, .95);
+  --ivory-rgb: 247, 245, 239;
+  --surface-highlight: rgba(255,255,255,.78);
+  --card-glow: rgba(173, 131, 67, .09);
+  --shadow: 0 34px 80px -44px rgba(48, 39, 26, .30);
+  --shadow-soft: 0 18px 45px -26px rgba(48, 39, 26, .24);
+  --radius-card: 14px;
+  --radius-field: 8px;
+  --radius-button: 8px;
+  --focus-ring: #8b6734;
+  --panel-elevated: #fffefa;
+  --panel-border: rgba(115, 88, 48, .26);
+  --panel-backdrop: rgba(247, 245, 239, .88);
+  --button-shadow: 0 12px 26px -19px rgba(83, 59, 29, .35);
 
-  /* Accent — Or champagne */
-  --champagne: #b18d4e;
-  --champagne-2: #9e7c3f;
-  --champagne-3: #d3ba85;
-  --champagne-soft: rgba(177, 141, 78, 0.12);
-  --champagne-line: rgba(177, 141, 78, 0.5);
+  /* COUTURE 2026 — matières de la maison (site client). */
+  --radius-xl: 18px;
+  --gold-rule: linear-gradient(90deg, transparent 0%, var(--champagne-line) 16%, var(--champagne) 50%, var(--champagne-line) 84%, transparent 100%);
+  --gold-ink: linear-gradient(102deg, var(--champagne-2) 0%, var(--gold-text) 48%, var(--champagne) 100%);
+  --shadow-luxe: 0 42px 96px -46px rgba(48, 39, 26, .40), 0 14px 34px -24px rgba(48, 39, 26, .26);
+  --sheen: linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, .5) 50%, transparent 68%);
 
-  /* Surfaces translucides (verre) — pilotées par le thème.
-     Elles permettent au mode sombre de rester cohérent
-     sans toucher aux feuilles de style des pages. */
-  --surface-glass: rgba(255, 255, 255, 0.6);
-  --header-bg: rgba(248, 244, 235, 0.86);
-  --header-bg-soft: rgba(248, 244, 235, 0.9);
+  /* HAUTE COUTURE 2026 — matières nobles (or, grain, profondeur). */
+  --gold-ink-strong: linear-gradient(100deg, #8a6524 0%, #d9bd7e 32%, #f6ecc9 50%, #c9a65f 68%, #7c5a1e 100%);
+  --gold-rule-strong: linear-gradient(90deg, transparent 0%, var(--champagne-line) 14%, var(--champagne-3) 50%, var(--champagne-line) 86%, transparent 100%);
+  --shadow-haute: 0 64px 132px -62px rgba(40, 31, 18, .52), 0 26px 60px -40px rgba(40, 31, 18, .34);
+  --radius-pill: 999px;
+  --section-space: clamp(92px, 10vw, 150px);
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
 
-  /* Composante RGB de l'ivoire : permet aux dégradés de
-     suivre automatiquement le thème clair / sombre. */
-  --ivory-rgb: 247, 243, 234;
+  --calendar-available-bg: #e3efe6;
+  --calendar-available-ink: #315a40;
+  --calendar-reserved-bg: #f4e8cd;
+  --calendar-reserved-ink: #73501e;
+  --calendar-unavailable-bg: #f2dfdf;
+  --calendar-unavailable-ink: #873e40;
 
-  /* États */
-  --danger: #b3543c;
-  --danger-bg: rgba(179, 84, 60, 0.09);
-  --danger-line: rgba(179, 84, 60, 0.3);
-  --success: #4e7d5c;
-  --success-bg: rgba(78, 125, 92, 0.1);
-  --success-line: rgba(78, 125, 92, 0.3);
-
-  /* Typo — une seule famille sans-serif, normale et claire,
-     utilisée pour tout le site (titres et texte courant).
-     --serif pointe volontairement sur la même famille afin que
-     plus aucun titre ne s'affiche dans une police décorative. */
-  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, Helvetica, sans-serif;
-  --serif: var(--sans);
-
-  /* Mise en page */
-  --container: 1240px;
-  --shadow: 0 44px 90px -42px rgba(43, 34, 18, 0.35);
-  --shadow-soft: 0 26px 56px -30px rgba(43, 34, 18, 0.28);
-
-  /* Rétro-compatibilité (ancien thème sombre) */
+  /* Aliases historiques : compatibilité complète avec le CSS. */
   --background: var(--ivory);
   --surface: var(--white);
   --surface-soft: var(--ivory-3);
@@ -92,184 +96,282 @@
   --accent-light: var(--champagne-2);
 }
 
-/* ==============================================================
-   MODE SOMBRE — LUXURY CARS
-   Activé par data-theme="dark" sur <html>.
-   Le noir profond et l'or champagne remplacent l'ivoire,
-   sans toucher aux panneaux déjà sombres (--noir).
-   ============================================================== */
-
-[data-theme='dark'] {
+html[data-theme="dark"] {
   color-scheme: dark;
-
-  /* Fonds — noir chaud & brun profond */
-  --ivory: #13100c;
-  --ivory-2: #1a1610;
-  --ivory-3: #221d15;
-  --white: #1b1712;
-  --white-2: #201b14;
-
-  /* Encres — ivoire clair */
-  --ink: #f4efe4;
-  --ink-2: #dcd4c4;
-  --ink-3: #b3a992;
-  --muted: #a79d88;
-  --muted-2: #948a76;
-  --muted-3: #837a68;
-
-  /* Textes */
-  --gold-text: #d6b878;
-  --muted-text: #a79d88;
-  --danger-text: #e0a08e;
-  --success-text: #8fc39c;
-
-  /* Lignes */
-  --line: rgba(211, 186, 133, 0.22);
-  --line-soft: rgba(211, 186, 133, 0.12);
-  --line-strong: rgba(211, 186, 133, 0.4);
-
-  /* Accent — or champagne éclairci */
-  --champagne: #c9a96b;
-  --champagne-2: #d3ba85;
-  --champagne-3: #e6d3a6;
-  --champagne-soft: rgba(201, 169, 107, 0.16);
-  --champagne-line: rgba(201, 169, 107, 0.5);
-
-  /* États */
-  --danger: #d98a72;
-  --danger-bg: rgba(217, 138, 114, 0.14);
-  --danger-line: rgba(217, 138, 114, 0.34);
-  --success: #7fb28d;
-  --success-bg: rgba(127, 178, 141, 0.14);
-  --success-line: rgba(127, 178, 141, 0.34);
-
-  /* Surfaces translucides */
-  --surface-glass: rgba(255, 255, 255, 0.05);
-  --header-bg: rgba(19, 16, 12, 0.85);
-  --header-bg-soft: rgba(19, 16, 12, 0.9);
-  --ivory-rgb: 19, 16, 12;
+  --noir: #08090b;
+  --noir-2: #050608;
+  --ivory: #101216;
+  --ivory-2: #15181c;
+  --ivory-3: #202329;
+  --white: #1a1d22;
+  --white-2: #21242a;
+  --ink: #f5f0e5;
+  --ink-2: #e5dece;
+  --ink-3: #c4bcad;
+  --muted: #b8afa0;
+  --muted-2: #aea595;
+  --muted-3: #978e80;
+  --muted-text: #c5baaa;
+  --gold-text: #e0c18d;
+  --champagne: #d5b477;
+  --champagne-2: #e0c18d;
+  --champagne-3: #f0d8aa;
+  --champagne-soft: rgba(213, 180, 119, .12);
+  --champagne-line: rgba(213, 180, 119, .44);
+  --on-accent: #101115;
+  --line: rgba(222, 199, 158, .24);
+  --line-soft: rgba(222, 199, 158, .13);
+  --line-strong: rgba(222, 199, 158, .44);
+  --danger: #df958d;
+  --danger-text: #f0b7aa;
+  --danger-bg: rgba(223, 149, 141, .13);
+  --danger-line: rgba(223, 149, 141, .4);
+  --success: #95c1a4;
+  --success-text: #a4d3b2;
+  --success-bg: rgba(149, 193, 164, .13);
+  --success-line: rgba(149, 193, 164, .38);
+  --surface-glass: rgba(26, 29, 34, .87);
+  --header-bg: rgba(14, 16, 20, .92);
+  --header-bg-soft: rgba(14, 16, 20, .95);
+  --ivory-rgb: 16, 18, 22;
+  --surface-highlight: rgba(255,255,255,.045);
+  --card-glow: rgba(213, 180, 119, .12);
+  --shadow: 0 35px 90px -38px rgba(0, 0, 0, .77);
+  --shadow-soft: 0 18px 45px -20px rgba(0,0,0,.64);
+  --focus-ring: #e3c48a;
+  --panel-elevated: #23262b;
+  --panel-border: rgba(220, 190, 137, .29);
+  --panel-backdrop: rgba(16, 18, 22, .92);
+  --button-shadow: 0 13px 31px -16px rgba(0,0,0,.78);
+  --shadow-luxe: 0 44px 100px -44px rgba(0, 0, 0, .82), 0 16px 38px -22px rgba(0, 0, 0, .58);
+  --sheen: linear-gradient(115deg, transparent 34%, rgba(240, 216, 170, .22) 50%, transparent 66%);
+  --gold-ink-strong: linear-gradient(100deg, #b98f3f 0%, #ecd9a6 34%, #fbf3d6 50%, #e0c18d 66%, #9c7834 100%);
+  --gold-rule-strong: linear-gradient(90deg, transparent 0%, var(--champagne-line) 14%, var(--champagne-3) 50%, var(--champagne-line) 86%, transparent 100%);
+  --shadow-haute: 0 66px 140px -58px rgba(0, 0, 0, .86), 0 28px 64px -34px rgba(0, 0, 0, .62);
+  --calendar-available-bg: #193328;
+  --calendar-available-ink: #b0ddbd;
+  --calendar-reserved-bg: #3b3021;
+  --calendar-reserved-ink: #f0d19b;
+  --calendar-unavailable-bg: #3c2729;
+  --calendar-unavailable-ink: #edb6ad;
 }
 
-/* Transition douce lors du basculement clair / sombre. */
-html {
-  background-color: var(--ivory);
-}
-
-body {
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; padding: 0; }
+html { background: var(--ivory); scroll-behavior: smooth; }
 body {
   min-height: 100vh;
   background:
-    radial-gradient(1100px 560px at 85% -10%, rgba(201, 169, 107, 0.07), transparent 60%),
-    radial-gradient(900px 500px at -10% 30%, rgba(201, 169, 107, 0.04), transparent 55%),
+    radial-gradient(ellipse 1100px 700px at 88% -15%, var(--champagne-soft), transparent 66%),
+    radial-gradient(ellipse 800px 540px at -15% 42%, var(--card-glow), transparent 75%),
     var(--ivory);
   color: var(--ink);
   font-family: var(--sans);
   font-size: 15px;
-  line-height: 1.6;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  transition: background-color .3s ease, color .3s ease;
 }
-
-h1,
-h2,
-h3,
-h4 {
-  font-family: var(--sans);
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
+h1, h2, h3, h4 {
+  font-family: var(--serif);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: -.035em;
+  text-wrap: balance;
+  font-optical-sizing: auto;
 }
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-button,
-input,
-textarea,
-select {
-  font: inherit;
-  color: inherit;
-}
-
-img,
-svg {
-  display: block;
-  max-width: 100%;
-}
-
-::selection {
-  background: var(--champagne);
-  color: var(--noir);
-}
-
-a:focus-visible,
-button:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible,
-summary:focus-visible {
-  outline: 2px solid var(--champagne);
+a { color: inherit; text-decoration: none; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+img, svg, video { display: block; max-width: 100%; }
+::selection { background: var(--champagne); color: var(--on-accent); }
+:where(a, button, input, textarea, select, summary):focus-visible {
+  outline: 2px solid var(--champagne-2);
   outline-offset: 3px;
 }
-
-.container {
-  width: min(calc(100% - 64px), var(--container));
-  margin: 0 auto;
-}
-
+:where(input, select, textarea) { color-scheme: inherit; }
+:where(input, textarea)::placeholder { color: var(--muted-2); opacity: 1; }
+.container { width: min(calc(100% - 64px), var(--container)); margin-inline: auto; }
+* { scrollbar-width: thin; scrollbar-color: var(--champagne-line) transparent; }
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-thumb { background: var(--champagne-line); border: 2px solid var(--ivory); border-radius: 20px; }
+*::-webkit-scrollbar-track { background: transparent; }
 @media (max-width: 760px) {
-  .container {
-    width: min(calc(100% - 36px), var(--container));
-  }
+  .container { width: min(calc(100% - 36px), var(--container)); }
 }
-
-/* Scrollbar discrète, dans l'esprit du thème */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--champagne-line) transparent;
-}
-
-*::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-*::-webkit-scrollbar-thumb {
-  background: var(--champagne-line);
-  border: 3px solid var(--noir);
-}
-
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: .01ms !important;
   }
+}
+
+/* Finitions communes — contrastes, accessibilité et continuité entre thèmes. */
+:where(button, a, input, select, textarea) { -webkit-tap-highlight-color: transparent; }
+:is(button, a, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--focus-ring) !important;
+  outline-offset: 3px !important;
+}
+:where(input, select, textarea) { background-color: var(--white); border-color: var(--line); }
+:where(input, select, textarea):disabled { opacity:.6; cursor:not-allowed; }
+:where(button):disabled { opacity:.65; }
+
+/* LUXE — Boutons : micro-sheen + élévation dorée subtile */
+:where(button:not(:disabled)) {
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
+  box-shadow: var(--button-shadow);
+}
+:where(button:not(:disabled):hover) {
+  box-shadow: var(--shadow-soft);
+}
+:where(button:not(:disabled)::after) {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--sheen);
+  transform: translateX(-120%);
+  transition: transform .9s cubic-bezier(.23,1,.32,1);
+  mix-blend-mode: soft-light;
+}
+:where(button:not(:disabled):hover::after) {
+  transform: translateX(120%);
+}
+:where(button:not(:disabled):active) { transform: translateY(1px); }
+
+:where(table) { border-collapse:collapse; font-variant-numeric:tabular-nums; }
+:where(thead th) { color:var(--muted-text); letter-spacing:.045em; }
+:where(hr) { border:0; border-top:1px solid var(--line-soft); }
+html[data-theme="dark"] :where(input, select, textarea) { color-scheme:dark; }
+html[data-theme="light"] :where(input, select, textarea) { color-scheme:light; }
+@media (prefers-contrast: more) {
+  :root { --line: rgba(79, 62, 37, .6); --muted: #4c473e; }
+  html[data-theme="dark"] { --line: rgba(241, 222, 184, .6); --muted: #ded4c1; }
+}
+
+/* ==================================================================
+   FINITIONS GLOBALES — micro-interactions et détails cohérents.
+   Toutes ces règles utilisent :where() (spécificité nulle) : elles ne
+   comblent que les oublis et peuvent toujours être surchargées par un
+   module. Objectif : une expérience fluide et homogène partout.
+   ================================================================== */
+
+/* 1. Transitions douces partout où aucun module n'en définit.
+      On n'anime que des propriétés peu coûteuses. */
+:where(a, button, summary) {
+  transition:
+    color .2s ease,
+    background-color .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease,
+    opacity .2s ease,
+    transform .2s ease;
+}
+:where(input, select, textarea) {
+  transition:
+    color .2s ease,
+    background-color .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease;
+}
+
+/* 2. Retour tactile léger au clic (boutons uniquement). */
+:where(button:not(:disabled):active) {
+  transform: translateY(1px);
+}
+
+/* 3. Champs homogènes même sans style dédié. */
+:where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+  select,
+  textarea
+) {
+  border-radius: var(--radius-field);
+}
+:where(input, select, textarea) { caret-color: var(--champagne-2); }
+:root { accent-color: var(--champagne-2); }
+
+/* 4. Typographie : évite veuves et orphelines sur les blocs de texte. */
+:where(p, li, dd, blockquote) { text-wrap: pretty; }
+
+/* 5. Navigation par ancre : ne pas passer sous l'en-tête collant. */
+:root { scroll-padding-top: 96px; }
+
+/* 6. Liens de texte sans style : soulignement fin au survol. */
+:where(main a:not([class])):hover {
+  text-decoration: underline;
+  text-decoration-color: var(--champagne-2);
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+
+/* 7. Curseur cohérent sur les éléments non cliquables désactivés. */
+:where([aria-disabled="true"]) { cursor: not-allowed; }
+
+/* 8. Champs : léger indice de survol quand aucun style dédié n'existe. */
+:where(input, select, textarea):hover:not(:disabled):not(:focus) {
+  border-color: var(--line-strong);
+}
+
+/* 9. Boutons de sélection de fichier (input[type=file]) homogènes. */
+:where(input[type="file"])::file-selector-button {
+  margin-right: .7em;
+  padding: .5em .95em;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-button);
+  background: var(--white-2);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+}
+:where(input[type="file"])::file-selector-button:hover {
+  background: var(--champagne-soft);
+  border-color: var(--champagne-line);
+}
+
+/* 10. Blocs repliables : marqueur doré cohérent. */
+:where(summary) { cursor: pointer; }
+:where(summary)::marker { color: var(--gold-text); }
+
+/* ==================================================================
+   HAUTE COUTURE 2026 — MATIÈRES NOBLES DU SITE CLIENT
+   Grain de papier, lumière chaude, profondeur et or métallique.
+   Purement additif : aucun impact sur la structure ou la logique.
+   ================================================================== */
+
+/* Grain de papier : voile fixe, non interactif, très discret. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background-image: var(--grain);
+  background-size: 150px 150px;
+  opacity: .02;
+}
+html[data-theme="dark"] body::after { opacity: .035; }
+
+/* Lumière chaude en tête, en flanc et en pied de page (matière). */
+body {
+  background:
+    radial-gradient(ellipse 1600px 920px at 86% -16%, var(--champagne-soft), transparent 62%),
+    radial-gradient(ellipse 1100px 720px at -10% 40%, var(--card-glow), transparent 74%),
+    radial-gradient(ellipse 1800px 1100px at 50% 124%, var(--champagne-soft), transparent 68%),
+    var(--ivory);
+}
+
+/* Sélection de texte : or plein et encre claire, dans les deux thèmes. */
+::selection { background: var(--champagne-2); color: var(--white); }
+
+/* Le grain ne s'imprime pas : on réserve l'encre au contenu. */
+@media print {
+  body::after { display: none; }
 }

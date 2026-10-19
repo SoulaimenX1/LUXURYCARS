@@ -7,7 +7,13 @@ import { NextResponse } from 'next/server';
 // TYPES
 // ==========================================================
 
-type AdminAction = 'confirm' | 'reject';
+type AdminAction = 'confirm' | 'reject' | 'archive' | 'restore';
+
+// Format officiel de l'application : RES-AAAA-NNNNNN.
+// La validation reste volontairement tolérante (3 à 20 caractères
+// alphanumériques/tirets) afin de ne jamais bloquer une réservation
+// valide stockée en base, tout en interdisant toute valeur abusive.
+const RESERVATION_NUMBER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9-]{2,19}$/;
 
 interface DecisionBody {
     reservationNumber: string;
@@ -77,7 +83,7 @@ export async function GET() {
 
     try {
         const response = await fetch(
-            buildApiUrl('/reservations/admin/pending'),
+            buildApiUrl('/reservations/admin/all'),
             {
                 method: 'GET',
                 headers: {
@@ -214,7 +220,7 @@ export async function PATCH(request: Request) {
 
     if (
         typeof reservationNumber !== 'string' ||
-        !/^RES-\d{4}-\d{6}$/.test(reservationNumber)
+        !RESERVATION_NUMBER_PATTERN.test(reservationNumber)
     ) {
         return NextResponse.json(
             { message: 'Invalid reservation number.' },
@@ -226,7 +232,12 @@ export async function PATCH(request: Request) {
     // VALIDER L'ACTION
     // --------------------------------------------------------
 
-    if (action !== 'confirm' && action !== 'reject') {
+    if (
+        action !== 'confirm' &&
+        action !== 'reject' &&
+        action !== 'archive' &&
+        action !== 'restore'
+    ) {
         return NextResponse.json(
             { message: 'Invalid administrator action.' },
             { status: 400 },
@@ -298,9 +309,132 @@ export async function PATCH(request: Request) {
         });
 
         return forwardResponse(response);
-    } catch {
+    } catch (error) {
+        // Le backend n'a pas pu être joint (par exemple pendant un
+        // redémarrage du serveur en développement). On renvoie un
+        // message clair plutôt qu'une erreur opaque.
+        console.error(
+            '[admin/reservations] decision proxy failed:',
+            error,
+        );
+
         return NextResponse.json(
-            { message: 'Unable to process administrator decision.' },
+            {
+                message:
+                    'The reservation service is temporarily unavailable. Please try again in a moment.',
+            },
+            { status: 502 },
+        );
+    }
+}
+
+// ==========================================================
+// DELETE /api/admin/reservations?reservationNumber=RES-...
+// ==========================================================
+//
+// Supprime définitivement une réservation annulée.
+//
+// Le numéro est passé en paramètre de requête afin de garder un
+// DELETE sans corps. Le backend NestJS vérifie le statut de la
+// réservation et refuse toute réservation non annulée.
+// ==========================================================
+
+export async function DELETE(request: Request) {
+    // --------------------------------------------------------
+    // VÉRIFIER L'ORIGINE DE LA REQUÊTE
+    // --------------------------------------------------------
+
+    const origin = request.headers.get('origin');
+    const fetchSite = request.headers.get('sec-fetch-site');
+
+    if (fetchSite === 'cross-site') {
+        return NextResponse.json(
+            { message: 'Cross-site request rejected.' },
+            { status: 403 },
+        );
+    }
+
+    if (origin) {
+        try {
+            if (
+                new URL(origin).origin !==
+                new URL(request.url).origin
+            ) {
+                return NextResponse.json(
+                    { message: 'Invalid request origin.' },
+                    { status: 403 },
+                );
+            }
+        } catch {
+            return NextResponse.json(
+                { message: 'Invalid request origin.' },
+                { status: 403 },
+            );
+        }
+    }
+
+    // --------------------------------------------------------
+    // AUTHENTIFICATION
+    // --------------------------------------------------------
+
+    const token = await getToken();
+
+    if (!token) {
+        return NextResponse.json(
+            { message: 'Authentication required.' },
+            { status: 401 },
+        );
+    }
+
+    // --------------------------------------------------------
+    // VALIDER LE NUMÉRO DE RÉSERVATION
+    // --------------------------------------------------------
+
+    const reservationNumber = new URL(request.url).searchParams.get(
+        'reservationNumber',
+    );
+
+    if (
+        typeof reservationNumber !== 'string' ||
+        !RESERVATION_NUMBER_PATTERN.test(reservationNumber)
+    ) {
+        return NextResponse.json(
+            { message: 'Invalid reservation number.' },
+            { status: 400 },
+        );
+    }
+
+    // --------------------------------------------------------
+    // CONTACTER LE BACKEND NESTJS
+    // --------------------------------------------------------
+
+    try {
+        const endpoint = buildApiUrl(
+            `/reservations/admin/by-number/${encodeURIComponent(
+                reservationNumber,
+            )}`,
+        );
+
+        const response = await fetch(endpoint, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            cache: 'no-store',
+        });
+
+        return forwardResponse(response);
+    } catch (error) {
+        console.error(
+            '[admin/reservations] delete proxy failed:',
+            error,
+        );
+
+        return NextResponse.json(
+            {
+                message:
+                    'The reservation service is temporarily unavailable. Please try again in a moment.',
+            },
             { status: 502 },
         );
     }

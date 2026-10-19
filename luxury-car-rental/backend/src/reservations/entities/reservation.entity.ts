@@ -102,6 +102,16 @@ export class Reservation {
     })
     totalAmount!: string;
 
+    // Tarifs complémentaires enregistrés dans la devise contractuelle EUR.
+    @Column({name:'extras_amount',type:'numeric',precision:12,scale:2,default:0})
+    extrasAmount!: string;
+    @Column({name:'delivery_amount',type:'numeric',precision:12,scale:2,default:0})
+    deliveryAmount!: string;
+    @Column({name:'discount_amount',type:'numeric',precision:12,scale:2,default:0})
+    discountAmount!: string;
+    @Column({name:'promotion_code',type:'varchar',length:30,nullable:true})
+    promotionCode!: string | null;
+
     // Statut de la réservation.
     @Column({
         name: 'status',
@@ -144,6 +154,25 @@ export class Reservation {
         nullable: true,
     })
     decisionReason!: string | null;
+
+    // Date d'archivage par l'administration.
+    // NULL = réservation active (visible dans la liste de travail).
+    // L'archive est organisationnelle et réversible : elle ne
+    // modifie jamais le statut de la réservation.
+    @Column({
+        name: 'archived_at',
+        type: 'timestamptz',
+        nullable: true,
+    })
+    archivedAt!: Date | null;
+
+    // Administrateur ayant archivé la réservation.
+    @Column({
+        name: 'archived_by',
+        type: 'uuid',
+        nullable: true,
+    })
+    archivedBy!: string | null;
 
     // Date de création.
     @Column({

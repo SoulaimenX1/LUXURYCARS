@@ -1,0 +1,349 @@
+{
+  "info": {
+    "name": "Luxury Car Rental — Booking Flow",
+    "_postman_id": "b7c1a0f2-4a5e-4d6b-9c33-2f0a1b7c9d10",
+    "description": "End-to-end reservation workflow: real vehicle -> real pickup location -> dynamic availability -> datetimes -> authoritative quote -> transactional reservation -> my reservations. Amounts and availability are always computed by NestJS/PostgreSQL; the browser never supplies a price.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3001", "type": "string" },
+    { "key": "webUrl", "value": "http://localhost:3000", "type": "string" },
+    { "key": "vehicleId", "value": "eb21db73-5f3a-43b5-a984-34f8d8bd115b", "type": "string" },
+    { "key": "locationId", "value": "e1e66542-8ea2-4c6f-8ebb-fdb08d32fe81", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "reservationNumber", "value": "", "type": "string" },
+    { "key": "adminToken", "value": "", "type": "string" },
+    { "key": "cancelledReservationNumber", "value": "", "type": "string" },
+    { "key": "cancelledReservationNumber2", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "1. Register customer",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"QA\",\n  \"lastName\": \"Booking\",\n  \"email\": \"qa.booking.postman@example.com\",\n  \"password\": \"BookingTest123!\",\n  \"phone\": \"+33600000000\"\n}"
+        },
+        "description": "Public. Creates a customer account. 409 if the email already exists."
+      }
+    },
+    {
+      "name": "2. Login (stores accessToken)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const data = pm.response.json();",
+              "if (data && data.accessToken) { pm.collectionVariables.set('accessToken', data.accessToken); }",
+              "pm.test('status is 200/201', () => pm.response.to.be.success);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"qa.booking.postman@example.com\",\n  \"password\": \"BookingTest123!\"\n}"
+        },
+        "description": "Public. Returns { accessToken, tokenType }. The test script saves accessToken into the collection variable used by every authenticated request."
+      }
+    },
+    {
+      "name": "3. Create customer profile (driving licence)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": { "raw": "{{baseUrl}}/customer-profiles/me", "host": ["{{baseUrl}}"], "path": ["customer-profiles", "me"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"dateOfBirth\": \"1990-05-05\",\n  \"addressLine\": \"1 Test Street\",\n  \"city\": \"Basel\",\n  \"postalCode\": \"4000\",\n  \"country\": \"CH\",\n  \"licenseNumber\": \"QA-123456\",\n  \"licenseCountry\": \"CH\",\n  \"licenseIssuedOn\": \"2015-01-01\",\n  \"licenseExpiresOn\": \"2035-01-01\"\n}"
+        },
+        "description": "Bearer (customer). The backend re-checks the authenticated customer and that the licence covers the return date at reservation time."
+      }
+    },
+    {
+      "name": "4. Vehicle pickup locations (public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/vehicles/{{vehicleId}}/locations",
+          "host": ["{{baseUrl}}"],
+          "path": ["vehicles", "{{vehicleId}}", "locations"]
+        },
+        "description": "Public. Real enabled locations that take pickup for THIS vehicle (vehicle_rental_locations, falling back to all enabled pick-up locations when a vehicle has no explicit assignment)."
+      }
+    },
+    {
+      "name": "5. Availability calendar (public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/vehicles/{{vehicleId}}/availability-calendar?locationId={{locationId}}&month=2026-12",
+          "host": ["{{baseUrl}}"],
+          "path": ["vehicles", "{{vehicleId}}", "availability-calendar"],
+          "query": [
+            { "key": "locationId", "value": "{{locationId}}" },
+            { "key": "month", "value": "2026-12" }
+          ]
+        },
+        "description": "Public. Returns per-day status (available / partial / unavailable / past), pickup slots and return slots as UTC ISO instants, plus the location timezone and opening hours."
+      }
+    },
+    {
+      "name": "6. Availability check (public)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/availability/check", "host": ["{{baseUrl}}"], "path": ["availability", "check"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vehicleId\": \"{{vehicleId}}\",\n  \"pickupLocationId\": \"{{locationId}}\",\n  \"pickupAt\": \"2026-12-10T08:00:00.000Z\",\n  \"returnAt\": \"2026-12-13T08:00:00.000Z\"\n}"
+        },
+        "description": "Public. Re-validates the whole [pickupAt, returnAt) interval. HTTP 200 always for business outcomes: { available: false, reason: \"conflict\" } when unavailable; HTTP 400 only for malformed input."
+      }
+    },
+    {
+      "name": "7. Authoritative quote (public)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/premium/quote", "host": ["{{baseUrl}}"], "path": ["premium", "quote"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vehicleId\": \"{{vehicleId}}\",\n  \"pickupAt\": \"2026-12-10T08:00:00.000Z\",\n  \"returnAt\": \"2026-12-13T08:00:00.000Z\",\n  \"pickupLocationId\": \"{{locationId}}\",\n  \"dropoffLocationId\": \"{{locationId}}\",\n  \"pickupMethod\": \"branch\"\n}"
+        },
+        "description": "Public. Server-side price: rentalDays, dailyPrice, extrasAmount, deliveryAmount, discountAmount, depositAmount, totalAmount, terms. Changing the dates changes the amount but never the vehicle."
+      }
+    },
+    {
+      "name": "8. Create reservation (stores reservationNumber)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const data = pm.response.json();",
+              "if (data && data.reservationNumber) { pm.collectionVariables.set('reservationNumber', data.reservationNumber); }",
+              "pm.test('created', () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": { "raw": "{{baseUrl}}/reservations", "host": ["{{baseUrl}}"], "path": ["reservations"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vehicleId\": \"{{vehicleId}}\",\n  \"pickupAt\": \"2026-12-10T08:00:00.000Z\",\n  \"returnAt\": \"2026-12-13T08:00:00.000Z\",\n  \"pickupLocationId\": \"{{locationId}}\",\n  \"dropoffLocationId\": \"{{locationId}}\",\n  \"pickupMethod\": \"branch\",\n  \"customerNotes\": \"Postman end-to-end check\"\n}"
+        },
+        "description": "Bearer (customer). Transactional re-check of availability + licence, unique reference, then INSERT. HTTP 409 when the period is no longer free (database EXCLUDE constraint on overlapping periods)."
+      }
+    },
+    {
+      "name": "9. My reservations",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": { "raw": "{{baseUrl}}/reservations/me", "host": ["{{baseUrl}}"], "path": ["reservations", "me"] },
+        "description": "Bearer (customer). Only the reservations of the JWT user, with pickup/dropoff location snapshots. The confirmation page reads this list and matches reservationNumber."
+      }
+    },
+    {
+      "name": "10. Admin — vehicles available for assignment",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": { "raw": "{{baseUrl}}/locations/admin/vehicles", "host": ["{{baseUrl}}"], "path": ["locations", "admin", "vehicles"] },
+        "description": "Bearer (admin only). Real vehicles (brand, model, plate, status) that can be assigned to a service point."
+      }
+    },
+    {
+      "name": "11. Admin — location assignments",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/locations/admin/{{locationId}}/vehicles",
+          "host": ["{{baseUrl}}"],
+          "path": ["locations", "admin", "{{locationId}}", "vehicles"]
+        },
+        "description": "Bearer (admin only). Returns { vehicleIds } currently assigned to this location."
+      }
+    },
+    {
+      "name": "12. Admin — set location assignments",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/locations/admin/{{locationId}}/vehicles",
+          "host": ["{{baseUrl}}"],
+          "path": ["locations", "admin", "{{locationId}}", "vehicles"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vehicleIds\": [\"{{vehicleId}}\"]\n}"
+        },
+        "description": "Bearer (admin only). Replaces the vehicles served at this location. A vehicle that appears here is served ONLY at the locations where it is listed; an empty list leaves this location open to every unrestricted vehicle."
+      }
+    },
+    {
+      "name": "13. Admin — upsert location (hours, time zone, buffer)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": { "raw": "{{baseUrl}}/premium/admin/locations", "host": ["{{baseUrl}}"], "path": ["premium", "admin", "locations"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"code\": \"BSL-CITY\",\n  \"name\": \"Basel city centre\",\n  \"category\": \"city_center\",\n  \"city\": \"Basel\",\n  \"country\": \"Switzerland\",\n  \"address\": \"1 Example Street, 4000 Basel\",\n  \"pickupFee\": \"50.00\",\n  \"dropoffFee\": \"25.00\",\n  \"oneWayFee\": \"35.00\",\n  \"canPickup\": true,\n  \"canDropoff\": true,\n  \"enabled\": true,\n  \"timezone\": \"Europe/Zurich\",\n  \"opensAt\": \"09:00\",\n  \"closesAt\": \"18:00\",\n  \"turnaroundMinutes\": 60\n}"
+        },
+        "description": "Bearer (admin only). Creates or updates a real location. Opening hours, IANA time zone and the turnaround buffer drive the availability calendar; all boundary math is done in the location time zone."
+      }
+    },
+    {
+      "name": "14. Via the web proxy — vehicle locations (cookie session)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{webUrl}}/api/vehicles/{{vehicleId}}/locations",
+          "host": ["{{webUrl}}"],
+          "path": ["api", "vehicles", "{{vehicleId}}", "locations"]
+        },
+        "description": "Same contract through the Next.js proxy the browser uses. The JWT stays in an HttpOnly cookie; the browser never calls NestJS directly. Send the access_token cookie for authenticated proxy routes."
+      }
+    },
+    {
+      "name": "15. Via the web proxy — create reservation (cookie session)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{webUrl}}/api/reservations", "host": ["{{webUrl}}"], "path": ["api", "reservations"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vehicleId\": \"{{vehicleId}}\",\n  \"pickupAt\": \"2026-12-10T08:00:00.000Z\",\n  \"returnAt\": \"2026-12-13T08:00:00.000Z\",\n  \"pickupLocationId\": \"{{locationId}}\",\n  \"dropoffLocationId\": \"{{locationId}}\",\n  \"pickupMethod\": \"branch\"\n}"
+        },
+        "description": "The proxy validates, then forwards with the stored cookie. Requires an authenticated session cookie (log in through the web app first)."
+      }
+    },
+    {
+      "name": "16. Admin login (stores adminToken)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const data = pm.response.json();",
+              "if (data && data.accessToken) { pm.collectionVariables.set('adminToken', data.accessToken); }",
+              "pm.test('admin login succeeded', () => pm.response.to.be.success);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@luxury.test\",\n  \"password\": \"AdminPass123!\"\n}"
+        },
+        "description": "Public. Logs in as the demo administrator and stores adminToken. Required by every /reservations/admin route below."
+      }
+    },
+    {
+      "name": "17. Admin — list reservations and pick two cancelled ones",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const list = pm.response.json();",
+              "const cancelled = Array.isArray(list) ? list.filter((r) => r.status === 'cancelled') : [];",
+              "pm.test('at least two cancelled reservations exist', () => cancelled.length >= 2);",
+              "if (cancelled[0]) { pm.collectionVariables.set('cancelledReservationNumber', cancelled[0].reservationNumber); }",
+              "if (cancelled[1]) { pm.collectionVariables.set('cancelledReservationNumber2', cancelled[1].reservationNumber); }"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": { "raw": "{{baseUrl}}/reservations/admin/all", "host": ["{{baseUrl}}"], "path": ["reservations", "admin", "all"] },
+        "description": "Bearer (admin). Returns every reservation. The test script stores two cancelled reservation numbers so the two delete requests below have real targets (a cancelled reservation is the only kind that can be deleted)."
+      }
+    },
+    {
+      "name": "18. Admin — delete a cancelled reservation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));",
+              "pm.test('body is { deleted: true }', () => pm.response.json().deleted === true);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/reservations/admin/by-number/{{cancelledReservationNumber2}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["reservations", "admin", "by-number", "{{cancelledReservationNumber2}}"]
+        },
+        "description": "Bearer (admin). Permanently deletes a CANCELLED reservation; its preferences, extras and reviews are removed with it. 409 'Only cancelled reservations can be deleted' for any other status. 409 'This reservation is linked to a rental contract and cannot be deleted.' when a rental still references it, so rental history is preserved. 404 for an unknown number."
+      }
+    },
+    {
+      "name": "19. Via the web proxy — delete a cancelled reservation (cookie session)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status is 200', () => pm.response.to.have.status(200));",
+              "pm.test('body is { deleted: true }', () => pm.response.json().deleted === true);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Cookie", "value": "access_token={{adminToken}}" }],
+        "url": {
+          "raw": "{{webUrl}}/api/admin/reservations?reservationNumber={{cancelledReservationNumber}}",
+          "host": ["{{webUrl}}"],
+          "path": ["api", "admin", "reservations"],
+          "query": [{ "key": "reservationNumber", "value": "{{cancelledReservationNumber}}" }]
+        },
+        "description": "Same contract through the Next.js proxy the browser uses. The reservation number travels as a query parameter (a DELETE has no body) and the proxy forwards the HttpOnly cookie session. 400 for a malformed number, 401 without a session, 403 for a cross-site request."
+      }
+    }
+  ]
+}

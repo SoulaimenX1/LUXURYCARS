@@ -86,6 +86,9 @@ Conséquence : sans compte admin, **toutes** ces routes sont inaccessibles :
 - `GET /reservations/admin/pending`
 - `PATCH /reservations/admin/by-number/:n/confirm`
 - `PATCH /reservations/admin/by-number/:n/reject`
+- `PATCH /reservations/admin/by-number/:n/archive`
+- `PATCH /reservations/admin/by-number/:n/restore`
+- `DELETE /reservations/admin/by-number/:n`
 - `POST /vehicles`, `POST /vehicles/brands|categories|models`
 - `GET /vehicles` (liste admin)
 - `PATCH /vehicles/by-plate/:plate`
@@ -162,7 +165,7 @@ L'ordre des dossiers est significatif.
 04 · Marques                   GET public, POST admin
 05 · Catégories                GET public, POST admin
 06 · Modèles                   GET public, POST admin
-07 · Véhicules                 POST admin, GET admin, PATCH admin, POST/DELETE média, GET catalog, GET available
+07 · Véhicules                 POST admin, GET admin, PATCH admin, DELETE admin (marque/catégorie/modèle/véhicule, `?force=true` en cascade), POST/DELETE média, GET catalog, GET available
 08 · Profil client & permis    POST customer-profiles/me, GET customer-profiles/me
 09 · Réservations — Client     3× POST, GET me, PATCH cancel
 10 · Réservations — Admin      GET pending, PATCH confirm, PATCH reject
@@ -345,7 +348,35 @@ C'est exactement ce code (`23P01`) que `reservations.service.ts` intercepte pour
 
 ## 10. Repartir de zéro
 
-**L'API n'expose pas de `DELETE` généraliste.** Aucun véhicule, marque, catégorie, modèle ou réservation ne peut être supprimé. La seule exception concerne les **médias d'un véhicule** : `DELETE /vehicles/by-plate/:plate/image` et `DELETE /vehicles/by-plate/:plate/video` retirent la photo ou la vidéo (fichier + ligne). Pour tout le reste, le CRUD disponible est en réalité un **CRU** (Create, Read, Update).
+**L'API expose désormais des `DELETE` ciblés pour la flotte.** Un administrateur peut supprimer une **marque**, une **catégorie**, un **modèle** et un **véhicule** :
+
+| Méthode | Route | Effet |
+|---|---|---|
+| `DELETE` | `/vehicles/brands/:id` | supprime une marque |
+| `DELETE` | `/vehicles/categories/:id` | supprime une catégorie |
+| `DELETE` | `/vehicles/models/:id` | supprime un modèle |
+| `DELETE` | `/vehicles/by-plate/:plate` | supprime un véhicule |
+
+**Suppression en cascade protégée (`?force=true`).** Sans ce drapeau, la suppression d'une marque / catégorie / modèle encore référencé renvoie **`409`** (`RESTRICT`). Avec `?force=true`, le serveur supprime en **une seule transaction** l'entrée, ses modèles et ses véhicules liés. Les véhicules porteurs de **réservations** ou d'**avis** restent protégés : leur présence annule la transaction et renvoie `409`, afin de ne jamais effacer l'historique de location.
+
+Les **médias d'un véhicule** se suppriment également : `DELETE /vehicles/by-plate/:plate/image` et `.../video` (fichier + ligne).
+
+### Supprimer une réservation annulée
+
+Une réservation **annulée** n'a plus d'utilité opérationnelle : l'administrateur peut l'effacer définitivement.
+
+| Méthode | Route | Effet |
+|---|---|---|
+| `DELETE` | `/reservations/admin/by-number/:reservationNumber` | supprime définitivement une réservation annulée |
+
+- Les lignes rattachées (`reservation_preferences`, `reservation_extras`, `vehicle_reviews`) partent en **cascade**.
+- **`409`** `Only cancelled reservations can be deleted` pour tout autre statut (le statut est revérifié côté serveur).
+- **`409`** `This reservation is linked to a rental contract and cannot be deleted.` quand un contrat de location (`rentals`) référence encore la réservation : l'historique financier est préservé.
+- **`404`** numéro inconnu · **`401`** sans jeton · **`403`** pour un jeton non administrateur.
+
+Côté interface — **Control centre → Reservation management** — un bouton-icône (corbeille) apparaît **uniquement** sur les cartes au statut `cancelled`. Il ouvre une confirmation thématique (`tone: danger`) avant l'appel `DELETE`.
+
+Dans la collection **Booking Flow**, les requêtes **16 → 19** couvrent ce flux : login administrateur (met `adminToken` en variable), sélection de deux réservations annulées, suppression directe sur NestJS, puis suppression via le proxy web.
 
 Pour réinitialiser entre deux tests :
 
@@ -473,7 +504,7 @@ Couverture actuelle :
 
 | Limite | Impact |
 |---|---|
-| **`DELETE` limité aux médias** | seuls la photo et la vidéo d'un véhicule peuvent être supprimées ; CRU pour le reste, réinitialisation manuelle en SQL |
+| **Cascade `?force=true` protégée** | supprimer une marque / catégorie / modèle utilisé est possible via `?force=true`, mais un véhicule lié porteur d'une réservation ou d'un avis annule la transaction (`409`) : l'historique de location n'est jamais effacé |
 | **Aucun refresh token** | les jetons expirent au bout d'1 h |
 | **Pas de rate limiting** sur `/auth/login` | pas de protection anti-bruteforce |
 | **Pas de CORS** dans `main.ts` | un frontend sur `:3000` ne peut pas appeler l'API sur `:3001` |

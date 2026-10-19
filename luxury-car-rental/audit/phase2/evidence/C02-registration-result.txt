@@ -1,0 +1,86 @@
+- banner:
+  - link "L LUXURY CARS PREMIUM CAR RENTAL":
+    - /url: /
+    - generic: L
+    - strong:
+      - text: LUXURY
+      - emphasis: CARS
+    - generic: PREMIUM CAR RENTAL
+  - navigation:
+    - link "Home":
+      - /url: /
+    - link "Fleet":
+      - /url: /vehicles
+    - link "Contact":
+      - /url: /contact
+  - 'button "Display currency: EUR. Prices billed in EUR"':
+    - generic: €
+    - generic: EUR
+    - generic: ▾
+  - button "Activer le thème clair":
+  - link "Sign in":
+    - /url: /login
+  - link "Create account":
+    - /url: /register
+- main:
+  - link "L LUXURY CAR RENTAL":
+    - /url: /
+    - generic: L
+    - strong: LUXURY
+    - generic: CAR RENTAL
+  - generic: CUSTOMER ACCESS
+  - heading "Welcome back" [level=1]:
+    - text: Welcome
+    - generic: back
+  - generic: SECURE ACCESS · JWT AUTHENTICATION
+  - link "← Back to home":
+    - /url: /
+  - generic: SIGN IN
+  - heading "Access your account" [level=2]
+  - paragraph: Enter your account credentials to continue.
+  - generic: Email address
+  - textbox "Email address":
+    - /placeholder: name@example.com
+  - generic: Password
+  - textbox "Password":
+    - /placeholder: Enter your password
+  - button "Sign in"
+  - paragraph:
+    - text: New customer?
+    - link "Create an account":
+      - /url: /register
+- contentinfo:
+  - link "LUXURY CARS":
+    - /url: /
+    - text: LUXURY
+    - emphasis: CARS
+  - paragraph:
+    - text: Premium vehicles.
+    - text: Exceptional journeys.
+  - strong: EXPLORE
+  - link "Home":
+    - /url: /
+  - link "Our fleet":
+    - /url: /vehicles
+  - link "Contact":
+    - /url: /contact
+  - strong: ACCOUNT
+  - link "Sign in":
+    - /url: /login
+  - link "Create account":
+    - /url: /register
+  - link "My account":
+    - /url: /account
+  - link "My reservations":
+    - /url: /account/reservations
+  - link "My rentals":
+    - /url: /account/rentals
+  - link "My premium collection":
+    - /url: /account/premium
+  - generic: © 2026 LUXURY CARS
+  - generic: Web-Based Luxury Car Rental Management System
+  - generic: Prices recorded in EUR · Other currencies are indicative
+- region "Notifications":
+  - list
+- button "Open Next.js Dev Tools":
+- alert: Welcome back

@@ -12,12 +12,11 @@ import { NextResponse } from 'next/server';
 //
 // Aucun JWT n'est nécessaire pour ce catalogue public.
 //
-// Le catalogue change rarement : il est mis en cache
-// pendant 60 secondes afin d'éviter un appel à NestJS
-// à chaque affichage de la page.
+// Pas de cache côté proxy : les photos ajoutées par Admin
+// deviennent visibles dès la prochaine consultation.
 // ==========================================================
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
@@ -26,9 +25,7 @@ export async function GET() {
             buildApiUrl('/vehicles/catalog'),
             {
                 method: 'GET',
-                next: {
-                    revalidate: 60,
-                },
+                cache: 'no-store',
             },
         );
 
@@ -75,7 +72,7 @@ export async function GET() {
             status: 200,
             headers: {
                 'Cache-Control':
-                    'public, s-maxage=60, stale-while-revalidate=300',
+                    'no-store',
             },
         });
     } catch {

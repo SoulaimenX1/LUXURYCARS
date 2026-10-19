@@ -84,7 +84,7 @@ try {
 
     const { rows: existing } = await client.query(
       `SELECT id FROM vehicle_images
-        WHERE vehicle_id = $1
+        WHERE vehicle_id = $1 AND media_type = 'image'
         ORDER BY is_primary DESC, id ASC
         LIMIT 1`,
       [row.id],
@@ -101,8 +101,8 @@ try {
     } else {
       await client.query(
         `INSERT INTO vehicle_images
-            (vehicle_id, storage_path, alt_text, is_primary)
-         VALUES ($1, $2, $3, true)`,
+            (vehicle_id, media_type, storage_path, alt_text, is_primary)
+         VALUES ($1, 'image', $2, $3, true)`,
         [row.id, storagePath, alt],
       );
       inserted += 1;

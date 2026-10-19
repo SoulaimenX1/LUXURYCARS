@@ -378,63 +378,6 @@ export default async function AdminPage() {
                         ))}
                     </div>
 
-                    {/* ============================================= */}
-                    {/* MODULES ADMIN DISPONIBLES                       */}
-                    {/* ============================================= */}
-
-                    <div className={styles.sectionHeading}>
-                        <div>
-                            <span className={styles.eyebrow}>
-                                ADMINISTRATIVE OPERATIONS
-                            </span>
-
-                            <h2>Management modules</h2>
-                        </div>
-                    </div>
-
-                    <div className={styles.modulesGrid}>
-
-                        <Link
-                            href="/admin/reservations"
-                            className={styles.moduleCard}
-                        >
-                            <span className={styles.moduleNumber}>
-                                01
-                            </span>
-
-                            <h3>Reservation Management</h3>
-
-                            <p>
-                                Review incoming reservations,
-                                confirm or reject customer requests.
-                            </p>
-
-                            <span className={styles.moduleAction}>
-                                OPEN MODULE →
-                            </span>
-                        </Link>
-
-                        <Link
-                            href="/admin/vehicles"
-                            className={styles.moduleCard}
-                        >
-                            <span className={styles.moduleNumber}>
-                                02
-                            </span>
-
-                            <h3>Fleet Management</h3>
-
-                            <p>
-                                Manage brands, categories,
-                                vehicle models and fleet records.
-                            </p>
-
-                            <span className={styles.moduleAction}>
-                                OPEN MODULE →
-                            </span>
-                        </Link>
-
-                    </div>
 
                 </div>
             </section>

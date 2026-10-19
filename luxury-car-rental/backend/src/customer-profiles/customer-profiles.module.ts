@@ -1,3 +1,4 @@
+import { NotificationsModule } from '../notifications/notifications.module.js';
 import {
     Module,
 } from '@nestjs/common';
@@ -34,6 +35,7 @@ import {
 
         AuthModule,
         UsersModule,
+        NotificationsModule,
     ],
 
     controllers: [

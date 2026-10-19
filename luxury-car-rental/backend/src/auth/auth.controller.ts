@@ -42,6 +42,14 @@ import {
     RolesGuard,
 } from './guards/roles.guard.js';
 
+import {
+    AuthRateLimitGuard,
+} from './rate-limit/auth-rate-limit.guard.js';
+
+import {
+    AuthRateLimit,
+} from './rate-limit/auth-rate-limit.options.js';
+
 @Controller('auth')
 export class AuthController {
     constructor(
@@ -53,6 +61,8 @@ export class AuthController {
     // ==========================================
 
     @Post('register')
+    @UseGuards(AuthRateLimitGuard)
+    @AuthRateLimit('register')
     register(@Body() dto: RegisterDto) {
         return this.authService.register(dto);
     }
@@ -63,6 +73,8 @@ export class AuthController {
 
     @Post('login')
     @HttpCode(HttpStatus.OK)
+    @UseGuards(AuthRateLimitGuard)
+    @AuthRateLimit('login')
     login(@Body() dto: LoginDto) {
         return this.authService.login(dto);
     }

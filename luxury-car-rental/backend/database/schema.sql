@@ -210,6 +210,11 @@ CREATE TABLE vehicles (
 
   security_deposit numeric(10,2) NOT NULL CHECK (security_deposit >= 0),
 
+-- Valeur du véhicule (valeur d'achat / de marché), affichée aux clients.
+-- Toujours un nombre réel strictement positif.
+
+  vehicle_value    numeric(12,2) NOT NULL CHECK (vehicle_value > 0),
+
   mileage_km       integer       NOT NULL DEFAULT 0 CHECK (mileage_km >= 0),
 
   description      text,
@@ -348,6 +353,8 @@ customer_notes text,
 decided_by uuid REFERENCES users (id) ON DELETE SET NULL,
 decided_at timestamptz,
 decision_reason text,
+archived_at timestamptz,
+archived_by uuid REFERENCES users (id) ON DELETE SET NULL,
 created_at timestamptz NOT NULL DEFAULT now(),
 updated_at timestamptz NOT NULL DEFAULT now(),
 CONSTRAINT chk_res_dates CHECK (return_at > pickup_at),
@@ -369,6 +376,8 @@ CONSTRAINT ex_res_no_double_booking
 CREATE INDEX idx_reservations_customer ON reservations (customer_id);
 
 CREATE INDEX idx_reservations_status ON reservations (status, pickup_at);
+
+CREATE INDEX idx_reservations_archived_at ON reservations (archived_at);
 
 -- Cross-table rule: a reservation cannot overlap a maintenance window (and vice versa).
 
@@ -489,6 +498,25 @@ CONSTRAINT chk_rental_lifecycle CHECK (
 );
 
 CREATE INDEX idx_rentals_status ON rentals (status, expected_return_at);
+
+-- Historique des prolongations : une entrée par décision administrative.
+-- Ce patch est idempotent et compatible avec une base déjà initialisée.
+CREATE TABLE IF NOT EXISTS rental_extensions (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    rental_id uuid NOT NULL REFERENCES rentals(id) ON DELETE RESTRICT,
+    old_return_at timestamptz NOT NULL,
+    new_return_at timestamptz NOT NULL,
+    old_total_amount numeric(12,2) NOT NULL CHECK (old_total_amount >= 0),
+    new_total_amount numeric(12,2) NOT NULL CHECK (new_total_amount >= old_total_amount),
+    additional_amount numeric(12,2) NOT NULL CHECK (additional_amount >= 0),
+    extended_by uuid NOT NULL REFERENCES users(id),
+    reason varchar(500),
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT chk_extension_later CHECK (new_return_at > old_return_at),
+    CONSTRAINT chk_extension_amount CHECK (additional_amount = new_total_amount - old_total_amount)
+);
+CREATE INDEX IF NOT EXISTS idx_rental_extensions_rental ON rental_extensions (rental_id, created_at DESC);
+
 
 -- One table for both vehicle check-out (handover) and check-in (return)
 

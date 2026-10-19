@@ -1,12 +1,15 @@
 'use client';
 
 import Link from 'next/link';
+import NotificationBell from '@/components/notification-bell';
 import { usePathname, useRouter } from 'next/navigation';
 import {
     useEffect,
     useState,
     type ReactNode,
 } from 'react';
+
+import { useToast } from '@/components/toast';
 
 import styles from './admin-layout.module.css';
 
@@ -61,6 +64,14 @@ const navigation = [
         label: 'Fleet management',
         number: '03',
     },
+    { href: '/admin/rentals', label: 'Rental management', number: '04' },
+    { href: '/admin/customers', label: 'Customers', number: '05' },
+    { href: '/admin/availability', label: 'Availability calendar', number: '06' },
+    { href: '/admin/premium', label: 'Premium extras & offers', number: '07' },
+    { href: '/admin/operations', label: 'Finance & returns', number: '08' },
+    { href: '/admin/locations', label: 'Pick-up & Drop-off', number: '09' },
+    { href: '/admin/media', label: 'Media studio / 3D', number: '10' },
+    { href: '/admin/notifications', label: 'Notifications', number: '11' },
 ];
 
 // ==========================================================
@@ -81,6 +92,8 @@ export default function AdminLayout({
 
     const [loggingOut, setLoggingOut] =
         useState(false);
+
+    const toast = useToast();
 
     // ========================================================
     // VÉRIFIER LA SESSION ADMIN
@@ -168,9 +181,20 @@ export default function AdminLayout({
         setLoggingOut(true);
 
         try {
-            await fetch('/api/auth/logout', {
+            const response = await fetch('/api/auth/logout', {
                 method: 'POST',
             });
+
+            if (!response.ok) {
+                throw new Error('Logout failed.');
+            }
+
+            toast.success('You have been signed out.', 'Session');
+        } catch {
+            toast.error(
+                'Unable to sign out. Please try again.',
+                'Session',
+            );
         } finally {
             router.replace('/login');
             router.refresh();
@@ -251,7 +275,7 @@ export default function AdminLayout({
                     <h1>
                         Control
                         <br />
-                        centre.
+                        centre
                     </h1>
                 </div>
 
@@ -359,20 +383,25 @@ export default function AdminLayout({
                         </span>
                     </div>
 
-                    <div className={styles.topbarRight}>
-                        <span>
-                            ADMINISTRATOR
-                        </span>
+                    <div className={styles.topbarActions}>
+                        {/* Cloche personnelle de l’administrateur. */}
+                        <NotificationBell admin />
 
-                        <strong>
-                            {user?.firstName
-                                ? `${user.firstName}${user.lastName
-                                    ? ` ${user.lastName}`
-                                    : ''
-                                }`
-                                : user?.email ??
-                                'Admin'}
-                        </strong>
+                        <div className={styles.topbarRight}>
+                            <span>
+                                ADMINISTRATOR
+                            </span>
+
+                            <strong>
+                                {user?.firstName
+                                    ? `${user.firstName}${user.lastName
+                                        ? ` ${user.lastName}`
+                                        : ''
+                                    }`
+                                    : user?.email ??
+                                    'Admin'}
+                            </strong>
+                        </div>
                     </div>
                 </div>
 

@@ -1,5 +1,8 @@
 
-import { Module } from '@nestjs/common';
+import { InboxService } from './inbox.service.js';
+import { InboxController } from './inbox.controller.js';
+
+import { Module, forwardRef } from '@nestjs/common';
 
 import {
   TypeOrmModule,
@@ -30,22 +33,25 @@ import {
 @Module({
   imports: [
     TypeOrmModule.forFeature([Notification]),
-    AuthModule,
+    forwardRef(() => AuthModule),
     UsersModule,
   ],
 
   controllers: [
     NotificationsController,
+    InboxController,
   ],
 
   providers: [
     NotificationsService,
+    InboxService,
   ],
 
   // Exporter le service pour que VehiclesModule puisse
   // créer une notification lors de l'ajout d'une voiture.
   exports: [
     NotificationsService,
+    InboxService,
   ],
 })
 export class NotificationsModule {}

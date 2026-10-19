@@ -11,9 +11,7 @@ import type {
   VehicleItem,
 } from '@/lib/catalog-types';
 
-import {
-  formatAmount,
-} from '@/lib/format';
+import { Price } from '@/components/currency-provider';
 
 import styles from './highlights.module.css';
 
@@ -55,7 +53,7 @@ function ShowcaseCard({
 }) {
   return (
     <Link
-      href="/vehicles"
+      href={`/vehicles/${vehicle.id}`}
       className={styles.card}
     >
       <div className={styles.media}>
@@ -95,7 +93,7 @@ function ShowcaseCard({
 
         <div className={styles.meta}>
           <span className={styles.price}>
-            {formatAmount(vehicle.dailyPrice)}
+            <Price value={vehicle.dailyPrice} />
             <small> / day</small>
           </span>
 
@@ -176,8 +174,18 @@ export default function HomeHighlights() {
         )
   ).slice(0, 3);
 
+  // Éviter de répéter une voiture déjà mise en avant dans
+  // « The most rented cars » juste au-dessus.
+  const mostRentedIds = new Set(
+    mostRented.map((vehicle) => vehicle.id),
+  );
+
   const limited = vehicles
-    .filter((vehicle) => vehicle.isLimited)
+    .filter(
+      (vehicle) =>
+        vehicle.isLimited &&
+        !mostRentedIds.has(vehicle.id),
+    )
     .slice(0, 3);
 
   return (
@@ -191,7 +199,7 @@ export default function HomeHighlights() {
 
             <h2>
               The most rented
-              <em> cars.</em>
+              <em> cars</em>
             </h2>
 
             <p className={styles.lead}>
@@ -220,7 +228,7 @@ export default function HomeHighlights() {
 
               <h2>
                 Available now,
-                <em> in limited numbers.</em>
+                <em> in limited numbers</em>
               </h2>
 
               <p className={styles.lead}>

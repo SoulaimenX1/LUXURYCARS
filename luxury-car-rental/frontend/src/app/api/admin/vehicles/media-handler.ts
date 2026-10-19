@@ -29,12 +29,12 @@ export type VehicleMediaKind = 'image' | 'video';
 // Taille maximale acceptée par type de média.
 const MAX_BYTES: Record<VehicleMediaKind, number> = {
     image: 8 * 1024 * 1024,
-    video: 80 * 1024 * 1024,
+    video: 300 * 1024 * 1024,
 };
 
 const MAX_LABEL: Record<VehicleMediaKind, string> = {
     image: '8 MB',
-    video: '80 MB',
+    video: '300 MB',
 };
 
 // ==========================================================

@@ -1,3 +1,4 @@
+import { InboxService } from '../notifications/inbox.service.js';
 import {
   Body,
   Controller,
@@ -51,6 +52,7 @@ export class ReservationsController {
   constructor(
     private readonly reservationsService:
       ReservationsService,
+    private readonly inbox: InboxService,
   ) {}
 
   // ==========================================
@@ -60,7 +62,7 @@ export class ReservationsController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CUSTOMER)
-  createReservation(
+  async createReservation(
     @Req()
     request: AuthenticatedRequest,
 
@@ -71,8 +73,9 @@ export class ReservationsController {
     const userId = request.user.id;
 
     // Créer sa réservation.
-    return this.reservationsService
-      .createReservation(userId, dto);
+    const reservation = await this.reservationsService.createReservation(userId, dto);
+    await this.inbox.safelyNotify('created', reservation);
+    return reservation;
   }
 
   // ==========================================
@@ -101,7 +104,7 @@ export class ReservationsController {
   @Patch('by-number/:reservationNumber/cancel')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CUSTOMER)
-  cancelMyReservation(
+  async cancelMyReservation(
     @Req()
     request: AuthenticatedRequest,
 
@@ -113,10 +116,8 @@ export class ReservationsController {
 
     // Annuler uniquement une réservation
     // qui appartient à ce client.
-    return this.reservationsService
-      .cancelMyReservation(
-        userId,
-        reservationNumber,
-      );
+    const reservation = await this.reservationsService.cancelMyReservation(userId, reservationNumber);
+    await this.inbox.safelyNotify('cancelled', reservation);
+    return reservation;
   }
 }

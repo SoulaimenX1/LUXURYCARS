@@ -1,0 +1,91 @@
+- banner:
+  - link "L LUXURY CARS PREMIUM CAR RENTAL":
+    - /url: /
+    - generic: L
+    - strong:
+      - text: LUXURY
+      - emphasis: CARS
+    - generic: PREMIUM CAR RENTAL
+  - navigation:
+    - link "Home":
+      - /url: /
+    - link "Fleet":
+      - /url: /vehicles
+    - link "Contact":
+      - /url: /contact
+  - button "Notifications (1 unread)":
+    - generic: "1"
+  - 'button "Display currency: EUR. Prices billed in EUR"':
+    - generic: €
+    - generic: EUR
+    - generic: ▾
+  - button "Activer le thème clair":
+  - link "My account":
+    - /url: /account
+  - link "My reservations":
+    - /url: /account/reservations
+  - button "Sign out"
+- main:
+  - generic: RECOMMENDED COLLECTION
+  - heading "Discover our recommended fleet" [level=1]
+  - paragraph: A hand-curated selection of the most exclusive vehicles.
+  - strong: "3"
+  - generic: Vehicles in catalogue
+  - strong: "1"
+  - generic: Luxury brands
+  - strong: "1"
+  - generic: Vehicle categories
+  - text: RECOMMENDED FOR YOU
+  - heading "The fleet, curated" [level=2]
+  - paragraph: 0 vehicles found
+  - region "Saved vehicles":
+    - text: MY SELECTION
+    - heading "Your saved cars" [level=2]
+    - paragraph: Tap ♡ Save on any car to add it here.
+  - generic: Category
+  - button "All"
+  - button "Audit Grand Touring"
+  - generic: Brand
+  - combobox "Brand":
+    - option "All brands" [selected]
+    - option "Audit Bentley"
+  - button "Limited editions only" [active] [pressed]
+  - button "Clear filters"
+  - heading "No vehicles match your filters" [level=3]
+  - paragraph: Try another category or brand, or reset the filters.
+  - button "Clear filters"
+- contentinfo:
+  - link "LUXURY CARS":
+    - /url: /
+    - text: LUXURY
+    - emphasis: CARS
+  - paragraph:
+    - text: Premium vehicles.
+    - text: Exceptional journeys.
+  - strong: EXPLORE
+  - link "Home":
+    - /url: /
+  - link "Our fleet":
+    - /url: /vehicles
+  - link "Contact":
+    - /url: /contact
+  - strong: ACCOUNT
+  - link "Sign in":
+    - /url: /login
+  - link "Create account":
+    - /url: /register
+  - link "My account":
+    - /url: /account
+  - link "My reservations":
+    - /url: /account/reservations
+  - link "My rentals":
+    - /url: /account/rentals
+  - link "My premium collection":
+    - /url: /account/premium
+  - generic: © 2026 LUXURY CARS
+  - generic: Web-Based Luxury Car Rental Management System
+  - generic: Prices recorded in EUR · Other currencies are indicative
+- region "Notifications":
+  - list
+- button "Open Next.js Dev Tools":
+- alert: Our Fleet | Luxury Cars

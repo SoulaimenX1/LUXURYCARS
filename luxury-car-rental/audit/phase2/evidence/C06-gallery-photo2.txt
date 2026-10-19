@@ -1,0 +1,125 @@
+- banner:
+  - link "L LUXURY CARS PREMIUM CAR RENTAL":
+    - /url: /
+    - generic: L
+    - strong:
+      - text: LUXURY
+      - emphasis: CARS
+    - generic: PREMIUM CAR RENTAL
+  - navigation:
+    - link "Home":
+      - /url: /
+    - link "Fleet":
+      - /url: /vehicles
+    - link "Contact":
+      - /url: /contact
+  - button "Notifications (1 unread)":
+    - generic: "1"
+  - 'button "Display currency: EUR. Prices billed in EUR"':
+    - generic: €
+    - generic: EUR
+    - generic: ▾
+  - button "Activer le thème clair":
+  - link "My account":
+    - /url: /account
+  - link "My reservations":
+    - /url: /account/reservations
+  - button "Sign out"
+- main:
+  - link "← The collection":
+    - /url: /vehicles
+  - paragraph: THE COLLECTION · Audit Grand Touring
+  - heading "Audit Bentley Continental Audit" [level=1]:
+    - text: Audit Bentley
+    - emphasis: Continental Audit
+  - paragraph: Disposable browser audit fixture; not a real rental vehicle.
+  - generic: DAILY RATE FROM
+  - strong: €300.00
+  - region "Vehicle media experience":
+    - tablist "Media type":
+      - tab "Photo gallery3" [selected]
+      - tab "Test drive films0"
+      - tab "Interactive 3D0"
+    - img "Audit gallery copy"
+    - img "Audit gallery copy"
+    - img "Audit gallery copy"
+    - button "View photo 1":
+      - img "Audit gallery copy"
+    - button "View photo 2" [active] [pressed]:
+      - img "Audit gallery copy"
+    - button "View photo 3":
+      - img "Audit gallery copy"
+  - generic: PERFORMANCE & CRAFT
+  - heading "The finer details" [level=2]
+  - term: Model year
+  - definition: "2025"
+  - term: Power
+  - definition: 550 HP
+  - term: Transmission
+  - definition: automatic
+  - term: Seats
+  - definition: "4"
+  - term: Fuel
+  - definition: petrol
+  - term: Engine
+  - definition: —
+  - term: 0–100 km/h
+  - definition: —
+  - term: Top speed
+  - definition: —
+  - generic: PRIVATE RESERVATION
+  - heading "Your driving experience" [level=2]
+  - paragraph: Choose your dates and collection location before submitting your request.
+  - term: Daily rental
+  - definition: €300.00
+  - term: Security deposit
+  - definition: €2,000.00
+  - term: Vehicle value
+  - definition: €200,000.00
+  - link "RESERVE THIS VEHICLE →":
+    - /url: /vehicles/08d1bae5-9aa2-457a-a1d8-f87a7fb721fb/reserve
+    - text: RESERVE THIS VEHICLE
+    - generic: →
+  - link "CONTACT US →":
+    - /url: /contact
+    - text: CONTACT US
+    - generic: →
+  - paragraph: Your vehicle and exact dates are checked before booking. Airport, hotel and custom delivery requests are subject to staff confirmation.
+  - generic: CLIENT EXPERIENCE
+  - heading "Verified guest experiences" [level=2]
+  - paragraph: No customer reviews yet.
+- contentinfo:
+  - link "LUXURY CARS":
+    - /url: /
+    - text: LUXURY
+    - emphasis: CARS
+  - paragraph:
+    - text: Premium vehicles.
+    - text: Exceptional journeys.
+  - strong: EXPLORE
+  - link "Home":
+    - /url: /
+  - link "Our fleet":
+    - /url: /vehicles
+  - link "Contact":
+    - /url: /contact
+  - strong: ACCOUNT
+  - link "Sign in":
+    - /url: /login
+  - link "Create account":
+    - /url: /register
+  - link "My account":
+    - /url: /account
+  - link "My reservations":
+    - /url: /account/reservations
+  - link "My rentals":
+    - /url: /account/rentals
+  - link "My premium collection":
+    - /url: /account/premium
+  - generic: © 2026 LUXURY CARS
+  - generic: Web-Based Luxury Car Rental Management System
+  - generic: Prices recorded in EUR · Other currencies are indicative
+- region "Notifications":
+  - list
+- button "Open Next.js Dev Tools":
+- alert: Our Fleet | Luxury Cars

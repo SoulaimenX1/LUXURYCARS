@@ -142,9 +142,11 @@
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.3px;
+  box-shadow: var(--button-shadow);
   transition:
     background 0.2s ease,
-    color 0.2s ease;
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .accountButton span {
@@ -154,6 +156,7 @@
 .accountButton:hover {
   background: var(--champagne);
   color: var(--noir);
+  box-shadow: var(--shadow-soft);
 }
 
 /* ==============================================================
@@ -317,6 +320,7 @@
   background: var(--champagne);
   border: 1px solid var(--champagne);
   color: var(--noir);
+  box-shadow: var(--button-shadow);
 }
 
 .primaryButton:hover {
@@ -324,17 +328,20 @@
   border-color: var(--noir);
   color: var(--champagne-3);
   transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
 }
 
 .secondaryButton {
   background: var(--surface-glass);
   border: 1px solid var(--line-strong);
   color: var(--ink);
+  box-shadow: var(--button-shadow);
 }
 
 .secondaryButton:hover {
   border-color: var(--champagne);
   color: var(--champagne);
+  box-shadow: var(--shadow-soft);
 }
 
 .heroBooking {
@@ -1325,3 +1332,309 @@
     line-height: 1.7;
   }
 }
+
+
+/* MAISON — Accueil éditorial, contrastes premium dans les deux thèmes. */
+.page { background: var(--ivory); }
+.heroContent h1, .sectionHeading h2, .faqHeading h2, .finalCta h2 { font-family: var(--serif); font-weight: 400; letter-spacing: -.042em; }
+.heroContent h1 { text-shadow: 0 12px 42px rgba(0,0,0,.28); }
+.sectionLabel, .eyebrow { letter-spacing: .22em; }
+.categoryCard, .advantageCard { border-radius: var(--radius-card); overflow: hidden; }
+.categoryCard, .advantageCard { transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease; }
+.categoryCard:hover, .advantageCard:hover { box-shadow: var(--shadow-soft); }
+.primaryButton, .secondaryButton, .bookingButton, .lightButton, .primaryDarkButton, .secondaryDarkButton, .outlineDarkButton { border-radius: var(--radius-button); }
+
+/* Finition maison : lisibilité des titres et détails raffinés en clair/sombre. */
+.sectionLabel, .eyebrow { text-transform:uppercase; }
+.categoryCard, .advantageCard { border-color:var(--panel-border); }
+.categoryCard:focus-visible, .advantageCard:focus-within { outline:2px solid var(--focus-ring); outline-offset:4px; }
+html[data-theme="dark"] .heroMedia { filter:saturate(.76) brightness(.85); }
+html[data-theme="dark"] .categoryCard { background:linear-gradient(150deg,var(--white-2),var(--white)); }
+html[data-theme="dark"] .journey { border-color:var(--line-soft); }
+
+/* ==============================================================
+   COUTURE 2026 — ACCUEIL
+   Filet d'or, blason typographique et matières de galerie.
+   Uniquement des jetons de thème : rendu identique en clair/sombre.
+   ============================================================== */
+
+/* --- Libellés de section : filet d'or en amont. --- */
+.eyebrow,
+.sectionLabel {
+  letter-spacing: .26em;
+}
+
+.sectionLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.sectionLabel::before {
+  content: '';
+  width: 30px;
+  height: 1px;
+  flex-shrink: 0;
+  background: var(--gold-rule);
+}
+
+/* --- Blason typographique : mise à l'échelle et métal sur l'accent. --- */
+.heroContent h1 {
+  font-size: clamp(52px, 6.6vw, 96px);
+  letter-spacing: -.048em;
+}
+
+.heroContent h1 span {
+  color: var(--gold-text);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .heroContent h1 span,
+  .sectionIntro h2 em,
+  .sectionHeading h2 em,
+  .journeyHeader h2 em,
+  .faqHeading h2 em {
+    background-image: var(--gold-ink);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+/* --- Cartes catégories : galerie, filet d'or au survol. --- */
+.categoryCard {
+  border-radius: var(--radius-xl);
+  isolation: isolate;
+}
+
+.categoryCard::before {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gold-rule);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .5s cubic-bezier(.2, .7, .2, 1);
+}
+
+.categoryCard:hover::before,
+.categoryCard:focus-visible::before {
+  transform: scaleX(1);
+}
+
+.categoryCard:hover {
+  box-shadow: var(--shadow-luxe);
+}
+
+.categoryTop {
+  font-size: 15px;
+  letter-spacing: .08em;
+}
+
+.arrow {
+  border-radius: 999px;
+}
+
+/* --- Avantages : nappe d'or discrète au survol. --- */
+.advantageCard {
+  transition: background .4s ease, border-color .4s ease;
+}
+
+.advantageCard:hover {
+  background: linear-gradient(180deg, var(--champagne-soft), transparent 72%);
+  border-color: var(--champagne-line);
+}
+
+/* --- Parcours : pastille dorée qui s'allume. --- */
+.journeyItem {
+  transition: background .4s ease;
+}
+
+.journeyItem:hover {
+  background: linear-gradient(180deg, transparent, var(--champagne-soft));
+}
+
+/* --- FAQ : question réactive en or. --- */
+.faqItem summary {
+  transition: color .2s ease;
+}
+
+.faqItem:hover summary,
+.faqItem[open] summary {
+  color: var(--gold-text);
+}
+
+/* --- Boutons : lait d'or et reflet au survol. --- */
+.primaryButton,
+.bookingButton,
+.lightButton,
+.primaryDarkButton {
+  position: relative;
+  overflow: hidden;
+}
+
+.primaryButton::after,
+.bookingButton::after,
+.lightButton::after,
+.primaryDarkButton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--sheen);
+  transform: translateX(-140%);
+  transition: transform .75s ease;
+}
+
+.primaryButton:hover::after,
+.bookingButton:hover::after,
+.lightButton:hover::after,
+.primaryDarkButton:hover::after {
+  transform: translateX(140%);
+}
+
+.heroBooking {
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+}
+
+/* --- Bandeau final : liséré d'or intérieur. --- */
+.finalCtaInner {
+  position: relative;
+  border-top: 1px solid rgba(255, 255, 255, .32);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .categoryCard::before,
+  .primaryButton::after,
+  .bookingButton::after,
+  .lightButton::after,
+  .primaryDarkButton::after {
+    transition: none !important;
+  }
+}
+
+/* ==============================================================
+   HAUTE COUTURE 2026 — ACCUEIL
+   Scène d'ouverture grand format, or métallique, profondeur.
+   Additif : n'agit que sur l'échelle, la lumière et les finitions.
+   ============================================================== */
+
+/* --- Scène d'ouverture : plus haute, plus profonde, plus d'or. --- */
+.heroInner { min-height: clamp(680px, 86vh, 860px); }
+
+.heroContent h1 {
+  font-size: clamp(56px, 7.4vw, 112px);
+  letter-spacing: -.052em;
+  line-height: 1.02;
+}
+
+.heroDescription { max-width: 560px; }
+
+/* Filet d'or en pied de scène. */
+.hero::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--gold-rule-strong);
+  opacity: .6;
+  pointer-events: none;
+}
+
+/* --- Bandeau d'atouts : filets d'or et libellés de maison. --- */
+.benefitsStrip {
+  border-top-color: var(--champagne-line);
+  border-bottom-color: var(--champagne-line);
+}
+.benefitsInner > span {
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  font-size: 10.5px;
+}
+.benefitsInner small { font-size: 15px; }
+
+/* --- Rythme des sections : filet d'or en tête de bloc. --- */
+.advantages, .journey, .faq { position: relative; }
+
+.advantages::before,
+.journey::before,
+.faq::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92%, 1180px);
+  height: 1px;
+  background: var(--gold-rule-strong);
+  opacity: .45;
+  pointer-events: none;
+}
+
+/* --- Titres de section : plus grands, libellé doré plus franc. --- */
+.sectionIntro h2, .sectionHeading h2, .journeyHeader h2, .faqHeading h2 {
+  font-size: clamp(40px, 4.8vw, 72px);
+  letter-spacing: -1.8px;
+}
+.sectionLabel::before { width: 38px; }
+
+/* --- Cartes catégories : cadre de galerie, élévation noble. --- */
+.categoryCard {
+  box-shadow: var(--shadow-soft);
+  transition:
+    transform .5s cubic-bezier(.2, .7, .2, 1),
+    box-shadow .5s ease,
+    border-color .4s ease;
+}
+.categoryCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-haute);
+}
+
+/* --- Avantages : filet d'or vertical qui s'allume. --- */
+.advantageCard { position: relative; }
+.advantageCard::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--gold-rule-strong);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform .5s cubic-bezier(.2, .7, .2, 1);
+}
+.advantageCard:hover::after { transform: scaleY(1); }
+
+/* --- Bandeau final : profondeur de la maison. --- */
+.finalCtaInner { box-shadow: var(--shadow-haute); }
+
+/* --- Or métallique : titre d'accroche et numéros du parcours. --- */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .heroContent h1 span,
+  .sectionIntro h2 em,
+  .sectionHeading h2 em,
+  .journeyHeader h2 em,
+  .faqHeading h2 em,
+  .journeyNumber {
+    background-image: var(--gold-ink-strong);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .categoryCard,
+  .advantageCard::after { transition: none !important; }
+}
+

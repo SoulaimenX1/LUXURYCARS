@@ -1,0 +1,123 @@
+{
+  "info": {
+    "_postman_id": "0b6a6d2e-2c4f-4c1a-9c3e-availability01",
+    "name": "Luxury Car Rental — Availability",
+    "description": "Vérification de la disponibilité réelle d'un véhicule physique unique.\nToutes les réponses proviennent de NestJS/PostgreSQL : le serveur reste la seule autorité (aucune disponibilité n'est inventée côté client).\n\nVariables d'environnement à définir :\n  baseUrl      = http://localhost:3001\n  token        = <JWT customer ou admin>\n  vehicleId    = <uuid du véhicule>\n  locationId   = <uuid du lieu de prise en charge>\n\nLes trois premiers appels (calendrier, vérification, alternatives) sont publics et ne requièrent pas de JWT. Les appels client/admin sont fournis avec l'en-tête Authorization.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3001" },
+    { "key": "token", "value": "" },
+    { "key": "vehicleId", "value": "" },
+    { "key": "locationId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Calendrier de disponibilité (public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/vehicles/{{vehicleId}}/availability-calendar?locationId={{locationId}}&month=2035-06",
+          "host": ["{{baseUrl}}"],
+          "path": ["vehicles", "{{vehicleId}}", "availability-calendar"],
+          "query": [
+            { "key": "locationId", "value": "{{locationId}}" },
+            { "key": "month", "value": "2035-06" }
+          ]
+        },
+        "description": "Renvoie les jours du mois avec leur statut (available / partial / unavailable / past) et les créneaux réels calculés à partir des réservations, immobilisations et locations actives. Vert = disponible, ambre = partiel, rouge = indisponible. Les données viennent exclusivement de PostgreSQL."
+      }
+    },
+    {
+      "name": "2. Vérifier un intervalle (public)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vehicleId\": \"{{vehicleId}}\",\n  \"pickupLocationId\": \"{{locationId}}\",\n  \"dropoffLocationId\": \"{{locationId}}\",\n  \"pickupAt\": \"2035-06-01T09:00:00.000Z\",\n  \"returnAt\": \"2035-06-03T09:00:00.000Z\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/availability/check",
+          "host": ["{{baseUrl}}"],
+          "path": ["availability", "check"]
+        },
+        "description": "Revalide l'intervalle complet : véhicule actif, lieux (même pays + compatibilité véhicule/lieu), horaires d'ouverture, durée minimale, tampon de préparation, et chevauchement avec réservations bloquantes (pending/confirmed/converted), location active et immobilisation. Réponse : { available, reason, message, details }."
+      }
+    },
+    {
+      "name": "3. Alternatives (public)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vehicleId\": \"{{vehicleId}}\",\n  \"pickupLocationId\": \"{{locationId}}\",\n  \"dropoffLocationId\": \"{{locationId}}\",\n  \"pickupAt\": \"2035-06-01T09:00:00.000Z\",\n  \"returnAt\": \"2035-06-03T09:00:00.000Z\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/availability/alternatives",
+          "host": ["{{baseUrl}}"],
+          "path": ["availability", "alternatives"]
+        },
+        "description": "Si l'intervalle est indisponible, renvoie : message, nextAvailable (prochaine période réellement libre pour CE véhicule, même durée) et alternatives (véhicules de même catégorie réellement disponibles sur l'intervalle, avec image et prix). Le véhicule choisi n'est jamais remplacé automatiquement."
+      }
+    },
+    {
+      "name": "4. Créer une réservation (client)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"vehicleId\": \"{{vehicleId}}\",\n  \"pickupLocationId\": \"{{locationId}}\",\n  \"dropoffLocationId\": \"{{locationId}}\",\n  \"pickupAt\": \"2035-06-01T09:00:00.000Z\",\n  \"returnAt\": \"2035-06-03T09:00:00.000Z\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/reservations",
+          "host": ["{{baseUrl}}"],
+          "path": ["reservations"]
+        },
+        "description": "Crée une réservation. La disponibilité est revalidée, puis l'insertion se fait dans une transaction avec verrou de la ligne véhicule (FOR UPDATE ... SKIP LOCKED). La contrainte PostgreSQL EXCLUDE ex_res_no_double_booking est l'arbitre final : deux requêtes concurrentes ne peuvent jamais réserver le même intervalle."
+      }
+    },
+    {
+      "name": "5. Confirmer une réservation (admin)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": { "mode": "raw", "raw": "" },
+        "url": {
+          "raw": "{{baseUrl}}/reservations/admin/by-number/RES-2035-000001/confirm",
+          "host": ["{{baseUrl}}"],
+          "path": ["reservations", "admin", "by-number", "RES-2035-000001", "confirm"]
+        },
+        "description": "Passe une réservation de pending à confirmed. Aucun body. Les règles de disponibilité restent garanties par la transaction verrouillée et la contrainte PostgreSQL."
+      }
+    },
+    {
+      "name": "6. Aperçu / modifier une réservation (admin)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"pickupAt\": \"2035-06-10T09:00:00.000Z\",\n  \"returnAt\": \"2035-06-12T09:00:00.000Z\",\n  \"pickupLocationId\": \"{{locationId}}\",\n  \"dropoffLocationId\": \"{{locationId}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/reservations/admin/by-number/RES-2035-000001/edit",
+          "host": ["{{baseUrl}}"],
+          "path": ["reservations", "admin", "by-number", "RES-2035-000001", "edit"]
+        },
+        "description": "La modification revalide la disponibilité en excluant la réservation en cours (elle ne se bloque pas elle-même) tout en contrôlant toutes les autres réservations, locations et immobilisations. Le Save côté interface n'est activé qu'après validation serveur. (Aperçu : POST .../edit/preview.)"
+      }
+    }
+  ]
+}

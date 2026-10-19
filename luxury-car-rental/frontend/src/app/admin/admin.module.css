@@ -87,32 +87,61 @@
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1px;
-  border: 1px solid var(--line);
-  background: var(--line);
+  gap: 18px;
 }
 
 .statCard {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding: 28px;
+  padding: 30px 28px 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
   background: var(--white);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+}
+
+/* Filet doré discret : la signature « maison » des cartes indicateurs. */
+.statCard::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--champagne),
+    transparent 72%
+  );
+  opacity: 0.55;
+}
+
+.statCard:hover {
+  transform: translateY(-3px);
+  border-color: var(--champagne-line);
+  box-shadow: var(--shadow);
 }
 
 .statLabel {
   color: var(--champagne);
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 700;
-  letter-spacing: 1.8px;
+  letter-spacing: 1.9px;
 }
 
 .statValue {
   color: var(--ink);
   font-family: var(--serif);
-  font-size: 44px;
+  font-size: 46px;
   font-weight: 400;
   line-height: 1;
+  letter-spacing: -0.02em;
 }
 
 .statDescription {
@@ -255,3 +284,9 @@
     padding: 26px 22px;
   }
 }
+
+
+/* MAISON — Tableau de bord direction. */
+.hero h1, .sectionHeading h2, .statValue { font-family: var(--serif); font-weight: 400; }
+.moduleCard { border-radius: var(--radius-card); background: var(--white); transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease; }
+.moduleCard:hover { box-shadow: var(--shadow); border-color: var(--champagne-line); transform: translateY(-3px); }

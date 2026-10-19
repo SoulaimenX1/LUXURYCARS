@@ -1,3 +1,5 @@
+import { InboxService } from './inbox.service.js';
+import { Logger } from '@nestjs/common';
 
 import {
     Injectable,
@@ -48,10 +50,12 @@ export interface VehicleNotificationInput {
 
 @Injectable()
 export class NotificationsService {
+    private readonly logger = new Logger(NotificationsService.name);
     constructor(
         @InjectRepository(Notification)
         private readonly notificationsRepository:
             Repository<Notification>,
+        private readonly inbox: InboxService,
     ) {}
 
     // ==========================================
@@ -190,11 +194,18 @@ export class NotificationsService {
                 'A special edition now available in our collection.';
         }
 
-        return this.createVehicleNotification({
+        const notice = await this.createVehicleNotification({
             vehicleId: params.vehicleId,
             type,
             title,
             message,
         });
+        try {
+            await this.inbox.broadcastFleet(params.vehicleId, title, message);
+        } catch (error) {
+            // Une panne du canal privé n'annule pas l'ajout du véhicule.
+            this.logger.warn(`Fleet inbox unavailable: ${String(error)}`);
+        }
+        return notice;
     }
 }

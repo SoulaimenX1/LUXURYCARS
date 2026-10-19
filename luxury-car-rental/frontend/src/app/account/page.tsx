@@ -2,7 +2,13 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import {
+    useEffect,
+    useState,
+    type FormEvent,
+} from 'react';
+
+import { useToast } from '@/components/toast';
 
 import styles from './account.module.css';
 
@@ -26,12 +32,28 @@ interface AuthenticatedUser {
 
 export default function AccountPage() {
     const router = useRouter();
+    const toast = useToast();
 
     const [user, setUser] =
         useState<AuthenticatedUser | null>(null);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    // Aucun permis enregistré : le client reçoit une invitation
+    // visible à compléter son profil.
+    const [licenceMissing, setLicenceMissing] = useState(false);
+
+    // Formulaire « informations personnelles » (téléphone obligatoire).
+    const [form, setForm] = useState({
+        firstName: '',
+        lastName: '',
+        phone: '',
+    });
+
+    const [saving, setSaving] = useState(false);
+    const [saveError, setSaveError] = useState('');
+    const [saveMessage, setSaveMessage] = useState('');
 
     // ======================================================
     // CHARGER L'UTILISATEUR CONNECTÉ
@@ -79,6 +101,34 @@ export default function AccountPage() {
 
                 if (active) {
                     setUser(data);
+
+                    setForm({
+                        firstName: data.firstName ?? '',
+                        lastName: data.lastName ?? '',
+                        phone: data.phone ?? '',
+                    });
+                }
+
+                // Le profil client (permis de conduire) est
+                // distinct du compte : le backend renvoie 404
+                // tant que le client n'a pas enregistré son permis.
+                try {
+                    const profileResponse = await fetch(
+                        '/api/customer-profile',
+                        {
+                            method: 'GET',
+                            cache: 'no-store',
+                        },
+                    );
+
+                    if (active) {
+                        setLicenceMissing(
+                            profileResponse.status === 404,
+                        );
+                    }
+                } catch {
+                    // Une erreur réseau ne doit pas masquer
+                    // le tableau de bord.
                 }
             } catch {
                 if (active) {
@@ -99,6 +149,96 @@ export default function AccountPage() {
             active = false;
         };
     }, [router]);
+
+    // ======================================================
+    // ENREGISTRER LES INFORMATIONS PERSONNELLES
+    // ======================================================
+
+    async function savePersonalInformation(
+        event: FormEvent<HTMLFormElement>,
+    ) {
+        event.preventDefault();
+
+        setSaveError('');
+        setSaveMessage('');
+
+        const phone = form.phone.trim();
+
+        // Le numéro de téléphone est obligatoire.
+        if (!phone) {
+            const message = 'A phone number is required.';
+            setSaveError(message);
+            toast.error(message, 'Personal information');
+            return;
+        }
+
+        if (!/^\+?[0-9 ().-]{6,30}$/.test(phone)) {
+            const message = 'Please enter a valid phone number.';
+            setSaveError(message);
+            toast.error(message, 'Personal information');
+            return;
+        }
+
+        setSaving(true);
+
+        try {
+            const response = await fetch('/api/profile', {
+                method: 'PATCH',
+
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+
+                body: JSON.stringify({
+                    firstName: form.firstName.trim(),
+                    lastName: form.lastName.trim(),
+                    phone,
+                }),
+            });
+
+            const data = (await response
+                .json()
+                .catch(() => null)) as
+                | (AuthenticatedUser & {
+                      message?: string | string[];
+                  })
+                | null;
+
+            if (!response.ok) {
+                const rawMessage = data?.message;
+
+                throw new Error(
+                    Array.isArray(rawMessage)
+                        ? rawMessage.join(' ')
+                        : rawMessage ||
+                              'Unable to save your information.',
+                );
+            }
+
+            // Le backend renvoie le profil public mis à jour.
+            setUser((previous) => ({
+                ...previous,
+                ...(data ?? {}),
+            }));
+
+            setSaveMessage(
+                'Your information has been saved.',
+            );
+            toast.success(
+                'Your information has been saved.',
+                'Personal information',
+            );
+        } catch (caught) {
+            const message =
+                caught instanceof Error
+                    ? caught.message
+                    : 'Unable to save your information.';
+            setSaveError(message);
+            toast.error(message, 'Personal information');
+        } finally {
+            setSaving(false);
+        }
+    }
 
     // ======================================================
     // CHARGEMENT
@@ -183,7 +323,7 @@ export default function AccountPage() {
                         </span>
 
                         <h1>
-                            Welcome, {firstName}.
+                            Welcome, {firstName}
                         </h1>
 
                         <p>
@@ -212,6 +352,44 @@ export default function AccountPage() {
                     >
                         {error}
                     </div>
+                )}
+
+                {/* ================================================= */}
+                {/* PERMIS MANQUANT — AVERTISSEMENT                   */}
+                {/* ================================================= */}
+
+                {licenceMissing && (
+                    <section
+                        className={styles.licenceBanner}
+                        role="alert"
+                    >
+                        <div className={styles.licenceText}>
+                            <span
+                                className={styles.licenceEyebrow}
+                            >
+                                DRIVING LICENCE REQUIRED
+                            </span>
+
+                            <h2>
+                                You must register your driving
+                                licence
+                            </h2>
+
+                            <p>
+                                Add your driving licence details
+                                to your profile to be able to book
+                                a vehicle.
+                            </p>
+                        </div>
+
+                        <Link
+                            href="/account/profile"
+                            className={styles.licenceCta}
+                        >
+                            Register my licence
+                            <span aria-hidden="true">→</span>
+                        </Link>
+                    </section>
                 )}
 
                 {/* ================================================= */}
@@ -278,7 +456,7 @@ export default function AccountPage() {
                         </Link>
 
                         <Link
-                            href="/availability"
+                            href="/contact"
                             className={styles.actionCard}
                         >
                             <span className={styles.actionNumber}>
@@ -286,10 +464,10 @@ export default function AccountPage() {
                             </span>
 
                             <div>
-                                <h3>Check availability</h3>
+                                <h3>Contact us</h3>
                                 <p>
-                                    Choose dates and find an
-                                    available vehicle.
+                                    Reach our team in Budapest
+                                    for any request.
                                 </p>
                             </div>
 
@@ -340,6 +518,22 @@ export default function AccountPage() {
                             </span>
                         </Link>
 
+                        <Link
+                            href="/account/rentals"
+                            className={styles.actionCard}
+                        >
+                            <span className={styles.actionNumber}>05</span>
+                            <div>
+                                <h3>My rentals</h3>
+                                <p>Track active rentals, pickup details and rental history.</p>
+                            </div>
+                            <span className={styles.arrow}>→</span>
+                        </Link>
+                        <Link href="/account/premium" className={styles.actionCard}>
+                          <span className={styles.actionNumber}>06</span>
+                          <div><h3>My premium collection</h3><p>Saved vehicles, membership tier and verified reviews.</p></div>
+                          <span className={styles.arrow}>→</span>
+                        </Link>
                     </div>
                 </section>
 
@@ -414,6 +608,127 @@ export default function AccountPage() {
                         </Link>
 
                     </div>
+                </section>
+
+                {/* ================================================= */}
+                {/* INFORMATIONS PERSONNELLES (ÉDITABLES)             */}
+                {/* ================================================= */}
+
+                <section className={styles.accountSection}>
+
+                    <div className={styles.sectionTitle}>
+                        <span>PERSONAL INFORMATION</span>
+                        <h2>Update your details</h2>
+                    </div>
+
+                    <form
+                        className={styles.editCard}
+                        onSubmit={savePersonalInformation}
+                    >
+
+                        <div className={styles.editFields}>
+
+                            <label className={styles.editField}>
+                                <span>First name</span>
+
+                                <input
+                                    type="text"
+                                    autoComplete="given-name"
+                                    value={form.firstName}
+                                    onChange={(event) =>
+                                        setForm((previous) => ({
+                                            ...previous,
+                                            firstName:
+                                                event.target.value,
+                                        }))
+                                    }
+                                />
+                            </label>
+
+                            <label className={styles.editField}>
+                                <span>Last name</span>
+
+                                <input
+                                    type="text"
+                                    autoComplete="family-name"
+                                    value={form.lastName}
+                                    onChange={(event) =>
+                                        setForm((previous) => ({
+                                            ...previous,
+                                            lastName:
+                                                event.target.value,
+                                        }))
+                                    }
+                                />
+                            </label>
+
+                            <label className={styles.editField}>
+                                <span>
+                                    Phone number
+                                    <em aria-hidden="true">
+                                        {' '}
+                                        *
+                                    </em>
+                                </span>
+
+                                <input
+                                    type="tel"
+                                    autoComplete="tel"
+                                    placeholder="+216 ..."
+                                    required
+                                    value={form.phone}
+                                    onChange={(event) =>
+                                        setForm((previous) => ({
+                                            ...previous,
+                                            phone:
+                                                event.target.value,
+                                        }))
+                                    }
+                                />
+                            </label>
+
+                            <label className={styles.editField}>
+                                <span>Email</span>
+
+                                <input
+                                    type="email"
+                                    value={user.email ?? ''}
+                                    readOnly
+                                    disabled
+                                />
+                            </label>
+
+                        </div>
+
+                        {saveError && (
+                            <p
+                                className={styles.saveError}
+                                role="alert"
+                            >
+                                {saveError}
+                            </p>
+                        )}
+
+                        {saveMessage && (
+                            <p
+                                className={styles.saveMessage}
+                                role="status"
+                            >
+                                {saveMessage}
+                            </p>
+                        )}
+
+                        <button
+                            type="submit"
+                            className={styles.saveButton}
+                            disabled={saving}
+                        >
+                            {saving
+                                ? 'Saving...'
+                                : 'Save changes'}
+                        </button>
+
+                    </form>
                 </section>
 
             </div>

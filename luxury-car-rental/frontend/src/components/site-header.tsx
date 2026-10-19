@@ -14,6 +14,8 @@ import {
 
 import NotificationBell from './notification-bell';
 import ThemeToggle from './theme-toggle';
+import CurrencySelector from './currency-selector';
+import { useToast } from './toast';
 
 import styles from './site-chrome.module.css';
 
@@ -34,7 +36,7 @@ interface CurrentUser {
 const NAVIGATION = [
     { href: '/', label: 'Home' },
     { href: '/vehicles', label: 'Fleet' },
-    { href: '/availability', label: 'Availability' },
+    { href: '/contact', label: 'Contact' },
 ];
 
 export default function SiteHeader() {
@@ -46,6 +48,8 @@ export default function SiteHeader() {
 
     const [signingOut, setSigningOut] =
         useState(false);
+
+    const toast = useToast();
 
     // Vérifier la session à chaque changement de page.
     useEffect(() => {
@@ -95,9 +99,20 @@ export default function SiteHeader() {
         setSigningOut(true);
 
         try {
-            await fetch('/api/auth/logout', {
+            const response = await fetch('/api/auth/logout', {
                 method: 'POST',
             });
+
+            if (!response.ok) {
+                throw new Error('Logout failed.');
+            }
+
+            toast.success('You have been signed out.', 'Session');
+        } catch {
+            toast.error(
+                'Unable to sign out. Please try again.',
+                'Session',
+            );
         } finally {
             setUser(null);
             setSigningOut(false);
@@ -158,6 +173,7 @@ export default function SiteHeader() {
                 <div className={styles.headerActions}>
                     {user && <NotificationBell />}
 
+                    <CurrencySelector />
                     <ThemeToggle />
 
                     {user ? (

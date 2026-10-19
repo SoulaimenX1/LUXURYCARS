@@ -19,9 +19,23 @@ import {
     UsersService,
 } from '../users/users.service.js';
 
+import {
+    InboxService,
+} from '../notifications/inbox.service.js';
+
 import type {
     CreateCustomerInput,
 } from '../users/users.service.js';
+
+// Stub du service de notifications : une connexion ne doit
+// jamais échouer si le rappel de permis est indisponible.
+function inboxStub() {
+    return {
+        safelyLicenseRequired: vi
+            .fn()
+            .mockResolvedValue(undefined),
+    } as unknown as InboxService;
+}
 
 import {
     AccountStatus,
@@ -65,6 +79,7 @@ describe('AuthService', () => {
             {
                 signAsync: vi.fn(),
             } as unknown as JwtService,
+            inboxStub(),
         );
 
         const result = await service.register(registerDto);
@@ -122,6 +137,7 @@ describe('AuthService', () => {
             {
                 signAsync: vi.fn(),
             } as unknown as JwtService,
+            inboxStub(),
         );
 
         await expect(
@@ -163,6 +179,7 @@ describe('AuthService', () => {
             {
                 signAsync,
             } as unknown as JwtService,
+            inboxStub(),
         );
 
         const result = await service.login({
@@ -227,6 +244,7 @@ describe('AuthService', () => {
             {
                 signAsync,
             } as unknown as JwtService,
+            inboxStub(),
         );
 
         await expect(
@@ -257,6 +275,7 @@ describe('AuthService', () => {
             {
                 signAsync,
             } as unknown as JwtService,
+            inboxStub(),
         );
 
         await expect(
@@ -299,6 +318,7 @@ describe('AuthService', () => {
             {
                 signAsync,
             } as unknown as JwtService,
+            inboxStub(),
         );
 
         await expect(
@@ -312,5 +332,94 @@ describe('AuthService', () => {
 
         // JWT must not be generated
         expect(signAsync).not.toHaveBeenCalled();
+    });
+
+    // ==========================================
+    // TEST 7: LICENCE REMINDER ON LOGIN
+    // ==========================================
+
+    it('should request a licence reminder when a customer logs in', async () => {
+        const passwordHash = await argon2.hash(
+            'TestPassword2026!',
+        );
+
+        const user = {
+            id: '550e8400-e29b-41d4-a716-446655440000',
+            email: 'test@example.com',
+            passwordHash,
+            role: UserRole.CUSTOMER,
+            status: AccountStatus.ACTIVE,
+        } as User;
+
+        const safelyLicenseRequired = vi
+            .fn()
+            .mockResolvedValue(undefined);
+
+        const service = new AuthService(
+            {
+                findByEmailForAuth: vi
+                    .fn()
+                    .mockResolvedValue(user),
+            } as unknown as UsersService,
+            {
+                signAsync: vi
+                    .fn()
+                    .mockResolvedValue('test-access-token'),
+            } as unknown as JwtService,
+            {
+                safelyLicenseRequired,
+            } as unknown as InboxService,
+        );
+
+        await service.login({
+            email: 'test@example.com',
+            password: 'TestPassword2026!',
+        });
+
+        expect(safelyLicenseRequired).toHaveBeenCalledOnce();
+        expect(safelyLicenseRequired).toHaveBeenCalledWith(
+            user.id,
+        );
+    });
+
+    it('should not request a licence reminder for an administrator', async () => {
+        const passwordHash = await argon2.hash(
+            'AdminPass123!',
+        );
+
+        const admin = {
+            id: '660e8400-e29b-41d4-a716-446655440001',
+            email: 'admin@luxury.test',
+            passwordHash,
+            role: UserRole.ADMIN,
+            status: AccountStatus.ACTIVE,
+        } as User;
+
+        const safelyLicenseRequired = vi
+            .fn()
+            .mockResolvedValue(undefined);
+
+        const service = new AuthService(
+            {
+                findByEmailForAuth: vi
+                    .fn()
+                    .mockResolvedValue(admin),
+            } as unknown as UsersService,
+            {
+                signAsync: vi
+                    .fn()
+                    .mockResolvedValue('test-access-token'),
+            } as unknown as JwtService,
+            {
+                safelyLicenseRequired,
+            } as unknown as InboxService,
+        );
+
+        await service.login({
+            email: 'admin@luxury.test',
+            password: 'AdminPass123!',
+        });
+
+        expect(safelyLicenseRequired).not.toHaveBeenCalled();
     });
 });

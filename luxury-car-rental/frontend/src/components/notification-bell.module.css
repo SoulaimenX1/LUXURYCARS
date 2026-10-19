@@ -191,3 +191,49 @@
     max-height: 46vh;
   }
 }
+
+
+/* MAISON — Cloche, panneau de notification flottant. */
+.button, .panel, .item { border-radius: var(--radius-field); }
+.panel { background: var(--white); box-shadow: var(--shadow); }
+.markAll { border:0; background:transparent; color:var(--gold-text); font-size:11px; cursor:pointer; text-align:right; }
+.markAll:hover { text-decoration:underline; }
+
+/* ==============================================================
+   COUTURE 2026 — CLOCHE
+   ============================================================== */
+.button {
+  border-radius: 999px;
+}
+
+.button:hover {
+  box-shadow: var(--button-shadow);
+}
+
+.badge {
+  box-shadow: 0 0 0 2px var(--header-bg);
+}
+
+.panel {
+  border-radius: var(--radius-card);
+  border-color: var(--panel-border);
+  box-shadow: var(--shadow-luxe);
+}
+
+.panelHeader {
+  border-bottom-color: var(--champagne-line);
+}
+
+.panelHeader strong {
+  letter-spacing: .02em;
+}
+
+.item:hover {
+  background: linear-gradient(90deg, var(--champagne-soft), transparent 85%);
+}
+
+.viewAll {
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-size: 11px;
+}

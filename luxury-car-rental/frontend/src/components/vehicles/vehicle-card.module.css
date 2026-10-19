@@ -435,6 +435,31 @@
   letter-spacing: 0.1px;
 }
 
+/* Valeur du véhicule — indicateur central, discret. */
+.vehicleValue {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 8px;
+  text-align: center;
+}
+
+.vehicleValue span {
+  color: var(--muted-2);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+}
+
+.vehicleValue strong {
+  color: var(--champagne-2);
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0.1px;
+}
+
 .reserveButton {
   flex-shrink: 0;
   margin-top: 24px;
@@ -504,4 +529,174 @@
   .deposit {
     text-align: left;
   }
+
+  .vehicleValue {
+    text-align: left;
+  }
 }
+
+
+/* MAISON — Cartes automobiles, jeux de matière et profondeur. */
+.vehicleCard { border-radius: var(--radius-card); overflow: hidden; box-shadow: var(--shadow-soft); }
+.vehicleCard:hover { box-shadow: var(--shadow); }
+.vehicleVisual { background: linear-gradient(125deg, var(--surface-highlight), transparent 65%), var(--ivory-3); }
+.vehicleBrand, .dailyRate { font-family: var(--serif); font-weight: 400; }
+.reserveButton { border-radius: var(--radius-button); }
+.categoryBadge, .editionFlag { backdrop-filter: blur(8px); }
+
+/* Cartes véhicule : séparation des surfaces et focus constant dans les deux thèmes. */
+.vehicleCard { border-color:var(--panel-border); }
+.vehicleCard:focus-within { outline:2px solid var(--focus-ring); outline-offset:4px; }
+.vehicleCard:has(.reserveButton:focus-visible) { transform:none; }
+html[data-theme="dark"] .vehicleCard { box-shadow:0 24px 58px -35px rgba(0,0,0,.85); }
+@media (prefers-reduced-motion:reduce) {
+  .vehicleCard, .vehicleImage, .vehicleVideo, .visualShine { animation:none !important; transition:none !important; }
+}
+
+
+.premiumActions {display:flex;gap:10px;margin-top:15px;}
+.premiumActions button {flex:1;padding:11px 8px;border:1px solid var(--panel-border);background:var(--white-2);color:var(--gold-text);cursor:pointer;border-radius:var(--radius-button);font-size:12px;}
+.premiumActions button[aria-pressed="true"] {background:var(--champagne-soft);border-color:var(--champagne);color:var(--ink);}
+/* Bouton « Save » actif : fond clair, cœur PLEIN noir + libellé « Saved ». */
+.premiumActions button.favoriteActive,
+.premiumActions button.favoriteActive[aria-pressed="true"] {background:var(--white-2);border-color:var(--noir);color:var(--noir);}
+.premiumActions button.favoriteActive:hover,
+.premiumActions button.favoriteActive[aria-pressed="true"]:hover {background:var(--champagne-soft);border-color:var(--noir);color:var(--noir);}
+.premiumActions button:focus-visible {outline:2px solid var(--focus-ring);outline-offset:2px;}
+
+.detailsLink{display:block;margin-top:14px;text-align:center;color:var(--gold-text);font-size:12px;text-decoration:underline;text-underline-offset:4px;}
+.detailsLink:focus-visible{outline:2px solid var(--focus-ring);outline-offset:3px;}
+
+/* ==============================================================
+   COUTURE 2026 — CARTE VÉHICULE
+   Cadre de galerie, filet d'or au survol, métal sur le tarif.
+   ============================================================== */
+.vehicleGrid { gap: 26px; }
+
+.vehicleCard {
+  border-radius: var(--radius-xl);
+  border-color: var(--panel-border);
+}
+
+.vehicleCard::before {
+  content: '';
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  pointer-events: none;
+  background: var(--gold-rule);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .55s cubic-bezier(.2, .7, .2, 1);
+}
+
+.vehicleCard:hover::before,
+.vehicleCard:focus-within::before {
+  transform: scaleX(1);
+}
+
+.vehicleCard:hover {
+  box-shadow: var(--shadow-luxe);
+}
+
+.categoryBadge {
+  border-radius: 999px;
+  letter-spacing: 1.6px;
+}
+
+.vehicleBrand {
+  letter-spacing: 3px;
+}
+
+.dailyRate strong {
+  color: var(--champagne-2);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .dailyRate strong {
+    background-image: var(--gold-ink);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+.reserveButton {
+  position: relative;
+  overflow: hidden;
+}
+
+.reserveButton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--sheen);
+  transform: translateX(-140%);
+  transition: transform .75s ease;
+}
+
+.reserveButton:hover::after {
+  transform: translateX(140%);
+}
+
+.premiumActions button {
+  letter-spacing: .04em;
+  transition: border-color .2s ease, background .2s ease, color .2s ease;
+}
+
+.premiumActions button:hover {
+  border-color: var(--champagne);
+  color: var(--gold-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vehicleCard::before,
+  .reserveButton::after {
+    transition: none !important;
+  }
+}
+
+/* ==============================================================
+   HAUTE COUTURE 2026 — CARTE VÉHICULE
+   Cadre de galerie doré, zoom noble et profondeur de vitrine.
+   ============================================================== */
+.vehicleGrid { gap: 30px; }
+
+.vehicleCard { border-color: var(--panel-border); }
+.vehicleCard:hover { box-shadow: var(--shadow-haute); }
+
+/* Cadre d'or intérieur du visuel, révélé au survol. */
+.vehicleVisual { position: relative; }
+.vehicleVisual::after {
+  content: '';
+  position: absolute;
+  inset: 13px;
+  z-index: 4;
+  border: 1px solid var(--champagne-line);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .45s ease;
+}
+.vehicleVisual:hover::after,
+.vehicleCard:hover .vehicleVisual::after { opacity: .75; }
+
+/* Zoom plus lent et plus ample, à la manière d'une galerie. */
+.vehicleImage { transition: transform .85s cubic-bezier(.2, .7, .2, 1); }
+.vehicleVisual:hover .vehicleImage { transform: scale(1.06); }
+
+/* Tarif : or métallique renforcé. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .dailyRate strong {
+    background-image: var(--gold-ink-strong);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vehicleVisual::after,
+  .vehicleImage { transition: none !important; }
+}
+

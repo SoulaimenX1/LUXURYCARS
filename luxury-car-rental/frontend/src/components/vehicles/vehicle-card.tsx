@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 import type { VehicleItem } from '@/lib/catalog-types';
-import { formatAmount, formatLabel } from '@/lib/format';
+import { formatLabel } from '@/lib/format';
+import { Price } from '@/components/currency-provider';
 
 import LuxeVideo from '@/components/luxe-video';
 import {
@@ -17,7 +18,7 @@ import styles from './vehicle-card.module.css';
 
 // ==========================================================
 // CARTE VÉHICULE PARTAGÉE
-// Utilisée par /vehicles et /availability.
+// Utilisée par la page /vehicles.
 // Conserve les animations, vidéos, badges et réservations.
 // ==========================================================
 
@@ -25,6 +26,15 @@ interface VehicleCardProps {
   vehicle: VehicleItem;
   index: number;
   availableLabel?: string;
+  premiumActions?: {
+    compared: boolean;
+    favorite: boolean;
+    // Le bouton « Save » n'apparaît que pour un client
+    // connecté : les visiteurs sans compte ne le voient pas.
+    canFavorite?: boolean;
+    onCompare: () => void;
+    onFavorite: () => void;
+  };
   cta: {
     label: string;
     href?: string;
@@ -43,11 +53,12 @@ export default function VehicleCard({
   index,
   availableLabel,
   cta,
+  premiumActions,
 }: VehicleCardProps) {
   const video = vehicleVideoAt(index);
   const [imageFailed, setImageFailed] = useState(false);
 
-  // Priorité : vidéo du véhicule, photo réelle, vidéo générique.
+  // Priorité : photo réelle du véhicule, puis vidéo en secours.
   const hasVideo = Boolean(vehicle.videoUrl);
   const hasImage = Boolean(vehicle.imageUrl) && !imageFailed;
 
@@ -67,13 +78,7 @@ export default function VehicleCard({
       {/* VISUEL CINÉMATIQUE                              */}
       {/* ================================================ */}
       <div className={styles.vehicleVisual}>
-        {hasVideo ? (
-          <LuxeVideo
-            className={styles.vehicleVideo}
-            src={vehicle.videoUrl ?? ''}
-            poster={vehicle.imageUrl ?? video.poster}
-          />
-        ) : hasImage ? (
+        {hasImage ? (
           <img
             className={styles.vehicleImage}
             src={vehicle.imageUrl ?? ''}
@@ -84,7 +89,7 @@ export default function VehicleCard({
         ) : (
           <LuxeVideo
             className={styles.vehicleVideo}
-            src={video.src}
+            src={hasVideo ? (vehicle.videoUrl ?? '') : video.src}
             poster={video.poster}
           />
         )}
@@ -218,17 +223,42 @@ export default function VehicleCard({
           <div className={styles.dailyRate}>
             <span>DAILY RATE</span>
             <div>
-              <strong>{formatAmount(vehicle.dailyPrice)}</strong>
+              <strong><Price value={vehicle.dailyPrice} /></strong>
               <small>/ day</small>
             </div>
           </div>
 
+          <div className={styles.vehicleValue}>
+            <span>Vehicle value</span>
+            <strong><Price value={vehicle.vehicleValue} /></strong>
+          </div>
+
           <div className={styles.deposit}>
             <span>Security deposit</span>
-            <strong>{formatAmount(vehicle.securityDeposit)}</strong>
+            <strong><Price value={vehicle.securityDeposit} /></strong>
           </div>
         </div>
 
+        {premiumActions && (
+          <div className={styles.premiumActions}>
+            <button type="button" aria-pressed={premiumActions.compared} onClick={premiumActions.onCompare}>
+              {premiumActions.compared?'✓ Comparing':'Compare'}
+            </button>
+            {premiumActions.canFavorite && (
+              <button
+                type="button"
+                aria-pressed={premiumActions.favorite}
+                className={premiumActions.favorite ? styles.favoriteActive : undefined}
+                onClick={premiumActions.onFavorite}
+              >
+                {premiumActions.favorite?'♥ Saved':'♡ Save'}
+              </button>
+            )}
+          </div>
+        )}
+        <Link href={`/vehicles/${encodeURIComponent(vehicle.id)}`} className={styles.detailsLink}>
+          View details & verified reviews →
+        </Link>
         {/* Bouton de réservation : lien ou action existante. */}
         {cta.href ? (
           <Link href={cta.href} className={styles.reserveButton}>

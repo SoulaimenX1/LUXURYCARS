@@ -1,3 +1,4 @@
+import { InboxService } from '../notifications/inbox.service.js';
 
 import {
     Body,
@@ -51,6 +52,7 @@ export class CustomerProfilesController {
     constructor(
         private readonly customerProfilesService:
             CustomerProfilesService,
+        private readonly inbox: InboxService,
     ) { }
 
     // ==========================================
@@ -62,7 +64,7 @@ export class CustomerProfilesController {
     @Post('me')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.CUSTOMER)
-    createMyProfile(
+    async createMyProfile(
         @Req() request: AuthenticatedRequest,
 
         @Body()
@@ -73,8 +75,9 @@ export class CustomerProfilesController {
         const userId = request.user.id;
 
         // Enregistrer son profil.
-        return this.customerProfilesService
-            .createProfile(userId, dto);
+        const profile = await this.customerProfilesService.createProfile(userId, dto);
+        await this.inbox.safelyLicenseUpdated(userId);
+        return profile;
     }
 
     // ==========================================
@@ -86,7 +89,7 @@ export class CustomerProfilesController {
     @Patch('me')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.CUSTOMER)
-    updateMyProfile(
+    async updateMyProfile(
         @Req() request: AuthenticatedRequest,
 
         @Body()
@@ -97,8 +100,9 @@ export class CustomerProfilesController {
         const userId = request.user.id;
 
         // Mettre à jour son profil.
-        return this.customerProfilesService
-            .updateProfile(userId, dto);
+        const profile = await this.customerProfilesService.updateProfile(userId, dto);
+        await this.inbox.safelyLicenseUpdated(userId);
+        return profile;
     }
 
     // ==========================================

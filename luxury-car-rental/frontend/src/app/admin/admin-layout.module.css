@@ -256,6 +256,12 @@
   box-shadow: 0 0 0 4px var(--success-bg);
 }
 
+.topbarActions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
 .topbarRight {
   display: flex;
   flex-direction: column;
@@ -377,3 +383,13 @@
     display: none;
   }
 }
+
+
+/* MAISON — Console d'administration : sidebar joaillerie. */
+.shell { background: var(--ivory); }
+.sidebar { background: var(--ivory-2); box-shadow: 6px 0 36px -34px rgba(0,0,0,.4); }
+.workspace h1 { font-family: var(--serif); font-weight: 400; }
+.navLink, .activeLink { border-radius: 6px; padding-inline: 12px; }
+.activeLink { background: var(--champagne-soft); border-left: 2px solid var(--champagne); }
+.logo, .avatar { border-radius: 6px; }
+.logout { border-radius: var(--radius-button); }

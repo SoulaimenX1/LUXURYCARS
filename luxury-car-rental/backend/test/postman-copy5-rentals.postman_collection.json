@@ -1,0 +1,436 @@
+{
+  "info": {
+    "name": "Luxury Car Rental — Copy 5 (Rental Management)",
+    "_postman_id": "138ea8c2-0005-4004-baba-202600000005",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Tests API de location ; renseigner les variables avec des comptes et des réservations de test. Les requêtes POST changent les données."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "customerToken",
+      "value": ""
+    },
+    {
+      "key": "reservationNumber",
+      "value": "RES-2026-000001"
+    },
+    {
+      "key": "rentalId",
+      "value": ""
+    },
+    {
+      "key": "newReturnDate",
+      "value": "2026-11-30"
+    },
+    {
+      "key": "pickupMileageKm",
+      "value": "12000"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Consultation (lecture seule)",
+      "item": [
+        {
+          "name": "Admin — Liste des locations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rentals/admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rentals",
+                "admin"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Tableau de locations\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Customer — Ses locations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rentals/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rentals",
+                "me"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Tableau client\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Customer ne peut pas voir les locations Admin",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rentals/admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rentals",
+                "admin"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin ne peut pas consulter My Rentals client",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rentals/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rentals",
+                "me"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Handover (écrit en base)",
+      "item": [
+        {
+          "name": "Admin — Démarrer une location confirmée",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rentals/admin/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rentals",
+                "admin",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reservationNumber\": \"{{reservationNumber}}\",\n  \"mileageKm\": 12000,\n  \"fuelLevelPct\": 80,\n  \"overallCondition\": \"good\",\n  \"notes\": \"V\\u00e9rification Postman, uniquement en base de test\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "const r=pm.response.json();",
+                  "pm.test(\"Contrat et location\",()=>{pm.expect(r.id).to.be.a(\"string\");pm.expect(r.contractNumber).to.be.a(\"string\");});",
+                  "if(r.id){pm.collectionVariables.set(\"rentalId\",r.id);}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refuser un second démarrage",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rentals/admin/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rentals",
+                "admin",
+                "start"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reservationNumber\": \"{{reservationNumber}}\",\n  \"mileageKm\": 12000,\n  \"fuelLevelPct\": 80,\n  \"overallCondition\": \"good\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Prolongation (écrit en base)",
+      "item": [
+        {
+          "name": "Admin — Prolonger une location",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rentals/admin/{{rentalId}}/extend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rentals",
+                "admin",
+                "{{rentalId}}",
+                "extend"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newReturnDate\": \"{{newReturnDate}}\",\n  \"reason\": \"Test administratif de prolongation\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", function () { pm.response.to.have.status(201); });",
+                  "const r=pm.response.json();",
+                  "pm.test(\"Montant additionnel\",()=>pm.expect(r).to.have.property(\"additionalAmount\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refuser la même date de retour",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/rentals/admin/{{rentalId}}/extend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "rentals",
+                "admin",
+                "{{rentalId}}",
+                "extend"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newReturnDate\": \"{{newReturnDate}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

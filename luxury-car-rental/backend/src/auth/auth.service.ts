@@ -1,7 +1,9 @@
 
 import {
+    Inject,
     Injectable,
     UnauthorizedException,
+    forwardRef,
 } from '@nestjs/common';
 
 import { JwtService } from '@nestjs/jwt';
@@ -11,7 +13,12 @@ import { UsersService } from '../users/users.service.js';
 
 import {
     AccountStatus,
+    UserRole,
 } from '../users/entities/user.entity.js';
+
+import {
+    InboxService,
+} from '../notifications/inbox.service.js';
 
 import { LoginDto } from './dto/login.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
@@ -21,6 +28,11 @@ export class AuthService {
     constructor(
         private readonly usersService: UsersService,
         private readonly jwtService: JwtService,
+
+        // Rappel de permis : un avis est créé à chaque connexion
+        // d'un client n'ayant pas encore enregistré son permis.
+        @Inject(forwardRef(() => InboxService))
+        private readonly inboxService: InboxService,
     ) { }
 
     // ==========================================
@@ -94,6 +106,14 @@ export class AuthService {
                 sub: user.id,
                 role: user.role,
             });
+
+        // Un client sans permis enregistré reçoit un avis
+        // « Driving licence required » à chaque connexion.
+        // L'échec de la notification ne doit jamais bloquer
+        // la connexion.
+        if (user.role === UserRole.CUSTOMER) {
+            await this.inboxService.safelyLicenseRequired(user.id);
+        }
 
         return {
             accessToken,

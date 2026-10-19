@@ -1,0 +1,413 @@
+/* ==========================================================
+   CONTACT — LUXURY CARS
+   Identité maison : ivoire, champagne/or, encre.
+   Compatible thème clair et thème sombre (tokens globaux).
+   ========================================================== */
+
+.page {
+  padding-bottom: 112px;
+}
+
+/* ---------- En-tête ---------- */
+
+.hero {
+  padding: 104px 24px 56px;
+  text-align: center;
+  background:
+    linear-gradient(
+      180deg,
+      var(--ivory-2),
+      var(--ivory)
+    );
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.heroInner {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  margin: 0 0 20px;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .32em;
+  text-transform: uppercase;
+  color: var(--gold-text);
+}
+
+.hero h1,
+.sectionHeading h2,
+.cta h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 500;
+  line-height: 1.08;
+  color: var(--ink);
+}
+
+.hero h1 {
+  font-size: clamp(2.4rem, 5vw, 3.9rem);
+}
+
+.hero h1 em,
+.sectionHeading h2 em,
+.cta h2 em {
+  font-style: italic;
+  color: var(--champagne-2);
+}
+
+.lead {
+  margin: 22px auto 0;
+  max-width: 560px;
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+/* ---------- Conteneurs ---------- */
+
+.container {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 64px 24px 0;
+}
+
+/* ---------- Cartes de contact ---------- */
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 30px 28px;
+  background: var(--panel-elevated);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  border-color: var(--champagne-line);
+  box-shadow: var(--shadow);
+}
+
+.cardLabel {
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--gold-text);
+}
+
+.card h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.28rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.cardBody {
+  margin: 0;
+  font-size: .96rem;
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+.hint {
+  margin: 0;
+  font-size: .84rem;
+  line-height: 1.6;
+  color: var(--muted-3);
+}
+
+.cardLink,
+.inlineLink {
+  color: var(--champagne-2);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color .2s ease, color .2s ease;
+}
+
+.cardLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.cardLink span {
+  transition: transform .2s ease;
+}
+
+.cardLink:hover,
+.inlineLink:hover {
+  border-bottom-color: currentColor;
+}
+
+.cardLink:hover span {
+  transform: translate(2px, -2px);
+}
+
+.inlineLink {
+  font-weight: 600;
+}
+
+/* ---------- Points de collecte ---------- */
+
+.sectionHeading {
+  max-width: 640px;
+  margin-bottom: 36px;
+}
+
+.sectionHeading h2 {
+  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+}
+
+.sectionLead {
+  margin: 16px 0 0;
+  font-size: .98rem;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.pointsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.point {
+  padding: 26px 24px;
+  background: var(--surface-glass);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-card);
+}
+
+.pointTag {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 5px 12px;
+  font-size: .64rem;
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--champagne-2);
+  background: var(--champagne-soft);
+  border: 1px solid var(--champagne-line);
+  border-radius: 999px;
+}
+
+.point h3 {
+  margin: 0 0 8px;
+  font-family: var(--serif);
+  font-size: 1.12rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.point p {
+  margin: 0;
+  font-size: .92rem;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+/* ---------- Appel à l'action ---------- */
+
+.cta {
+  max-width: var(--container);
+  margin: 80px auto 0;
+  padding: 0 24px;
+}
+
+.ctaInner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 48px;
+  background: var(--noir);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow);
+}
+
+.cta .eyebrow {
+  color: var(--champagne-3);
+}
+
+.cta h2 {
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  color: var(--white);
+}
+
+.cta h2 em {
+  color: var(--champagne-3);
+}
+
+.cta .lead {
+  margin: 14px 0 0;
+  color: var(--ivory-3);
+}
+
+.ctaActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 26px;
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: var(--radius-button);
+  transition: transform .2s ease, background .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.primaryButton {
+  color: var(--on-accent);
+  background: var(--champagne);
+  box-shadow: var(--button-shadow);
+}
+
+.primaryButton:hover {
+  background: var(--champagne-3);
+  transform: translateY(-2px);
+}
+
+.secondaryButton {
+  color: var(--ivory);
+  background: transparent;
+  border: 1px solid var(--champagne-line);
+}
+
+.secondaryButton:hover {
+  border-color: var(--champagne-3);
+  color: var(--white);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 720px) {
+  .hero {
+    padding: 84px 20px 44px;
+  }
+
+  .container {
+    padding-top: 48px;
+  }
+
+  .ctaInner {
+    padding: 34px 26px;
+  }
+}
+
+/* ==============================================================
+   COUTURE 2026 — CONTACT
+   ============================================================== */
+.hero {
+  background:
+    radial-gradient(720px 320px at 50% -10%, var(--champagne-soft), transparent 68%),
+    linear-gradient(180deg, var(--ivory-2), var(--ivory));
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 30px;
+  height: 1px;
+  background: var(--gold-rule);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .hero h1 em,
+  .sectionHeading h2 em {
+    background-image: var(--gold-ink);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+.card {
+  position: relative;
+  border-radius: var(--radius-xl);
+  border-color: var(--panel-border);
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gold-rule);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .5s cubic-bezier(.2, .7, .2, 1);
+}
+
+.card:hover::before {
+  transform: scaleX(1);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-luxe);
+}
+
+.cardLabel {
+  letter-spacing: .3em;
+}
+
+.point {
+  border-radius: var(--radius-card);
+  transition: border-color .3s ease, background .3s ease;
+}
+
+.point:hover {
+  border-color: var(--champagne-line);
+  background: var(--white-2);
+}
+
+.pointTag {
+  letter-spacing: .24em;
+}
+
+.ctaInner {
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(600px 300px at 12% 0%, rgba(213, 180, 119, .16), transparent 62%),
+    var(--noir);
+  border: 1px solid var(--panel-border);
+}
+
+.primaryButton {
+  box-shadow: var(--button-shadow);
+}

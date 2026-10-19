@@ -32,6 +32,10 @@ export interface PublicVehicleDto {
   dailyPrice: string;
   securityDeposit: string;
 
+  // Valeur du véhicule (valeur d'achat / de marché).
+  // NUMERIC => chaîne, comme les autres montants.
+  vehicleValue: string;
+
   // Description facultative.
   description: string | null;
 

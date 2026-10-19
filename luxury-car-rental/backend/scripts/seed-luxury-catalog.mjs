@@ -26,6 +26,19 @@ import { populateVehicleImages } from './lib/vehicle-images.mjs';
 
 const { Client } = pg;
 
+// PROTECTION : interdit toute destruction accidentelle des photos,
+// réservations, véhicules et notifications de l'utilisateur.
+// Ce script est réservé à une base de DÉMONSTRATION jetable.
+if (
+  !process.argv.includes('--reset-demo-database') ||
+  process.env.ALLOW_DESTRUCTIVE_DEMO_SEED !== 'I_UNDERSTAND_DATA_LOSS'
+) {
+  console.error('⛔ Catalogue existant protégé. Ce script efface les véhicules et les réservations.');
+  console.error('   Ne pas lancer sur votre base de travail.');
+  console.error('   Utiliser uniquement une base de démonstration vide dédiée.');
+  process.exit(1);
+}
+
 // ============================================================
 // 2. CATÉGORIES RÉELLES
 // ============================================================

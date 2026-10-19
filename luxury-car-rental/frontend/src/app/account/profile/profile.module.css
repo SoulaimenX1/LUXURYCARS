@@ -362,3 +362,103 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* MAISON — Profil client et permis, confort de lecture. */
+.intro h1, .card h2, .sectionLabel { font-family: var(--serif); font-weight: 400; }
+.card { border-radius: var(--radius-card); box-shadow: var(--shadow-soft); }
+.field input, .field select, .submitButton, .cancelButton { border-radius: var(--radius-field); }
+
+/* ==============================================================
+   COUTURE 2026 — PROFIL CLIENT
+   ============================================================== */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  letter-spacing: .26em;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 30px;
+  height: 1px;
+  background: var(--gold-rule);
+}
+
+.container h1 {
+  letter-spacing: -.042em;
+}
+
+.card,
+.formSection {
+  position: relative;
+  border-radius: var(--radius-xl);
+  border-color: var(--panel-border);
+  overflow: hidden;
+}
+
+.card::before,
+.formSection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gold-rule);
+}
+
+.cardLabel,
+.sectionLabel {
+  letter-spacing: .24em;
+}
+
+.details {
+  border-radius: var(--radius-card);
+}
+
+.licenceInfo {
+  border-radius: 0 var(--radius-field) var(--radius-field) 0;
+}
+
+.field input {
+  border-radius: var(--radius-field);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.field input:focus {
+  border-color: var(--champagne);
+  box-shadow: 0 0 0 3px var(--champagne-soft);
+}
+
+.submitButton,
+.cancelButton {
+  border-radius: var(--radius-button);
+}
+
+.submitButton {
+  position: relative;
+  overflow: hidden;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.submitButton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--sheen);
+  transform: translateX(-140%);
+  transition: transform .75s ease;
+}
+
+.submitButton:hover:not(:disabled)::after {
+  transform: translateX(140%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .submitButton::after { transition: none !important; }
+}

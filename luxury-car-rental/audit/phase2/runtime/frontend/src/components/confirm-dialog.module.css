@@ -1,0 +1,184 @@
+/* ==========================================================
+   CONFIRMATION THÉMÉE — modale MAISON
+   Cohérente avec la charte : ivoire, or, encre, ombre douce.
+   ========================================================== */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(var(--ivory-rgb), 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: overlay-in 0.18s ease both;
+}
+
+.dialog {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  padding: 34px 36px 30px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+  animation: dialog-in 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Filet doré en tête de modale : signature de la maison. */
+.dialog::before {
+  content: '';
+  display: block;
+  width: 44px;
+  height: 2px;
+  margin-bottom: 22px;
+  background: var(--champagne);
+}
+
+.title {
+  margin: 0 0 14px;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -0.3px;
+  line-height: 1.22;
+}
+
+.message {
+  margin: 0 0 28px;
+  color: var(--muted-text);
+  font-size: 13.5px;
+  line-height: 1.72;
+  white-space: pre-line;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancel,
+.confirm {
+  min-height: 46px;
+  padding: 0 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-button);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease,
+    filter 0.2s ease;
+}
+
+.cancel {
+  background: var(--white);
+  color: var(--gold-text);
+}
+
+.cancel:hover {
+  border-color: var(--champagne);
+  background: var(--champagne-soft);
+}
+
+.confirm[data-tone='default'] {
+  border-color: var(--champagne);
+  background: var(--champagne);
+  color: var(--on-accent);
+}
+
+.confirm[data-tone='success'] {
+  border-color: var(--success);
+  background: var(--success);
+  color: var(--white);
+}
+
+.confirm[data-tone='danger'] {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: var(--white);
+}
+
+.confirm:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+.confirm:active {
+  transform: translateY(0);
+}
+
+.cancel:focus-visible,
+.confirm:focus-visible {
+  outline: 2px solid var(--champagne-2);
+  outline-offset: 2px;
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .overlay {
+    padding: 16px;
+  }
+
+  .dialog {
+    padding: 28px 22px 24px;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancel,
+  .confirm {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .dialog {
+    animation: none;
+  }
+}
+
+/* ==============================================================
+   COUTURE 2026 — MODALE DE CONFIRMATION
+   ============================================================== */
+.dialog {
+  border-radius: var(--radius-xl);
+  border-color: var(--panel-border);
+  box-shadow: var(--shadow-luxe);
+}
+
+.dialog::before {
+  background: var(--gold-rule);
+}

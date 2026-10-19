@@ -119,6 +119,13 @@ export class CreateVehicleDto {
     @Min(0)
     securityDeposit!: number;
 
+    // Valeur du véhicule : toujours un nombre réel strictement positif.
+    @IsNumber({
+        maxDecimalPlaces: 2,
+    })
+    @Min(0.01)
+    vehicleValue!: number;
+
     // Kilométrage actuel.
     @IsOptional()
     @IsInt()

@@ -3,6 +3,9 @@ import type {
 } from 'next';
 
 import SiteChrome from '@/components/site-chrome';
+import { CurrencyProvider } from '@/components/currency-provider';
+import { ConfirmProvider } from '@/components/confirm-dialog';
+import { ToastProvider } from '@/components/toast';
 
 import './globals.css';
 
@@ -58,9 +61,15 @@ export default function RootLayout({
           }}
         />
 
-        <SiteChrome>
-          {children}
-        </SiteChrome>
+        <CurrencyProvider>
+          <ConfirmProvider>
+            <ToastProvider>
+              <SiteChrome>
+                {children}
+              </SiteChrome>
+            </ToastProvider>
+          </ConfirmProvider>
+        </CurrencyProvider>
       </body>
     </html>
   );

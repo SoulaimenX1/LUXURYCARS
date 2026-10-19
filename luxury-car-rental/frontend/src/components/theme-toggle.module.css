@@ -28,3 +28,15 @@
   outline: 2px solid var(--champagne);
   outline-offset: 3px;
 }
+
+
+/* MAISON — Interrupteur joaillerie avec retour visuel accessible. */
+.toggle {
+  border-radius: 50%;
+  color: var(--gold-text);
+  background: var(--surface-glass);
+  box-shadow: inset 0 1px 0 var(--surface-highlight);
+  transition: background .24s ease, color .24s ease, border-color .24s ease, transform .24s ease;
+}
+.toggle:hover { transform: rotate(16deg); color: var(--ink); background: var(--champagne-soft); }
+.toggle:active { transform: scale(.94); }

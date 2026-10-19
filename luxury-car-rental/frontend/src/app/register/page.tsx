@@ -11,6 +11,7 @@ import {
     useRouter,
 } from 'next/navigation';
 
+import { useToast } from '@/components/toast';
 import styles from '../auth.module.css';
 
 // ==========================================================
@@ -86,6 +87,8 @@ export default function RegisterPage() {
         setSuccess,
     ] = useState('');
 
+    const toast = useToast();
+
     // ========================================================
     // INSCRIPTION
     // ========================================================
@@ -105,9 +108,10 @@ export default function RegisterPage() {
         if (
             password.length < 12
         ) {
-            setError(
-                'Password must contain at least 12 characters.',
-            );
+            const message =
+                'Password must contain at least 12 characters.';
+            setError(message);
+            toast.error(message, 'Create account');
 
             return;
         }
@@ -116,9 +120,9 @@ export default function RegisterPage() {
             password !==
             confirmPassword
         ) {
-            setError(
-                'Passwords do not match.',
-            );
+            const message = 'Passwords do not match.';
+            setError(message);
+            toast.error(message, 'Create account');
 
             return;
         }
@@ -167,10 +171,11 @@ export default function RegisterPage() {
                         )
                         : data.message;
 
-                setError(
-                    message ??
-                    'Unable to create the account.',
-                );
+                const failure =
+                    message ?? 'Unable to create the account.';
+
+                setError(failure);
+                toast.error(failure, 'Create account');
 
                 return;
             }
@@ -179,9 +184,10 @@ export default function RegisterPage() {
             // SUCCÈS
             // ----------------------------------------------------
 
-            setSuccess(
-                'Account created successfully. Redirecting to sign in...',
-            );
+            const message =
+                'Account created successfully. Redirecting to sign in...';
+            setSuccess(message);
+            toast.success(message, 'Welcome to Luxury Cars');
 
             // Attendre légèrement pour montrer
             // le message de succès.
@@ -194,9 +200,10 @@ export default function RegisterPage() {
                 1200,
             );
         } catch {
-            setError(
-                'The registration service is currently unavailable.',
-            );
+            const message =
+                'The registration service is currently unavailable.';
+            setError(message);
+            toast.error(message, 'Create account');
         } finally {
             setLoading(false);
         }
@@ -260,7 +267,7 @@ export default function RegisterPage() {
                     <h1>
                         Your journey
                         <span>
-                            starts here.
+                            starts here
                         </span>
                     </h1>
 

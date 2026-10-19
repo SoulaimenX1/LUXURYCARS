@@ -304,6 +304,55 @@
   cursor: wait;
 }
 
+/* Rangée d'actions : boutons jamais superposés, espacement garanti. */
+.actionsRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-top: 26px;
+}
+
+.actionsRow .cancelButton,
+.actionsRow .checkinButton {
+  margin-top: 0;
+}
+
+/* Bouton de pré-enregistrement : action principale (or champagne). */
+.checkinButton {
+  padding: 13px 24px;
+  border: 1px solid var(--champagne);
+  border-radius: var(--radius-button);
+  background: var(--champagne);
+  color: var(--noir);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.checkinButton:hover:not(:disabled) {
+  background: var(--noir);
+  border-color: var(--noir);
+  color: var(--champagne-3);
+}
+
+.checkinButton:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+/* État « déjà enregistré » : informatif, non cliquable. */
+.checkinDone {
+  color: var(--gold-text);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
 /* ==============================================================
    RÉSUMÉ PAR STATUT
    ============================================================== */
@@ -379,3 +428,63 @@
     width: 100%;
   }
 }
+
+
+/* MAISON — Historique des réservations. */
+.intro h1, .summaryItem strong { font-family: var(--serif); font-weight: 400; }
+.card, .empty, .summary { border-radius: var(--radius-card); }
+.card { box-shadow: var(--shadow-soft); }
+.cancelButton, .primaryLink { border-radius: var(--radius-button); }
+
+/* Montants et lignes de compte : séparation nette, lisibilité nocturne. */
+.page :is(strong, dd) { font-variant-numeric:tabular-nums; }
+
+/* ==============================================================
+   COUTURE 2026 — MES RÉSERVATIONS
+   ============================================================== */
+.card {
+  position: relative;
+  border-radius: var(--radius-xl);
+  border-color: var(--panel-border);
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gold-rule);
+}
+
+.cardTop {
+  border-bottom-color: var(--line);
+}
+
+.status {
+  border-radius: 999px;
+  letter-spacing: .16em;
+}
+
+.empty {
+  border-radius: var(--radius-xl);
+  border-color: var(--panel-border);
+  box-shadow: var(--shadow-soft);
+}
+
+.summaryItem {
+  border-radius: var(--radius-card);
+  border-color: var(--panel-border);
+}
+
+.cancelButton {
+  border-radius: var(--radius-button);
+  letter-spacing: .06em;
+}
+
+.primaryLink {
+  border-bottom-color: var(--gold-text);
+}
+
